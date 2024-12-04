@@ -12,7 +12,7 @@ func (i *Image) ProcessHSLA(startX, startY, endX, endY int, fn func(x, y int, co
 	numCores := runtime.NumCPU()
 	sem := make(chan struct{}, numCores) // Limit goroutines to the number of cores.
 	var wg sync.WaitGroup
-
+	dst := i.Clone()
 	for y := startY; y < endY; y++ {
 		wg.Add(1)
 		sem <- struct{}{} // Acquire a slot.
@@ -22,12 +22,12 @@ func (i *Image) ProcessHSLA(startX, startY, endX, endY int, fn func(x, y int, co
 				wg.Done()
 			}()
 			for x := startX; x < endX; x++ {
-				i.SetHSLA(fn(x, row, i.GetHSLA(x, row)))
+				dst.SetHSLA(fn(x, row, dst.GetHSLA(x, row)))
 			}
 		}(y)
 	}
-
 	wg.Wait()
+	i.Set(dst.raw)
 	return i
 }
 
@@ -36,7 +36,7 @@ func (i *Image) ProcessRGBA(startX, startY, endX, endY int, fn func(x, y int, co
 	numCores := runtime.NumCPU()
 	sem := make(chan struct{}, numCores)
 	var wg sync.WaitGroup
-
+	dst := i.Clone()
 	for y := startY; y < endY; y++ {
 		wg.Add(1)
 		sem <- struct{}{}
@@ -46,11 +46,11 @@ func (i *Image) ProcessRGBA(startX, startY, endX, endY int, fn func(x, y int, co
 				wg.Done()
 			}()
 			for x := startX; x < endX; x++ {
-				i.SetRGBA(fn(x, row, i.GetRGBA(x, row)))
+				dst.SetRGBA(fn(x, row, dst.GetRGBA(x, row)))
 			}
 		}(y)
 	}
-
 	wg.Wait()
+	i.Set(dst.raw)
 	return i
 }

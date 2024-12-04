@@ -24,9 +24,9 @@ func NewConvolutionMatrix(matrix [][]float64, factor, bias float64) *Convolution
 
 func NewSharpenFilter(amount float64) *ConvolutionMatrix {
 	matrix := [][]float64{
-		{0, -amount, 0},
-		{-amount, 1 + 4*amount, -amount},
-		{0, -amount, 0},
+		{-amount, -amount, -amount},
+		{-amount, 1 + 8*amount, -amount},
+		{-amount, -amount, -amount},
 	}
 	return NewConvolutionMatrix(matrix, 1, 0)
 }
@@ -59,10 +59,11 @@ func NewEdgeDetectFilter(amount float64) *ConvolutionMatrix {
 
 func NewEmbossFilter(amount float64) *ConvolutionMatrix {
 	matrix := [][]float64{
-		{-2 * amount, -1 * amount, 0},
+		{-1 * amount, -1 * amount, 0},
 		{-1 * amount, 1 * amount, 1 * amount},
-		{0, 1 * amount, 2 * amount},
+		{0, 1 * amount, 1 * amount},
 	}
+
 	return NewConvolutionMatrix(matrix, 1, 0)
 }
 
@@ -125,11 +126,11 @@ func (cm *ConvolutionMatrix) Apply(src *image.Image) *image.Image {
 				px := math.Clamp(x+j-halfSize, 0, w-1)
 				py := math.Clamp(y+i-halfSize, 0, h-1)
 
-				col := src.GetRGBA(px, py)
+				c := src.GetRGBA(px, py)
 
-				prf := float64(col.R()) / 255.0
-				pgf := float64(col.G()) / 255.0
-				pbf := float64(col.B()) / 255.0
+				prf := float64(c.R()) / 255.0
+				pgf := float64(c.G()) / 255.0
+				pbf := float64(c.B()) / 255.0
 
 				weight := cm.Matrix[i][j]
 				r += prf * weight

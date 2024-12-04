@@ -5,8 +5,6 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/toxyl/gfx/color/blend"
-	"github.com/toxyl/gfx/composition"
 	"github.com/toxyl/gfx/filters"
 	"github.com/toxyl/gfx/image"
 )
@@ -27,8 +25,6 @@ func main() {
 		chain   filterChain
 		fileIn  = flag.String("i", "", "input file")
 		fileOut = flag.String("o", "", "output file")
-		width   = flag.Int("w", 800, "width")
-		height  = flag.Int("h", 600, "height")
 	)
 	flag.Var(&chain, "f", "filters (use multiple -f flags for a filter chain)")
 	flag.Parse()
@@ -57,10 +53,10 @@ func main() {
 			fChain = append(fChain, filters.NewImageFilter(name, options))
 		}
 		img := image.NewFromFile(*fileIn)
-		c := composition.New(*width, *height)
-		c.Filters = fChain
-		c.Layers = append(c.Layers, composition.NewLayerFromImage(img, 1.0, blend.NORMAL, nil))
-		c.Render().SaveAsPNG(*fileOut)
+		for _, f := range fChain {
+			img = f.Apply(img)
+		}
+		img.SaveAsPNG(*fileOut)
 		return
 	}
 	flag.Usage()

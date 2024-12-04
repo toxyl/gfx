@@ -11,6 +11,7 @@ func (i *Image) mergeHSLA(src *Image, startX, startY, endX, endY int, fn func(x,
 	numCores := runtime.NumCPU()
 	sem := make(chan struct{}, numCores)
 	var wg sync.WaitGroup
+	dst := i.Clone()
 
 	for y := startY; y < endY; y++ {
 		wg.Add(1)
@@ -21,11 +22,11 @@ func (i *Image) mergeHSLA(src *Image, startX, startY, endX, endY int, fn func(x,
 				wg.Done()
 			}()
 			for x := startX; x < endX; x++ {
-				i.SetHSLA(fn(x, row, src.GetHSLA(x, row)))
+				dst.SetHSLA(fn(x, row, src.GetHSLA(x, row)))
 			}
 		}(y)
 	}
-
 	wg.Wait()
+	i.Set(dst.raw)
 	return i
 }
