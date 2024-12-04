@@ -183,7 +183,7 @@ func (s *ImageFilter) Apply(i *image.Image) *image.Image {
 			s.getLum(), s.getLumTolerance(), s.getLumFeather(),
 		))
 	default:
-		fmt.Printf("unknown filter type: %s", s.Type)
+		fmt.Printf("unknown filter type: %s\n", s.Type)
 		return i
 	}
 }

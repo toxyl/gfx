@@ -1,8 +1,8 @@
 package colorshift
 
 import (
-	"github.com/toxy/gfx/color/hsla"
-	"github.com/toxy/gfx/image"
+	"github.com/toxyl/gfx/color/hsla"
+	"github.com/toxyl/gfx/image"
 )
 
 func Apply(i *image.Image, hue, sat, lum float64) *image.Image {

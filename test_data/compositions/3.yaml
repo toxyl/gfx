@@ -1,0 +1,123 @@
+enabled: true
+name: Sun (GOES)
+layers:
+    - path: https://services.swpc.noaa.gov/images/animations/suvi/primary/284/latest.png
+      alpha: 1
+      mode: normal
+      filters: 
+        - type: denoise
+    - path: https://services.swpc.noaa.gov/images/animations/suvi/secondary/284/latest.png
+      alpha: 1
+      mode: multiply
+      filters:
+        - type: denoise
+        - type: blur
+          options:
+            intensity: 4
+    - path: https://services.swpc.noaa.gov/images/animations/suvi/primary/304/latest.png
+      alpha: 1
+      mode: difference
+      filters: 
+        - type: denoise
+    - path: https://services.swpc.noaa.gov/images/animations/suvi/secondary/304/latest.png
+      alpha: 1
+      mode: difference
+      filters: 
+        - type: denoise
+    - path: https://services.swpc.noaa.gov/images/animations/suvi/primary/094/latest.png
+      alpha: 0.5
+      mode: average
+      filters:
+        - type: denoise
+        - type: enhance
+          options:
+            intensity: 1.05
+    - path: https://services.swpc.noaa.gov/images/animations/suvi/secondary/094/latest.png
+      alpha: 0.5
+      mode: average
+      filters:
+        - type: denoise
+        - type: enhance
+          options:
+            intensity: 1.05
+        - type: blur
+          options:
+            intensity: 2
+    - path: https://services.swpc.noaa.gov/images/animations/suvi/primary/195/latest.png
+      alpha: 0.75
+      mode: difference
+      filters:
+        - type: denoise
+        - type: enhance
+          options:
+            intensity: 1.05
+    - path: https://services.swpc.noaa.gov/images/animations/suvi/secondary/195/latest.png
+      alpha: 0.75
+      mode: darken
+      filters:
+        - type: denoise
+        - type: enhance
+          options:
+            intensity: 1.05
+    - path: https://services.swpc.noaa.gov/images/animations/suvi/primary/131/latest.png
+      alpha: 0.5
+      mode: darken
+      filters:
+        - type: denoise
+        - type: color-shift
+          options:
+            hue: -60
+            lum: 0
+            sat: 0
+        - type: enhance
+          options: {}
+    - path: https://services.swpc.noaa.gov/images/animations/suvi/secondary/131/latest.png
+      alpha: 0.75
+      mode: pin-light
+      filters:
+        - type: denoise
+        - type: color-shift
+          options:
+            hue: -150
+            lum: 0
+            sat: 0
+        - type: enhance
+          options: {}
+    - path: https://services.swpc.noaa.gov/images/animations/suvi/primary/171/latest.png
+      alpha: 0.5
+      mode: average
+      filters:
+        - type: denoise
+        - type: color-shift
+          options:
+            hue: -190
+            lum: 0
+            sat: 0
+        - type: enhance
+          options: {}
+    - path: https://services.swpc.noaa.gov/images/animations/suvi/secondary/171/latest.png
+      alpha: 0.5
+      mode: pin-light
+      filters:
+        - type: denoise
+        - type: color-shift
+          options:
+            hue: 5
+            lum: 0.01
+            sat: -0.05
+        - type: enhance
+          options: {}
+crop:
+    x: 20
+    "y": 20
+    w: 182
+    h: 182
+filters:
+  - type: enhance
+  - type: alpha-map
+    options:
+      source: l
+      lower: 0.01
+      upper: 0.30
+width: 222
+height: 222

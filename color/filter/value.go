@@ -25,7 +25,7 @@ func NewFilterValue(min, max, tolerance float64) FilterValue {
 
 func ToFilterValue(val, tolerance, feather float64) FilterValue {
 	if feather > tolerance {
-		fmt.Printf("Feather exceeds tolerance, decreasing feather from %f to %f", feather, tolerance)
+		fmt.Printf("feather exceeds tolerance, decreasing feather from %f to %f\n", feather, tolerance)
 		feather = tolerance
 	}
 	// Calculate min and max range based on value and tolerance

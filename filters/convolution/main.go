@@ -117,7 +117,7 @@ func (cm *ConvolutionMatrix) Apply(src *image.Image) *image.Image {
 	w := src.W()
 	h := src.H()
 
-	return src.ProcessRGBA(0, 0, src.W(), src.H(), func(x, y int, col *rgba.RGBA) (x2, y2 int, col2 *rgba.RGBA) {
+	return src.ProcessRGBA(0, 0, w, h, func(x, y int, col *rgba.RGBA) (x2, y2 int, col2 *rgba.RGBA) {
 		var r, g, b float64
 
 		for i := 0; i < matrixSize; i++ {
