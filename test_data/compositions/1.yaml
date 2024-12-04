@@ -8,7 +8,6 @@ crop:
   w: 182
   h: 182
 filters:
-  - type: denoise
   - type: enhance
   - type: color-shift
     options:

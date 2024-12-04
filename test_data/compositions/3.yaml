@@ -5,12 +5,10 @@ layers:
       alpha: 1
       mode: normal
       filters: 
-        - type: denoise
     - path: https://services.swpc.noaa.gov/images/animations/suvi/secondary/284/latest.png
       alpha: 1
       mode: multiply
       filters:
-        - type: denoise
         - type: blur
           options:
             intensity: 4
@@ -18,17 +16,14 @@ layers:
       alpha: 1
       mode: difference
       filters: 
-        - type: denoise
     - path: https://services.swpc.noaa.gov/images/animations/suvi/secondary/304/latest.png
       alpha: 1
       mode: difference
       filters: 
-        - type: denoise
     - path: https://services.swpc.noaa.gov/images/animations/suvi/primary/094/latest.png
       alpha: 0.5
       mode: average
       filters:
-        - type: denoise
         - type: enhance
           options:
             intensity: 1.05
@@ -36,7 +31,6 @@ layers:
       alpha: 0.5
       mode: average
       filters:
-        - type: denoise
         - type: enhance
           options:
             intensity: 1.05
@@ -47,7 +41,6 @@ layers:
       alpha: 0.75
       mode: difference
       filters:
-        - type: denoise
         - type: enhance
           options:
             intensity: 1.05
@@ -55,7 +48,6 @@ layers:
       alpha: 0.75
       mode: darken
       filters:
-        - type: denoise
         - type: enhance
           options:
             intensity: 1.05
@@ -63,7 +55,6 @@ layers:
       alpha: 0.5
       mode: darken
       filters:
-        - type: denoise
         - type: color-shift
           options:
             hue: -60
@@ -75,7 +66,6 @@ layers:
       alpha: 0.75
       mode: pin-light
       filters:
-        - type: denoise
         - type: color-shift
           options:
             hue: -150
@@ -87,7 +77,6 @@ layers:
       alpha: 0.5
       mode: average
       filters:
-        - type: denoise
         - type: color-shift
           options:
             hue: -190
@@ -99,7 +88,6 @@ layers:
       alpha: 0.5
       mode: pin-light
       filters:
-        - type: denoise
         - type: color-shift
           options:
             hue: 5

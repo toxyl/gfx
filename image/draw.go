@@ -10,8 +10,6 @@ func (i *Image) Draw(src *Image, srcX, srcY, srcW, srcH, dstX, dstY, dstW, dstH 
 	if srcW != dstW || srcH != dstH {
 		s = s.Resize(dstW, dstH)
 	}
-	i.Lock()
-	defer i.Unlock()
 	return i.mergeHSLA(s, 0, 0, dstW, dstH, func(x, y int, srcCol *hsla.HSLA) (x2 int, y2 int, col2 *hsla.HSLA) {
 		return x + dstX, y + dstY, blend.HSLA(i.GetHSLA(x+dstX, y+dstY), srcCol, mode, alpha)
 	})

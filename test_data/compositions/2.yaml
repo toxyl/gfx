@@ -4,7 +4,6 @@ layers:
     - path: https://sdo.gsfc.nasa.gov/assets/img/latest/latest_512_HMIIF.jpg
       alpha: 1
       mode: normal
-      crop: null
       filters:
         - type: extract
           options:
@@ -20,7 +19,6 @@ layers:
     - path: https://sdo.gsfc.nasa.gov/assets/img/latest/latest_512_HMII.jpg
       alpha: 1
       mode: overlay
-      crop: null
       filters:
         - type: extract
           options:
@@ -36,7 +34,6 @@ layers:
     - path: https://sdo.gsfc.nasa.gov/assets/img/latest/latest_512_HMIBC.jpg
       alpha: 1
       mode: average
-      crop: null
       filters:
         - type: extract
           options:
@@ -52,7 +49,6 @@ layers:
     - path: https://sdo.gsfc.nasa.gov/assets/img/latest/latest_512_HMIBC.jpg
       alpha: 1
       mode: average
-      crop: null
       filters:
         - type: extract
           options:
@@ -68,7 +64,6 @@ layers:
     - path: https://sdo.gsfc.nasa.gov/assets/img/latest/latest_512_HMIBC.jpg
       alpha: 1
       mode: average
-      crop: null
       filters:
         - type: extract
           options:
