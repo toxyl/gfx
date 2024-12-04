@@ -67,34 +67,6 @@ func NewEmbossFilter(amount float64) *ConvolutionMatrix {
 	return NewConvolutionMatrix(matrix, 1, 0)
 }
 
-func NewDenoiseFilter(amount float64) *ConvolutionMatrix {
-	kernelSize := int(2*amount) + 1
-
-	if kernelSize%2 == 0 {
-		kernelSize++
-	}
-
-	matrix := make([][]float64, kernelSize)
-	sum := 0.0
-	for i := range matrix {
-		matrix[i] = make([]float64, kernelSize)
-		for j := range matrix[i] {
-			x := float64(i - kernelSize/2)
-			y := float64(j - kernelSize/2)
-			matrix[i][j] = math.Exp(-(x*x + y*y) / (2 * amount * amount))
-			sum += matrix[i][j]
-		}
-	}
-
-	for i := range matrix {
-		for j := range matrix[i] {
-			matrix[i][j] /= sum
-		}
-	}
-
-	return NewConvolutionMatrix(matrix, 1, 0)
-}
-
 func NewEnhanceFilter(amount float64) *ConvolutionMatrix {
 	return NewCustomFilter(
 		amount, 1, 0,

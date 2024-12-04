@@ -30,7 +30,6 @@ const (
 	BRIGHTNESS         = "brightness"
 	COLOR_SHIFT        = "color-shift"
 	CONTRAST           = "contrast"
-	DENOISE            = "denoise"
 	EDGE_DETECT        = "edge-detect"
 	EMBOSS             = "emboss"
 	ENHANCE            = "enhance"
@@ -63,6 +62,33 @@ const (
 	OPTION_LOWER         = "lower"
 	OPTION_UPPER         = "upper"
 	OPTION_SOURCE        = "source"
+)
+
+var (
+	EXAMPLES = []string{
+		ALPHAMAP + "::" + OPTION_SOURCE + "=s*l::" + OPTION_LOWER + "=0.1::" + OPTION_UPPER + "=0.7",
+		BLUR + "::" + OPTION_AMOUNT + "=1.0",
+		BRIGHTNESS + "::" + OPTION_AMOUNT + "=1.0",
+		COLOR_SHIFT + "::" + OPTION_HUE + "=180.0::" + OPTION_SAT + "=0.1::" + OPTION_LUM + "=0.7",
+		CONTRAST + "::" + OPTION_AMOUNT + "=1.0",
+		EDGE_DETECT + "::" + OPTION_AMOUNT + "=1.0",
+		EMBOSS + "::" + OPTION_AMOUNT + "=1.0",
+		ENHANCE + "::" + OPTION_AMOUNT + "=1.0",
+		EXTRACT + "::" + OPTION_HUE + "=180.0::" + OPTION_HUE_TOLERANCE + "=90.0::" + OPTION_HUE_FEATHER + "=90.0::" +
+			OPTION_SAT + "=0.50::" + OPTION_SAT_TOLERANCE + "=0.25::" + OPTION_SAT_FEATHER + "=0.25::" +
+			OPTION_LUM + "=0.50::" + OPTION_LUM_TOLERANCE + "=0.25::" + OPTION_LUM_FEATHER + "=0.25",
+		GAMMA + "::" + OPTION_AMOUNT + "=1.0",
+		GRAYSCALE,
+		HUE_ROTATE + "::" + OPTION_AMOUNT + "=180.0",
+		INVERT,
+		LIGHTNESS_CONTRAST + "::" + OPTION_AMOUNT + "=1.0",
+		PASTELIZE,
+		SATURATION + "::" + OPTION_AMOUNT + "=1.0",
+		SEPIA,
+		SHARPEN + "::" + OPTION_AMOUNT + "=1.0",
+		THRESHOLD + "::" + OPTION_AMOUNT + "=1.0",
+		VIBRANCE + "::" + OPTION_AMOUNT + "=1.0",
+	}
 )
 
 type ImageFilter struct {
@@ -154,8 +180,6 @@ func (s *ImageFilter) Apply(i *image.Image) *image.Image {
 		return convolution.NewEdgeDetectFilter(s.getAmount()).Apply(i)
 	case ENHANCE:
 		return convolution.NewEnhanceFilter(s.getAmount()).Apply(i)
-	case DENOISE:
-		return convolution.NewDenoiseFilter(s.getAmount()).Apply(i)
 	case CONTRAST:
 		return contrast.Apply(i, s.getAmount())
 	case LIGHTNESS_CONTRAST:

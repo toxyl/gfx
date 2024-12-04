@@ -2,6 +2,8 @@ package main
 
 import (
 	"flag"
+	"fmt"
+	"os"
 	"strconv"
 	"strings"
 
@@ -57,6 +59,10 @@ func main() {
 			img = f.Apply(img)
 		}
 		img.SaveAsPNG(*fileOut)
+		return
+	}
+	if len(os.Args) > 1 && os.Args[1] == "filters" {
+		fmt.Printf("Available filters\n-----------------\n%s\n", strings.Join(filters.EXAMPLES, "\n"))
 		return
 	}
 	flag.Usage()
