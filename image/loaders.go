@@ -4,12 +4,11 @@ import (
 	"image"
 	"strings"
 
+	"github.com/toxyl/errors"
+	"github.com/toxyl/flo"
 	"github.com/toxyl/gfx/jpg"
 	"github.com/toxyl/gfx/net"
 	"github.com/toxyl/gfx/png"
-
-	"github.com/toxyl/errors"
-	"github.com/toxyl/flo"
 )
 
 func loadFromURL(url string) (image.Image, error) {

@@ -1,4 +1,4 @@
-module github.com/toxy/gfx
+module github.com/toxyl/gfx
 
 go 1.23.4
 

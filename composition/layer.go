@@ -1,21 +1,21 @@
 package composition
 
 import (
-	bld "github.com/toxyl/gfx/color/blend"
+	"github.com/toxyl/gfx/color/blend"
 	"github.com/toxyl/gfx/filters"
-	img "github.com/toxyl/gfx/image"
+	"github.com/toxyl/gfx/image"
 )
 
 type Layer struct {
-	data    *img.Image
+	data    *image.Image
 	Path    string                 `yaml:"path"`
 	Alpha   float64                `yaml:"alpha"`
-	Mode    bld.BlendMode          `yaml:"mode"`
+	Mode    blend.BlendMode        `yaml:"mode"`
 	Crop    *CropConfig            `yaml:"crop"`
 	Filters []*filters.ImageFilter `yaml:"filters"`
 }
 
-func NewLayer(path string, alpha float64, blendMode bld.BlendMode, cropConfig *CropConfig, filters ...*filters.ImageFilter) *Layer {
+func NewLayer(path string, alpha float64, blendMode blend.BlendMode, cropConfig *CropConfig, filters ...*filters.ImageFilter) *Layer {
 	cl := Layer{
 		data:    nil,
 		Path:    path,
@@ -28,7 +28,7 @@ func NewLayer(path string, alpha float64, blendMode bld.BlendMode, cropConfig *C
 	return &cl
 }
 
-func NewLayerFromImage(image *img.Image, alpha float64, blendMode bld.BlendMode, cropConfig *CropConfig, filters ...*filters.ImageFilter) *Layer {
+func NewLayerFromImage(image *image.Image, alpha float64, blendMode blend.BlendMode, cropConfig *CropConfig, filters ...*filters.ImageFilter) *Layer {
 	cl := Layer{
 		data:    image,
 		Path:    "",
@@ -42,15 +42,15 @@ func NewLayerFromImage(image *img.Image, alpha float64, blendMode bld.BlendMode,
 
 func (cl *Layer) load() {
 	if cl.Path != "" {
-		cl.data = img.NewFromURL(cl.Path)
+		cl.data = image.NewFromURL(cl.Path)
 		if cl.data == nil {
 			// this wasn't a URL, maybe it's a file
-			cl.data = img.NewFromFile(cl.Path)
+			cl.data = image.NewFromFile(cl.Path)
 		}
 	}
 }
 
-func (cl *Layer) Render(w, h int) *img.Image {
+func (cl *Layer) Render(w, h int) *image.Image {
 	cl.load()
 	res := cl.data.Resize(w, h)
 	for _, filter := range cl.Filters {

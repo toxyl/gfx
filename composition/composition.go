@@ -1,10 +1,9 @@
 package composition
 
 import (
-	"github.com/toxyl/gfx/filters"
-	img "github.com/toxyl/gfx/image"
-
 	"github.com/toxyl/flo"
+	"github.com/toxyl/gfx/filters"
+	"github.com/toxyl/gfx/image"
 )
 
 type CropConfig struct {
@@ -62,9 +61,9 @@ func NewFromFile(path string) *Composition {
 	return c.Load(path)
 }
 
-func (c *Composition) Render() *img.Image {
+func (c *Composition) Render() *image.Image {
 	w, h := c.Width, c.Height
-	res := img.New(w, h)
+	res := image.New(w, h)
 	ll := len(c.Layers)
 	for _, l := range c.Layers {
 		scaled := l.Render(w, h)

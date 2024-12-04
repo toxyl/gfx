@@ -1,10 +1,9 @@
 package huerotate
 
 import (
-	"math"
-
 	"github.com/toxyl/gfx/color/hsla"
 	"github.com/toxyl/gfx/image"
+	"github.com/toxyl/gfx/math"
 )
 
 func Apply(i *image.Image, angle float64) *image.Image {
