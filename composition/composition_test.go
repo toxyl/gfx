@@ -15,7 +15,7 @@ func TestComposition_Load(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			NewFromFile(tt.path).Render().SaveAsPNG("../test_data/compositions/render/" + tt.name + ".png")
+			Load(tt.path).Render().SaveAsPNG("../test_data/compositions/render/" + tt.name + ".png")
 		})
 	}
 }

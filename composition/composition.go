@@ -49,18 +49,6 @@ func (c *Composition) Save(path string) *Composition {
 	return c
 }
 
-func NewFromFile(path string) *Composition {
-	c := &Composition{
-		Enabled: true,
-		Name:    "",
-		Layers:  []*Layer{},
-		Crop:    nil,
-		Width:   0,
-		Height:  0,
-	}
-	return c.Load(path)
-}
-
 func (c *Composition) Render() *image.Image {
 	w, h := c.Width, c.Height
 	res := image.New(w, h)
@@ -82,4 +70,8 @@ func (c *Composition) Render() *image.Image {
 		res = res.Crop(c.Crop.X, c.Crop.Y, c.Crop.W, c.Crop.H)
 	}
 	return res
+}
+
+func Load(file string) *Composition {
+	return New(0, 0).Load(file)
 }
