@@ -614,9 +614,9 @@ func TestConvolutionMatrix(t *testing.T) {
 		}
 	}
 	tests := []struct {
-		name   string
-		Matrix *convolution.ConvolutionMatrix
-		src    *image.Image
+		name string
+		m    *convolution.ConvolutionMatrix
+		src  *image.Image
 	}{
 		{"blur-0.25", convolution.NewBlurFilter(0.25), testImage.Clone()},
 		{"blur-0.50", convolution.NewBlurFilter(0.50), testImage.Clone()},
@@ -652,7 +652,7 @@ func TestConvolutionMatrix(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			tt.Matrix.Apply(tt.src).SaveAsPNG("test_data/filters/convolution/" + tt.name + ".png")
+			tt.m.Apply(tt.src).SaveAsPNG("test_data/filters/convolution/" + tt.name + ".png")
 		})
 	}
 }
