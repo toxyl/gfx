@@ -1,4 +1,4 @@
-package saturation
+package sat
 
 import (
 	"math"
@@ -15,7 +15,7 @@ func Apply(img *image.Image, saturation float64) *image.Image {
 		gray := 0.299*r + 0.587*g + 0.114*b
 
 		adjust := func(value float64) uint8 {
-			return uint8(math.Min(255, math.Max(0, gray+saturation*(value-gray))))
+			return uint8(math.Min(255, math.Max(0, gray+(1-(-saturation))*(value-gray))))
 		}
 
 		return x, y, rgba.New(adjust(r), adjust(g), adjust(b), col.A())

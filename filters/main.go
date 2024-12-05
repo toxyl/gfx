@@ -14,11 +14,13 @@ import (
 	"github.com/toxyl/gfx/filters/extract"
 	"github.com/toxyl/gfx/filters/gamma"
 	"github.com/toxyl/gfx/filters/grayscale"
+	"github.com/toxyl/gfx/filters/huecontrast"
 	"github.com/toxyl/gfx/filters/huerotate"
 	"github.com/toxyl/gfx/filters/invert"
-	"github.com/toxyl/gfx/filters/lightnesscontrast"
+	"github.com/toxyl/gfx/filters/lumcontrast"
 	"github.com/toxyl/gfx/filters/pastelize"
-	"github.com/toxyl/gfx/filters/saturation"
+	"github.com/toxyl/gfx/filters/sat"
+	"github.com/toxyl/gfx/filters/satcontrast"
 	"github.com/toxyl/gfx/filters/sepia"
 	"github.com/toxyl/gfx/filters/threshold"
 	"github.com/toxyl/gfx/filters/vibrance"
@@ -27,27 +29,29 @@ import (
 )
 
 const (
-	ALPHAMAP           = "alpha-map"
-	BLUR               = "blur"
-	BRIGHTNESS         = "brightness"
-	COLOR_SHIFT        = "color-shift"
-	CONTRAST           = "contrast"
-	EDGE_DETECT        = "edge-detect"
-	EMBOSS             = "emboss"
-	ENHANCE            = "enhance"
-	EXTRACT            = "extract"
-	GAMMA              = "gamma"
-	GRAYSCALE          = "grayscale"
-	HUE_ROTATE         = "hue-rotate"
-	INVERT             = "invert"
-	LIGHTNESS_CONTRAST = "lightness-contrast"
-	PASTELIZE          = "pastelize"
-	SATURATION         = "saturation"
-	SEPIA              = "sepia"
-	SHARPEN            = "sharpen"
-	THRESHOLD          = "threshold"
-	VIBRANCE           = "vibrance"
-	CONVOLUTION        = "convolution"
+	ALPHAMAP     = "alpha-map"
+	BLUR         = "blur"
+	BRIGHTNESS   = "brightness"
+	COLOR_SHIFT  = "color-shift"
+	CONTRAST     = "contrast"
+	EDGE_DETECT  = "edge-detect"
+	EMBOSS       = "emboss"
+	ENHANCE      = "enhance"
+	EXTRACT      = "extract"
+	GAMMA        = "gamma"
+	GRAYSCALE    = "grayscale"
+	HUE_ROTATE   = "hue-rotate"
+	INVERT       = "invert"
+	HUE_CONTRAST = "hue-contrast"
+	SAT_CONTRAST = "sat-contrast"
+	LUM_CONTRAST = "lum-contrast"
+	PASTELIZE    = "pastelize"
+	SAT          = "sat"
+	SEPIA        = "sepia"
+	SHARPEN      = "sharpen"
+	THRESHOLD    = "threshold"
+	VIBRANCE     = "vibrance"
+	CONVOLUTION  = "convolution"
 
 	OPTION_AMOUNT        = "amount"
 	OPTION_FACTOR        = "factor"
@@ -75,6 +79,13 @@ var (
 		{1.0, 1.0, 1.0},
 	}
 	EXAMPLES = []string{
+		GRAYSCALE,
+		INVERT,
+		PASTELIZE,
+		SEPIA,
+		HUE_CONTRAST + "::" + OPTION_AMOUNT + "=1.0",
+		SAT_CONTRAST + "::" + OPTION_AMOUNT + "=1.0",
+		LUM_CONTRAST + "::" + OPTION_AMOUNT + "=1.0",
 		ALPHAMAP + "::" + OPTION_SOURCE + "=s*l::" + OPTION_LOWER + "=0.1::" + OPTION_UPPER + "=0.7",
 		BLUR + "::" + OPTION_AMOUNT + "=1.0",
 		BRIGHTNESS + "::" + OPTION_AMOUNT + "=1.0",
@@ -87,13 +98,8 @@ var (
 			OPTION_SAT + "=0.50::" + OPTION_SAT_TOLERANCE + "=0.25::" + OPTION_SAT_FEATHER + "=0.25::" +
 			OPTION_LUM + "=0.50::" + OPTION_LUM_TOLERANCE + "=0.25::" + OPTION_LUM_FEATHER + "=0.25",
 		GAMMA + "::" + OPTION_AMOUNT + "=1.0",
-		GRAYSCALE,
 		HUE_ROTATE + "::" + OPTION_AMOUNT + "=180.0",
-		INVERT,
-		LIGHTNESS_CONTRAST + "::" + OPTION_AMOUNT + "=1.0",
-		PASTELIZE,
-		SATURATION + "::" + OPTION_AMOUNT + "=1.0",
-		SEPIA,
+		SAT + "::" + OPTION_AMOUNT + "=1.0",
 		SHARPEN + "::" + OPTION_AMOUNT + "=1.0",
 		THRESHOLD + "::" + OPTION_AMOUNT + "=1.0",
 		VIBRANCE + "::" + OPTION_AMOUNT + "=1.0",
@@ -261,14 +267,18 @@ func (s *ImageFilter) Apply(i *image.Image) *image.Image {
 		return convolution.NewCustomFilter(s.getAmount(), 1, 0, func(a float64) (m [][]float64) { return s.getMatrix() }).Apply(i)
 	case CONTRAST:
 		return contrast.Apply(i, s.getAmount())
-	case LIGHTNESS_CONTRAST:
-		return lightnesscontrast.Apply(i, s.getAmount())
+	case HUE_CONTRAST:
+		return huecontrast.Apply(i, s.getAmount())
+	case SAT_CONTRAST:
+		return satcontrast.Apply(i, s.getAmount())
+	case LUM_CONTRAST:
+		return lumcontrast.Apply(i, s.getAmount())
 	case BRIGHTNESS:
 		return brightness.Apply(i, s.getAmount())
 	case THRESHOLD:
 		return threshold.Apply(i, uint8(s.getAmount()*255.0))
-	case SATURATION:
-		return saturation.Apply(i, s.getAmount())
+	case SAT:
+		return sat.Apply(i, s.getAmount())
 	case HUE_ROTATE:
 		return huerotate.Apply(i, s.getAmount())
 	case VIBRANCE:

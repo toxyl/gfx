@@ -1,0 +1,10 @@
+test_data/*.png
+test_data/blendmode/*.png
+test_data/compositions/*.png
+test_data/compositions/render/*.png
+test_data/filters/*.png
+test_data/filters/convolution/*.png
+test_data/main/*.png
+test_data/main/aia/*.png
+test_data/main/debug/*.png
+test_data/text/*.png
