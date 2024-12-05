@@ -22,64 +22,6 @@ func NewConvolutionMatrix(matrix [][]float64, factor, bias float64) *Convolution
 	}
 }
 
-func NewSharpenFilter(amount float64) *ConvolutionMatrix {
-	matrix := [][]float64{
-		{-amount, -amount, -amount},
-		{-amount, 1 + 8*amount, -amount},
-		{-amount, -amount, -amount},
-	}
-	return NewConvolutionMatrix(matrix, 1, 0)
-}
-
-func NewBlurFilter(amount float64) *ConvolutionMatrix {
-	kernelSize := math.Abs(int(2*amount)) + 1
-
-	if kernelSize%2 == 0 {
-		kernelSize++
-	}
-
-	matrix := make([][]float64, kernelSize)
-	for i := range matrix {
-		matrix[i] = make([]float64, kernelSize)
-		for j := range matrix[i] {
-			matrix[i][j] = 1.0 / float64(kernelSize*kernelSize)
-		}
-	}
-	return NewConvolutionMatrix(matrix, 1, 0)
-}
-
-func NewEdgeDetectFilter(amount float64) *ConvolutionMatrix {
-	matrix := [][]float64{
-		{-amount, -amount, -amount},
-		{-amount, 8 * amount, -amount},
-		{-amount, -amount, -amount},
-	}
-	return NewConvolutionMatrix(matrix, 1, 0)
-}
-
-func NewEmbossFilter(amount float64) *ConvolutionMatrix {
-	matrix := [][]float64{
-		{-1 * amount, -1 * amount, 0},
-		{-1 * amount, 1 * amount, 1 * amount},
-		{0, 1 * amount, 1 * amount},
-	}
-
-	return NewConvolutionMatrix(matrix, 1, 0)
-}
-
-func NewEnhanceFilter(amount float64) *ConvolutionMatrix {
-	return NewCustomFilter(
-		amount, 1, 0,
-		func(intensity float64) (matrix [][]float64) {
-			return [][]float64{
-				{-0.5 / intensity / 4.0, 1 / intensity / 6.0, -0.5 / intensity / 4.0},
-				{1 / intensity / 8.0, math.Clamp(intensity*intensity, 0.0, 1.5), 1 / intensity / 8.0},
-				{-0.5 / intensity / 4.0, 1 / intensity / 6.0, -0.5 / intensity / 4.0},
-			}
-		},
-	)
-}
-
 func NewCustomFilter(amount, factor, bias float64, filterFn FilterFn) *ConvolutionMatrix {
 	return NewConvolutionMatrix(filterFn(amount), factor, bias)
 }

@@ -1,4 +1,4 @@
-package grayscale
+package gray
 
 import (
 	"github.com/toxyl/gfx/color/rgba"

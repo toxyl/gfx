@@ -2,26 +2,31 @@ package filters
 
 import (
 	"fmt"
-	"strconv"
 	"strings"
 
 	"github.com/toxyl/gfx/color/filter"
 	"github.com/toxyl/gfx/filters/alphamap"
+	"github.com/toxyl/gfx/filters/blur"
 	"github.com/toxyl/gfx/filters/brightness"
 	"github.com/toxyl/gfx/filters/colorshift"
 	"github.com/toxyl/gfx/filters/contrast"
 	"github.com/toxyl/gfx/filters/convolution"
+	"github.com/toxyl/gfx/filters/edgedetect"
+	"github.com/toxyl/gfx/filters/emboss"
+	"github.com/toxyl/gfx/filters/enhance"
 	"github.com/toxyl/gfx/filters/extract"
 	"github.com/toxyl/gfx/filters/gamma"
-	"github.com/toxyl/gfx/filters/grayscale"
+	"github.com/toxyl/gfx/filters/gray"
+	"github.com/toxyl/gfx/filters/hue"
 	"github.com/toxyl/gfx/filters/huecontrast"
-	"github.com/toxyl/gfx/filters/huerotate"
 	"github.com/toxyl/gfx/filters/invert"
+	"github.com/toxyl/gfx/filters/lum"
 	"github.com/toxyl/gfx/filters/lumcontrast"
 	"github.com/toxyl/gfx/filters/pastelize"
 	"github.com/toxyl/gfx/filters/sat"
 	"github.com/toxyl/gfx/filters/satcontrast"
 	"github.com/toxyl/gfx/filters/sepia"
+	"github.com/toxyl/gfx/filters/sharpen"
 	"github.com/toxyl/gfx/filters/threshold"
 	"github.com/toxyl/gfx/filters/vibrance"
 	"github.com/toxyl/gfx/image"
@@ -29,119 +34,127 @@ import (
 )
 
 const (
-	ALPHAMAP     = "alpha-map"
-	BLUR         = "blur"
-	BRIGHTNESS   = "brightness"
-	COLOR_SHIFT  = "color-shift"
-	CONTRAST     = "contrast"
-	EDGE_DETECT  = "edge-detect"
-	EMBOSS       = "emboss"
-	ENHANCE      = "enhance"
-	EXTRACT      = "extract"
-	GAMMA        = "gamma"
-	GRAYSCALE    = "grayscale"
-	HUE_ROTATE   = "hue-rotate"
-	INVERT       = "invert"
-	HUE_CONTRAST = "hue-contrast"
-	SAT_CONTRAST = "sat-contrast"
-	LUM_CONTRAST = "lum-contrast"
-	PASTELIZE    = "pastelize"
-	SAT          = "sat"
-	SEPIA        = "sepia"
-	SHARPEN      = "sharpen"
-	THRESHOLD    = "threshold"
-	VIBRANCE     = "vibrance"
-	CONVOLUTION  = "convolution"
-
-	OPTION_AMOUNT        = "amount"
-	OPTION_FACTOR        = "factor"
-	OPTION_BIAS          = "bias"
-	OPTION_HUE           = "hue"
-	OPTION_HUE_TOLERANCE = "hue-tolerance"
-	OPTION_HUE_FEATHER   = "hue-feather"
-	OPTION_SAT           = "sat"
-	OPTION_SAT_TOLERANCE = "sat-tolerance"
-	OPTION_SAT_FEATHER   = "sat-feather"
-	OPTION_LUM           = "lum"
-	OPTION_LUM_TOLERANCE = "lum-tolerance"
-	OPTION_LUM_FEATHER   = "lum-feather"
-	OPTION_FALLOFF       = "falloff"
-	OPTION_LOWER         = "lower"
-	OPTION_UPPER         = "upper"
-	OPTION_SOURCE        = "source"
-	OPTION_MATRIX        = "matrix"
+	Gray        = "gray"
+	Invert      = "invert"
+	Pastelize   = "pastelize"
+	Sepia       = "sepia"
+	Hue         = "hue"
+	Sat         = "sat"
+	Lum         = "lum"
+	HueContrast = "hue-contrast"
+	SatContrast = "sat-contrast"
+	LumContrast = "lum-contrast"
+	ColorShift  = "color-shift"
+	Brightness  = "brightness"
+	Contrast    = "contrast"
+	Gamma       = "gamma"
+	Vibrance    = "vibrance"
+	Enhance     = "enhance"
+	Sharpen     = "sharpen"
+	Blur        = "blur"
+	EdgeDetect  = "edge-detect"
+	Emboss      = "emboss"
+	Threshold   = "threshold"
+	AlphaMap    = "alpha-map"
+	Extract     = "extract"
+	Convolution = "convolution"
+	optAmt      = "amount"
+	optFct      = "factor"
+	optBis      = "bias"
+	optHue      = "hue"
+	optSat      = "sat"
+	optLum      = "lum"
+	optHueTlr   = "hue-tolerance"
+	optSatTlr   = "sat-tolerance"
+	optLumTlr   = "lum-tolerance"
+	optHueFth   = "hue-feather"
+	optSatFth   = "sat-feather"
+	optLumFth   = "lum-feather"
+	optLwr      = "lower"
+	optUpp      = "upper"
+	optSrc      = "source"
+	optMtr      = "matrix"
 )
 
 var (
-	DEFAULT_MATRIX = [][]float64{
+	defMtr = [][]float64{
 		{1.0, 1.0, 1.0},
 		{1.0, 8.0, 1.0},
 		{1.0, 1.0, 1.0},
 	}
-	EXAMPLES = []string{
-		GRAYSCALE,
-		INVERT,
-		PASTELIZE,
-		SEPIA,
-		HUE_CONTRAST + "::" + OPTION_AMOUNT + "=1.0",
-		SAT_CONTRAST + "::" + OPTION_AMOUNT + "=1.0",
-		LUM_CONTRAST + "::" + OPTION_AMOUNT + "=1.0",
-		ALPHAMAP + "::" + OPTION_SOURCE + "=s*l::" + OPTION_LOWER + "=0.1::" + OPTION_UPPER + "=0.7",
-		BLUR + "::" + OPTION_AMOUNT + "=1.0",
-		BRIGHTNESS + "::" + OPTION_AMOUNT + "=1.0",
-		COLOR_SHIFT + "::" + OPTION_HUE + "=180.0::" + OPTION_SAT + "=0.1::" + OPTION_LUM + "=0.7",
-		CONTRAST + "::" + OPTION_AMOUNT + "=1.0",
-		EDGE_DETECT + "::" + OPTION_AMOUNT + "=1.0",
-		EMBOSS + "::" + OPTION_AMOUNT + "=1.0",
-		ENHANCE + "::" + OPTION_AMOUNT + "=1.0",
-		EXTRACT + "::" + OPTION_HUE + "=180.0::" + OPTION_HUE_TOLERANCE + "=90.0::" + OPTION_HUE_FEATHER + "=90.0::" +
-			OPTION_SAT + "=0.50::" + OPTION_SAT_TOLERANCE + "=0.25::" + OPTION_SAT_FEATHER + "=0.25::" +
-			OPTION_LUM + "=0.50::" + OPTION_LUM_TOLERANCE + "=0.25::" + OPTION_LUM_FEATHER + "=0.25",
-		GAMMA + "::" + OPTION_AMOUNT + "=1.0",
-		HUE_ROTATE + "::" + OPTION_AMOUNT + "=180.0",
-		SAT + "::" + OPTION_AMOUNT + "=1.0",
-		SHARPEN + "::" + OPTION_AMOUNT + "=1.0",
-		THRESHOLD + "::" + OPTION_AMOUNT + "=1.0",
-		VIBRANCE + "::" + OPTION_AMOUNT + "=1.0",
-		"'" + CONVOLUTION + "::" + OPTION_MATRIX + "=1.0, 1.0, 1.0,   1.0, 8.0, 1.0,   1.0, 1.0, 1.0'",
+	Examples = []string{
+		Gray,
+		Invert,
+		Pastelize,
+		Sepia,
+		Hue + "::" + optAmt + "=0.5",
+		Sat + "::" + optAmt + "=1.0",
+		Lum + "::" + optAmt + "=1.0",
+		HueContrast + "::" + optAmt + "=1.0",
+		SatContrast + "::" + optAmt + "=1.0",
+		LumContrast + "::" + optAmt + "=1.0",
+		ColorShift + "::" + optHue + "=180.0::" + optSat + "=0.1::" + optLum + "=0.7",
+		Brightness + "::" + optAmt + "=1.0",
+		Contrast + "::" + optAmt + "=1.0",
+		Gamma + "::" + optAmt + "=1.0",
+		Vibrance + "::" + optAmt + "=1.0",
+		Enhance + "::" + optAmt + "=1.0",
+		Sharpen + "::" + optAmt + "=1.0",
+		Blur + "::" + optAmt + "=1.0",
+		EdgeDetect + "::" + optAmt + "=1.0",
+		Emboss + "::" + optAmt + "=1.0",
+		Threshold + "::" + optAmt + "=1.0",
+		AlphaMap + "::" + optSrc + "=s*l::" + optLwr + "=0.1::" + optUpp + "=0.7",
+		Extract + "::" +
+			optHue + "=180.0::" + optHueTlr + "=90.0::" + optHueFth + "=90.0::" +
+			optSat + "=0.50::" + optSatTlr + "=0.25::" + optSatFth + "=0.25::" +
+			optLum + "=0.50::" + optLumTlr + "=0.25::" + optLumFth + "=0.25",
+		Convolution + "::" + optMtr + "=1.0,1.0,1.0,1.0,8.0,1.0,1.0,1.0,1.0",
+	}
+	filterMap = map[string]func(s *ImageFilter, i *image.Image){
+		Gray:        func(s *ImageFilter, i *image.Image) { gray.Apply(i) },
+		Invert:      func(s *ImageFilter, i *image.Image) { invert.Apply(i) },
+		Pastelize:   func(s *ImageFilter, i *image.Image) { pastelize.Apply(i) },
+		Sepia:       func(s *ImageFilter, i *image.Image) { sepia.Apply(i) },
+		Hue:         func(s *ImageFilter, i *image.Image) { hue.Apply(i, s.getAmt()) },
+		Sat:         func(s *ImageFilter, i *image.Image) { sat.Apply(i, s.getAmt()) },
+		Lum:         func(s *ImageFilter, i *image.Image) { lum.Apply(i, s.getAmt()) },
+		HueContrast: func(s *ImageFilter, i *image.Image) { huecontrast.Apply(i, s.getAmt()) },
+		SatContrast: func(s *ImageFilter, i *image.Image) { satcontrast.Apply(i, s.getAmt()) },
+		LumContrast: func(s *ImageFilter, i *image.Image) { lumcontrast.Apply(i, s.getAmt()) },
+		ColorShift:  func(s *ImageFilter, i *image.Image) { colorshift.Apply(i, s.getH(), s.getS(), s.getL()) },
+		Brightness:  func(s *ImageFilter, i *image.Image) { brightness.Apply(i, s.getAmt()) },
+		Contrast:    func(s *ImageFilter, i *image.Image) { contrast.Apply(i, s.getAmt()) },
+		Gamma:       func(s *ImageFilter, i *image.Image) { gamma.Apply(i, s.getAmt()) },
+		Vibrance:    func(s *ImageFilter, i *image.Image) { vibrance.Apply(i, s.getAmt()) },
+		Enhance:     func(s *ImageFilter, i *image.Image) { enhance.Apply(i, s.getAmt()) },
+		Sharpen:     func(s *ImageFilter, i *image.Image) { sharpen.Apply(i, s.getAmt()) },
+		Blur:        func(s *ImageFilter, i *image.Image) { blur.Apply(i, s.getAmt()) },
+		EdgeDetect:  func(s *ImageFilter, i *image.Image) { edgedetect.Apply(i, s.getAmt()) },
+		Emboss:      func(s *ImageFilter, i *image.Image) { emboss.Apply(i, s.getAmt()) },
+		Threshold:   func(s *ImageFilter, i *image.Image) { threshold.Apply(i, s.getAmt()) },
+		AlphaMap:    func(s *ImageFilter, i *image.Image) { alphamap.Apply(i, s.getSrc(), s.getLwr(), s.getUpp()) },
+		Extract: func(s *ImageFilter, i *image.Image) {
+			extract.Extract(i, filter.ToColorFilter(
+				s.getH(), s.getHTlr(), s.getHFth(),
+				s.getS(), s.getSTlr(), s.getSFth(),
+				s.getL(), s.getLTlr(), s.getLFth(),
+			))
+		},
+		Convolution: func(s *ImageFilter, i *image.Image) {
+			convolution.NewCustomFilter(
+				s.getAmt(),
+				1.0+s.getFct(),
+				s.getBis(),
+				func(a float64) (m [][]float64) { return s.getMtr() },
+			).Apply(i)
+		},
 	}
 )
 
 type ImageFilter struct {
 	Type    string         `yaml:"type"`
 	Options map[string]any `yaml:"options"`
-}
-
-func Parse(str string) *ImageFilter {
-	args := strings.Split(str, "::")
-	name := args[0]
-	options := map[string]any{}
-	for _, a := range args[1:] {
-		e := strings.Split(a, "=")
-		if len(e) != 2 {
-			continue
-		}
-		k := e[0]
-		v := e[1]
-		if k == OPTION_MATRIX {
-			m := []float64{}
-			for _, e := range strings.Split(v, ",") {
-				if f, err := strconv.ParseFloat(e, 64); err == nil {
-					m = append(m, f)
-				} else {
-					m = append(m, 0)
-				}
-			}
-			options[k] = m
-		} else if f, err := strconv.ParseFloat(v, 64); err == nil {
-			options[k] = f
-		} else if i, err := strconv.ParseInt(v, 10, 64); err == nil {
-			options[k] = i
-		} else {
-			options[k] = v
-		}
-	}
-	return NewImageFilter(name, options)
 }
 
 func NewImageFilter(typ string, options map[string]any) *ImageFilter {
@@ -151,7 +164,7 @@ func NewImageFilter(typ string, options map[string]any) *ImageFilter {
 	}
 }
 
-func (s *ImageFilter) getFloat(option string, def float64) float64 {
+func (s *ImageFilter) getFlt(option string, def float64) float64 {
 	v, ok := s.Options[option]
 	if ok && v != nil {
 		switch val := v.(type) {
@@ -186,7 +199,7 @@ func (s *ImageFilter) getFloat(option string, def float64) float64 {
 	return def
 }
 
-func (s *ImageFilter) getString(option string, def string) string {
+func (s *ImageFilter) getStr(option string, def string) string {
 	v, ok := s.Options[option]
 	if ok && v != nil {
 		return v.(string)
@@ -194,7 +207,7 @@ func (s *ImageFilter) getString(option string, def string) string {
 	return def
 }
 
-func (s *ImageFilter) getMatrixOption(option string, def [][]float64) [][]float64 {
+func (s *ImageFilter) getCMtr(option string, def [][]float64) [][]float64 {
 	v, ok := s.Options[option]
 	if ok && v != nil {
 		in := v.([]float64)
@@ -205,7 +218,7 @@ func (s *ImageFilter) getMatrixOption(option string, def [][]float64) [][]float6
 		// Check if the length of the input slice is a perfect square
 		if rows*rows != len(in) {
 			fmt.Printf("input matrix is not a perfect square, falling back to default\n")
-			return DEFAULT_MATRIX
+			return defMtr
 		}
 
 		// Initialize the matrix
@@ -226,77 +239,28 @@ func (s *ImageFilter) getMatrixOption(option string, def [][]float64) [][]float6
 	return def
 }
 
-func (s *ImageFilter) getSource() string          { return s.getString(OPTION_SOURCE, "s*l") }
-func (s *ImageFilter) getLowerThreshold() float64 { return s.getFloat(OPTION_LOWER, 0.0) }
-func (s *ImageFilter) getUpperThreshold() float64 { return s.getFloat(OPTION_UPPER, 0.0) }
-func (s *ImageFilter) getAmount() float64         { return s.getFloat(OPTION_AMOUNT, 1.0) }
-func (s *ImageFilter) getHue() float64            { return s.getFloat(OPTION_HUE, 0.0) }
-func (s *ImageFilter) getHueTolerance() float64   { return s.getFloat(OPTION_HUE_TOLERANCE, 180.0) }
-func (s *ImageFilter) getHueFeather() float64     { return s.getFloat(OPTION_HUE_FEATHER, 0.0) }
-func (s *ImageFilter) getSat() float64            { return s.getFloat(OPTION_SAT, 0.50) }
-func (s *ImageFilter) getSatTolerance() float64   { return s.getFloat(OPTION_SAT_TOLERANCE, 0.50) }
-func (s *ImageFilter) getSatFeather() float64     { return s.getFloat(OPTION_SAT_FEATHER, 0.0) }
-func (s *ImageFilter) getLum() float64            { return s.getFloat(OPTION_LUM, 0.50) }
-func (s *ImageFilter) getLumTolerance() float64   { return s.getFloat(OPTION_LUM_TOLERANCE, 0.50) }
-func (s *ImageFilter) getLumFeather() float64     { return s.getFloat(OPTION_LUM_FEATHER, 0.0) }
-func (s *ImageFilter) getMatrix() [][]float64 {
-	return s.getMatrixOption(OPTION_MATRIX, DEFAULT_MATRIX)
-}
+func (s *ImageFilter) getSrc() string      { return s.getStr(optSrc, "s*l") }
+func (s *ImageFilter) getLwr() float64     { return s.getFlt(optLwr, 0.0) }
+func (s *ImageFilter) getUpp() float64     { return s.getFlt(optUpp, 0.0) }
+func (s *ImageFilter) getAmt() float64     { return s.getFlt(optAmt, 1.0) }
+func (s *ImageFilter) getH() float64       { return s.getFlt(optHue, 0.0) }
+func (s *ImageFilter) getHTlr() float64    { return s.getFlt(optHueTlr, 180.0) }
+func (s *ImageFilter) getHFth() float64    { return s.getFlt(optHueFth, 0.0) }
+func (s *ImageFilter) getS() float64       { return s.getFlt(optSat, 0.50) }
+func (s *ImageFilter) getSTlr() float64    { return s.getFlt(optSatTlr, 0.50) }
+func (s *ImageFilter) getSFth() float64    { return s.getFlt(optSatFth, 0.0) }
+func (s *ImageFilter) getL() float64       { return s.getFlt(optLum, 0.50) }
+func (s *ImageFilter) getLTlr() float64    { return s.getFlt(optLumTlr, 0.50) }
+func (s *ImageFilter) getLFth() float64    { return s.getFlt(optLumFth, 0.0) }
+func (s *ImageFilter) getFct() float64     { return s.getFlt(optFct, 1.0) }
+func (s *ImageFilter) getBis() float64     { return s.getFlt(optBis, 0.0) }
+func (s *ImageFilter) getMtr() [][]float64 { return s.getCMtr(optMtr, defMtr) }
 
 func (s *ImageFilter) Apply(i *image.Image) *image.Image {
-	switch strings.ToLower(s.Type) {
-	case GRAYSCALE:
-		return grayscale.Apply(i)
-	case INVERT:
-		return invert.Apply(i)
-	case SEPIA:
-		return sepia.Apply(i)
-	case PASTELIZE:
-		return pastelize.Apply(i)
-	case SHARPEN:
-		return convolution.NewSharpenFilter(s.getAmount()).Apply(i)
-	case BLUR:
-		return convolution.NewBlurFilter(s.getAmount()).Apply(i)
-	case EMBOSS:
-		return convolution.NewEmbossFilter(s.getAmount()).Apply(i)
-	case EDGE_DETECT:
-		return convolution.NewEdgeDetectFilter(s.getAmount()).Apply(i)
-	case ENHANCE:
-		return convolution.NewEnhanceFilter(s.getAmount()).Apply(i)
-	case CONVOLUTION:
-		return convolution.NewCustomFilter(s.getAmount(), 1, 0, func(a float64) (m [][]float64) { return s.getMatrix() }).Apply(i)
-	case CONTRAST:
-		return contrast.Apply(i, s.getAmount())
-	case HUE_CONTRAST:
-		return huecontrast.Apply(i, s.getAmount())
-	case SAT_CONTRAST:
-		return satcontrast.Apply(i, s.getAmount())
-	case LUM_CONTRAST:
-		return lumcontrast.Apply(i, s.getAmount())
-	case BRIGHTNESS:
-		return brightness.Apply(i, s.getAmount())
-	case THRESHOLD:
-		return threshold.Apply(i, uint8(s.getAmount()*255.0))
-	case SAT:
-		return sat.Apply(i, s.getAmount())
-	case HUE_ROTATE:
-		return huerotate.Apply(i, s.getAmount())
-	case VIBRANCE:
-		return vibrance.Apply(i, s.getAmount())
-	case GAMMA:
-		return gamma.Apply(i, s.getAmount())
-	case ALPHAMAP:
-		return alphamap.Apply(i, s.getSource(), s.getLowerThreshold(), s.getUpperThreshold())
-	case COLOR_SHIFT:
-		return colorshift.Apply(i, s.getHue(), s.getSat(), s.getLum())
-	case EXTRACT:
-		return extract.Extract(i, filter.ToColorFilter(
-			s.getHue(), s.getHueTolerance(), s.getHueFeather(),
-			s.getSat(), s.getSatTolerance(), s.getSatFeather(),
-			s.getLum(), s.getLumTolerance(), s.getLumFeather(),
-		))
-	default:
-		fmt.Printf("unknown filter type: %s\n", s.Type)
+	if f, ok := filterMap[strings.ToLower(s.Type)]; ok {
+		f(s, i)
 		return i
 	}
+	fmt.Printf("unknown filter type: %s\n", s.Type)
+	return i
 }

@@ -18,8 +18,6 @@ func Apply(i *image.Image, source string, lowerThreshold, upperThreshold float64
 	return i.ProcessHSLA(0, 0, i.W(), i.H(), func(x, y int, col *hsla.HSLA) (x2 int, y2 int, col2 *hsla.HSLA) {
 		val := 0.0
 		switch alphaSrc {
-		case "h":
-			val = col.H()
 		case "s":
 			val = col.S()
 		case "l":
@@ -27,7 +25,7 @@ func Apply(i *image.Image, source string, lowerThreshold, upperThreshold float64
 		case "s*l":
 			val = col.S() * col.L()
 		default:
-			panic("invalid alpha source, available options are: h, s, l, s*l")
+			panic("invalid alpha source, available options are: s, l, s*l")
 		}
 
 		if (invert && val <= minVal) || (!invert && val >= maxVal) {
@@ -43,6 +41,6 @@ func Apply(i *image.Image, source string, lowerThreshold, upperThreshold float64
 		if invert {
 			a = 1 - a
 		}
-		return x, y, col.SetA(a)
+		return x, y, col.SetA(a + minVal)
 	})
 }

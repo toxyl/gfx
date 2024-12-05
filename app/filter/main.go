@@ -55,7 +55,7 @@ func main() {
 		return
 	}
 	if len(os.Args) > 1 && os.Args[1] == "filters" {
-		fmt.Printf("Available filters\n-----------------\n%s\n", strings.Join(filters.EXAMPLES, "\n"))
+		fmt.Printf("Available filters\n-----------------\n%s\n", strings.Join(filters.Examples, "\n"))
 		return
 	}
 	flag.Usage()
