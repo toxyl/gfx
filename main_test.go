@@ -203,7 +203,7 @@ func renderTestImage(name string, size int, h, hTolerance, hFeather, s, sToleran
 	)
 	MakeTestImage(size, h, hTolerance, hFeather, s, sTolerance, sFeather, l, lTolerance, lFeather, 0).SaveAsPNG(fImage)
 	extractTest(image.NewFromFile(fImage), size, size, h, hTolerance, hFeather, s, sTolerance, sFeather, l, lTolerance, lFeather).SaveAsPNG(f)
-	extractTest(fAIAImage, size, size, h, hTolerance, hFeather, s, sTolerance, sFeather, l, lTolerance, lFeather).SaveAsPNG(fAIA)
+	extractTest(fAIAImage.Clone(), size, size, h, hTolerance, hFeather, s, sTolerance, sFeather, l, lTolerance, lFeather).SaveAsPNG(fAIA)
 }
 
 func Test_Rendering(t *testing.T) {

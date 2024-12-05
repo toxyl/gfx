@@ -8,10 +8,6 @@ import (
 )
 
 func Apply(img *image.Image, gamma float64) *image.Image {
-	if gamma <= 0 {
-		panic("Gamma value must be greater than 0")
-	}
-
 	// Precompute gamma correction lookup table
 	lut := make([]uint8, 256)
 	invGamma := 1.0 / gamma

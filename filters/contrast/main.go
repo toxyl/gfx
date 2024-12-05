@@ -8,10 +8,6 @@ import (
 )
 
 func Apply(img *image.Image, contrast float64) *image.Image {
-	if contrast < -1 || contrast > 1 {
-		panic("Contrast value must be between -1 and 1")
-	}
-
 	// Precompute scaling factor
 	factor := (259 * (contrast + 1)) / (255 * (1 - contrast))
 

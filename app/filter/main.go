@@ -4,7 +4,6 @@ import (
 	"flag"
 	"fmt"
 	"os"
-	"strconv"
 	"strings"
 
 	"github.com/toxyl/gfx/filters"
@@ -34,25 +33,7 @@ func main() {
 	if fileIn != nil && *fileIn != "" && fileOut != nil && *fileOut != "" {
 		fChain := []*filters.ImageFilter{}
 		for _, f := range chain {
-			args := strings.Split(f, "::")
-			name := args[0]
-			options := map[string]any{}
-			for _, a := range args[1:] {
-				e := strings.Split(a, "=")
-				if len(e) != 2 {
-					continue
-				}
-				k := e[0]
-				v := e[1]
-				if f, err := strconv.ParseFloat(v, 64); err == nil {
-					options[k] = f
-				} else if i, err := strconv.ParseInt(v, 10, 64); err == nil {
-					options[k] = i
-				} else {
-					options[k] = v
-				}
-			}
-			fChain = append(fChain, filters.NewImageFilter(name, options))
+			fChain = append(fChain, filters.Parse(f))
 		}
 		img := image.NewFromFile(*fileIn)
 		for _, f := range fChain {

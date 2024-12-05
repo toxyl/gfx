@@ -76,10 +76,8 @@ layers:
             sat: 0.55
             sat-feather: 0.05
             sat-tolerance: 0.45
-crop: null
 filters:
     - type: enhance
-      options: {}
     - type: alpha-map
       options:
         lower: 0.01

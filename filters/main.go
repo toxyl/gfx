@@ -2,6 +2,7 @@ package filters
 
 import (
 	"fmt"
+	"strconv"
 	"strings"
 
 	"github.com/toxyl/gfx/color/filter"
@@ -22,6 +23,7 @@ import (
 	"github.com/toxyl/gfx/filters/threshold"
 	"github.com/toxyl/gfx/filters/vibrance"
 	"github.com/toxyl/gfx/image"
+	"github.com/toxyl/gfx/math"
 )
 
 const (
@@ -45,6 +47,7 @@ const (
 	SHARPEN            = "sharpen"
 	THRESHOLD          = "threshold"
 	VIBRANCE           = "vibrance"
+	CONVOLUTION        = "convolution"
 
 	OPTION_AMOUNT        = "amount"
 	OPTION_FACTOR        = "factor"
@@ -62,9 +65,15 @@ const (
 	OPTION_LOWER         = "lower"
 	OPTION_UPPER         = "upper"
 	OPTION_SOURCE        = "source"
+	OPTION_MATRIX        = "matrix"
 )
 
 var (
+	DEFAULT_MATRIX = [][]float64{
+		{1.0, 1.0, 1.0},
+		{1.0, 8.0, 1.0},
+		{1.0, 1.0, 1.0},
+	}
 	EXAMPLES = []string{
 		ALPHAMAP + "::" + OPTION_SOURCE + "=s*l::" + OPTION_LOWER + "=0.1::" + OPTION_UPPER + "=0.7",
 		BLUR + "::" + OPTION_AMOUNT + "=1.0",
@@ -88,12 +97,45 @@ var (
 		SHARPEN + "::" + OPTION_AMOUNT + "=1.0",
 		THRESHOLD + "::" + OPTION_AMOUNT + "=1.0",
 		VIBRANCE + "::" + OPTION_AMOUNT + "=1.0",
+		"'" + CONVOLUTION + "::" + OPTION_MATRIX + "=1.0, 1.0, 1.0,   1.0, 8.0, 1.0,   1.0, 1.0, 1.0'",
 	}
 )
 
 type ImageFilter struct {
 	Type    string         `yaml:"type"`
 	Options map[string]any `yaml:"options"`
+}
+
+func Parse(str string) *ImageFilter {
+	args := strings.Split(str, "::")
+	name := args[0]
+	options := map[string]any{}
+	for _, a := range args[1:] {
+		e := strings.Split(a, "=")
+		if len(e) != 2 {
+			continue
+		}
+		k := e[0]
+		v := e[1]
+		if k == OPTION_MATRIX {
+			m := []float64{}
+			for _, e := range strings.Split(v, ",") {
+				if f, err := strconv.ParseFloat(e, 64); err == nil {
+					m = append(m, f)
+				} else {
+					m = append(m, 0)
+				}
+			}
+			options[k] = m
+		} else if f, err := strconv.ParseFloat(v, 64); err == nil {
+			options[k] = f
+		} else if i, err := strconv.ParseInt(v, 10, 64); err == nil {
+			options[k] = i
+		} else {
+			options[k] = v
+		}
+	}
+	return NewImageFilter(name, options)
 }
 
 func NewImageFilter(typ string, options map[string]any) *ImageFilter {
@@ -146,6 +188,38 @@ func (s *ImageFilter) getString(option string, def string) string {
 	return def
 }
 
+func (s *ImageFilter) getMatrixOption(option string, def [][]float64) [][]float64 {
+	v, ok := s.Options[option]
+	if ok && v != nil {
+		in := v.([]float64)
+
+		// Calculate the number of rows and columns
+		rows := int(math.Sqrt(float64(len(in))))
+
+		// Check if the length of the input slice is a perfect square
+		if rows*rows != len(in) {
+			fmt.Printf("input matrix is not a perfect square, falling back to default\n")
+			return DEFAULT_MATRIX
+		}
+
+		// Initialize the matrix
+		m := make([][]float64, rows)
+		for i := range m {
+			m[i] = make([]float64, rows)
+		}
+
+		// Fill the matrix with values from the input slice
+		for i := 0; i < rows; i++ {
+			for j := 0; j < rows; j++ {
+				m[i][j] = in[i*rows+j]
+			}
+		}
+
+		return m
+	}
+	return def
+}
+
 func (s *ImageFilter) getSource() string          { return s.getString(OPTION_SOURCE, "s*l") }
 func (s *ImageFilter) getLowerThreshold() float64 { return s.getFloat(OPTION_LOWER, 0.0) }
 func (s *ImageFilter) getUpperThreshold() float64 { return s.getFloat(OPTION_UPPER, 0.0) }
@@ -159,6 +233,9 @@ func (s *ImageFilter) getSatFeather() float64     { return s.getFloat(OPTION_SAT
 func (s *ImageFilter) getLum() float64            { return s.getFloat(OPTION_LUM, 0.50) }
 func (s *ImageFilter) getLumTolerance() float64   { return s.getFloat(OPTION_LUM_TOLERANCE, 0.50) }
 func (s *ImageFilter) getLumFeather() float64     { return s.getFloat(OPTION_LUM_FEATHER, 0.0) }
+func (s *ImageFilter) getMatrix() [][]float64 {
+	return s.getMatrixOption(OPTION_MATRIX, DEFAULT_MATRIX)
+}
 
 func (s *ImageFilter) Apply(i *image.Image) *image.Image {
 	switch strings.ToLower(s.Type) {
@@ -180,6 +257,10 @@ func (s *ImageFilter) Apply(i *image.Image) *image.Image {
 		return convolution.NewEdgeDetectFilter(s.getAmount()).Apply(i)
 	case ENHANCE:
 		return convolution.NewEnhanceFilter(s.getAmount()).Apply(i)
+	case CONVOLUTION:
+		return convolution.NewCustomFilter(s.getAmount(), 1, 0, func(amount float64) (matrix [][]float64) {
+			return s.getMatrix()
+		}).Apply(i)
 	case CONTRAST:
 		return contrast.Apply(i, s.getAmount())
 	case LIGHTNESS_CONTRAST:

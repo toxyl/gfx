@@ -7,6 +7,7 @@ import (
 	"github.com/toxyl/gfx/color/hsla"
 	"github.com/toxyl/gfx/image"
 	"github.com/toxyl/gfx/math"
+	"github.com/toxyl/gfx/vars"
 )
 
 // prepHueRange normalizes and adjusts the boundaries of a FuzzyRange to operate
@@ -233,12 +234,9 @@ type FuzzyRangeHSLA struct {
 }
 
 func (f *FuzzyRangeHSLA) Calc(c *hsla.HSLA) *hsla.HSLA {
-	h := f.hue.calcWrapped(c.H())
-	s := f.sat.calc(c.S())
-	l := f.lum.calc(c.L())
-	alpha := h * l * s
+	alpha := f.hue.calcWrapped(c.H()) * f.lum.calc(c.L()) * f.sat.calc(c.S())
 	if alpha <= 0 {
-		return hsla.New(0, 0, 0, 0) // Fully transparent if any component is out of range
+		return vars.COLOR_TRANSPARENT // Fully transparent if any component is out of range
 	}
 	c.SetA(alpha)
 	return c

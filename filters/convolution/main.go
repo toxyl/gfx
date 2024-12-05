@@ -32,7 +32,7 @@ func NewSharpenFilter(amount float64) *ConvolutionMatrix {
 }
 
 func NewBlurFilter(amount float64) *ConvolutionMatrix {
-	kernelSize := int(2*amount) + 1
+	kernelSize := math.Abs(int(2*amount) + 1)
 
 	if kernelSize%2 == 0 {
 		kernelSize++

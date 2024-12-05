@@ -4,7 +4,6 @@ layers:
     - path: https://services.swpc.noaa.gov/images/animations/suvi/primary/284/latest.png
       alpha: 1
       mode: normal
-      filters: 
     - path: https://services.swpc.noaa.gov/images/animations/suvi/secondary/284/latest.png
       alpha: 1
       mode: multiply
@@ -15,11 +14,9 @@ layers:
     - path: https://services.swpc.noaa.gov/images/animations/suvi/primary/304/latest.png
       alpha: 1
       mode: difference
-      filters: 
     - path: https://services.swpc.noaa.gov/images/animations/suvi/secondary/304/latest.png
       alpha: 1
       mode: difference
-      filters: 
     - path: https://services.swpc.noaa.gov/images/animations/suvi/primary/094/latest.png
       alpha: 0.5
       mode: average
@@ -61,7 +58,6 @@ layers:
             lum: 0
             sat: 0
         - type: enhance
-          options: {}
     - path: https://services.swpc.noaa.gov/images/animations/suvi/secondary/131/latest.png
       alpha: 0.75
       mode: pin-light
@@ -72,7 +68,6 @@ layers:
             lum: 0
             sat: 0
         - type: enhance
-          options: {}
     - path: https://services.swpc.noaa.gov/images/animations/suvi/primary/171/latest.png
       alpha: 0.5
       mode: average
@@ -83,7 +78,6 @@ layers:
             lum: 0
             sat: 0
         - type: enhance
-          options: {}
     - path: https://services.swpc.noaa.gov/images/animations/suvi/secondary/171/latest.png
       alpha: 0.5
       mode: pin-light
@@ -94,7 +88,6 @@ layers:
             lum: 0.01
             sat: -0.05
         - type: enhance
-          options: {}
 crop:
     x: 20
     "y": 20

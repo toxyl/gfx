@@ -6,6 +6,7 @@ import (
 	"github.com/toxyl/gfx/color/hsla"
 	"github.com/toxyl/gfx/color/rgba"
 	"github.com/toxyl/gfx/math"
+	"github.com/toxyl/gfx/vars"
 )
 
 // RGBAToHSLA convert a RGBA color to a HSLA color.
@@ -104,8 +105,7 @@ func RGBAToRGBAPremul(col *rgba.RGBA) color.RGBA {
 // RGBAPremulToRGBA converts a premultiplied RGBA color to a RGBA color.
 func RGBAPremulToRGBA(col color.RGBA) *rgba.RGBA {
 	if col.A == 0 {
-		// If alpha is zero, return fully transparent black (0, 0, 0, 0).
-		return rgba.New(0, 0, 0, 0)
+		return vars.COLOR_TRANSPARENT_RGBA // If alpha is zero, return fully transparent black (0, 0, 0, 0).
 	}
 	scale := 255.0 / float32(col.A)
 	return rgba.New(
