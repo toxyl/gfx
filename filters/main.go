@@ -258,9 +258,7 @@ func (s *ImageFilter) Apply(i *image.Image) *image.Image {
 	case ENHANCE:
 		return convolution.NewEnhanceFilter(s.getAmount()).Apply(i)
 	case CONVOLUTION:
-		return convolution.NewCustomFilter(s.getAmount(), 1, 0, func(amount float64) (matrix [][]float64) {
-			return s.getMatrix()
-		}).Apply(i)
+		return convolution.NewCustomFilter(s.getAmount(), 1, 0, func(a float64) (m [][]float64) { return s.getMatrix() }).Apply(i)
 	case CONTRAST:
 		return contrast.Apply(i, s.getAmount())
 	case LIGHTNESS_CONTRAST:

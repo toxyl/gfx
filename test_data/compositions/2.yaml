@@ -53,7 +53,7 @@ layers:
         - type: extract
           options:
             hue: 125
-            hue-feather: 30
+            hue-feather: 20
             hue-tolerance: 20
             lum: 0.5
             lum-feather: 0.1
@@ -68,7 +68,7 @@ layers:
         - type: extract
           options:
             hue: 230
-            hue-feather: 30
+            hue-feather: 20
             hue-tolerance: 20
             lum: 0.5
             lum-feather: 0.1

@@ -1,30 +1,30 @@
 enabled: true
 name: Sun (GOES)
 layers:
-    - path: https://services.swpc.noaa.gov/images/animations/suvi/primary/284/latest.png
+    - path: ../test_data/compositions/layers/goes_16_284.png
       alpha: 1
       mode: normal
-    - path: https://services.swpc.noaa.gov/images/animations/suvi/secondary/284/latest.png
+    - path: ../test_data/compositions/layers/goes_18_284.png
       alpha: 1
       mode: multiply
       filters:
         - type: blur
           options:
             intensity: 4
-    - path: https://services.swpc.noaa.gov/images/animations/suvi/primary/304/latest.png
+    - path: ../test_data/compositions/layers/goes_16_304.png
       alpha: 1
       mode: difference
-    - path: https://services.swpc.noaa.gov/images/animations/suvi/secondary/304/latest.png
+    - path: ../test_data/compositions/layers/goes_16_304.png
       alpha: 1
       mode: difference
-    - path: https://services.swpc.noaa.gov/images/animations/suvi/primary/094/latest.png
+    - path: ../test_data/compositions/layers/goes_16_094.png
       alpha: 0.5
       mode: average
       filters:
         - type: enhance
           options:
             intensity: 1.05
-    - path: https://services.swpc.noaa.gov/images/animations/suvi/secondary/094/latest.png
+    - path: ../test_data/compositions/layers/goes_18_094.png
       alpha: 0.5
       mode: average
       filters:
@@ -34,21 +34,21 @@ layers:
         - type: blur
           options:
             intensity: 2
-    - path: https://services.swpc.noaa.gov/images/animations/suvi/primary/195/latest.png
+    - path: ../test_data/compositions/layers/goes_16_195.png
       alpha: 0.75
       mode: difference
       filters:
         - type: enhance
           options:
             intensity: 1.05
-    - path: https://services.swpc.noaa.gov/images/animations/suvi/secondary/195/latest.png
+    - path: ../test_data/compositions/layers/goes_18_195.png
       alpha: 0.75
       mode: darken
       filters:
         - type: enhance
           options:
             intensity: 1.05
-    - path: https://services.swpc.noaa.gov/images/animations/suvi/primary/131/latest.png
+    - path: ../test_data/compositions/layers/goes_16_131.png
       alpha: 0.5
       mode: darken
       filters:
@@ -58,7 +58,7 @@ layers:
             lum: 0
             sat: 0
         - type: enhance
-    - path: https://services.swpc.noaa.gov/images/animations/suvi/secondary/131/latest.png
+    - path: ../test_data/compositions/layers/goes_18_131.png
       alpha: 0.75
       mode: pin-light
       filters:
@@ -68,7 +68,7 @@ layers:
             lum: 0
             sat: 0
         - type: enhance
-    - path: https://services.swpc.noaa.gov/images/animations/suvi/primary/171/latest.png
+    - path: ../test_data/compositions/layers/goes_16_171.png
       alpha: 0.5
       mode: average
       filters:
@@ -78,7 +78,7 @@ layers:
             lum: 0
             sat: 0
         - type: enhance
-    - path: https://services.swpc.noaa.gov/images/animations/suvi/secondary/171/latest.png
+    - path: ../test_data/compositions/layers/goes_18_171.png
       alpha: 0.5
       mode: pin-light
       filters:
