@@ -39,7 +39,8 @@ func (fc *FilterChain) Load(file string) error {
 		return errors.Newf("file not found: %s", file)
 	}
 	for _, f := range strings.Split(f.AsString(), "\n") {
-		if strings.TrimSpace(f) == "" {
+		f = strings.TrimSpace(f)
+		if f == "" || f[0] == '#' {
 			continue
 		}
 		fChain = append(fChain, filters.Parse(f))
