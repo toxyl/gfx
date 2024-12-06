@@ -7,18 +7,19 @@ import (
 
 func Parse(str string) *ImageFilter {
 	args := strings.Split(str, "::")
-	name := args[0]
+	name := strings.TrimSpace(args[0])
 	options := map[string]any{}
 	for _, a := range args[1:] {
 		e := strings.Split(a, "=")
 		if len(e) != 2 {
 			continue
 		}
-		k := e[0]
-		v := e[1]
+		k := strings.TrimSpace(e[0])
+		v := strings.TrimSpace(e[1])
 		if k == optMtr {
 			m := []float64{}
 			for _, e := range strings.Split(v, ",") {
+				e = strings.TrimSpace(e)
 				if f, err := strconv.ParseFloat(e, 64); err == nil {
 					m = append(m, f)
 				} else {
