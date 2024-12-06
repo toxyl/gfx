@@ -157,6 +157,14 @@ type ImageFilter struct {
 	Options map[string]any `yaml:"options"`
 }
 
+func (f *ImageFilter) String() string {
+	res := f.Type
+	for k, v := range f.Options {
+		res += "::" + k + "=" + fmt.Sprint(v)
+	}
+	return res
+}
+
 func NewImageFilter(typ string, options map[string]any) *ImageFilter {
 	return &ImageFilter{
 		Type:    typ,

@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/toxyl/flo"
+	"github.com/toxyl/gfx/filterchain"
 	"github.com/toxyl/gfx/filters"
 	"github.com/toxyl/gfx/image"
 )
@@ -33,30 +34,37 @@ func main() {
 	flag.Parse()
 
 	if fileIn != nil && *fileIn != "" && fileOut != nil && *fileOut != "" {
-		fChain := []*filters.ImageFilter{}
+		fChain := filterchain.New()
+		appendFilters := true
+		saveChain := false
 		if fileChain != nil && *fileChain != "" {
 			f := flo.File(*fileChain)
 			if f.Exists() {
-				chain = strings.Split(f.AsString(), "\n")
+				if err := fChain.Load(f.Path()); err != nil {
+					fmt.Printf("Failed to load filter chain: %s\n", err.Error())
+					return
+				}
+				appendFilters = false
 				fmt.Printf("Filter chain loaded from file.\n")
 			} else {
-				f.StoreString(strings.Join(chain, "\n"))
-				fmt.Printf("Filter chain saved to file.\n")
+				saveChain = true
 			}
 		}
-		for _, f := range chain {
-			fChain = append(fChain, filters.Parse(f))
+		if appendFilters {
+			fChain.Append(chain...)
 		}
-		img := image.NewFromFile(*fileIn)
-		for _, f := range fChain {
-			img = f.Apply(img)
+		if saveChain {
+			fChain.Save(*fileChain)
+			fmt.Printf("Filter chain saved to file.\n")
 		}
-		img.SaveAsPNG(*fileOut)
+		fChain.Apply(image.NewFromFile(*fileIn)).SaveAsPNG(*fileOut)
 		return
 	}
+
 	if len(os.Args) > 1 && os.Args[1] == "filters" {
 		fmt.Printf("Available filters\n-----------------\n%s\n", strings.Join(filters.Examples, "\n"))
 		return
 	}
+
 	flag.Usage()
 }
