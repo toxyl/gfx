@@ -4,8 +4,11 @@ import (
 	"math"
 
 	"github.com/toxyl/gfx/color/rgba"
+	"github.com/toxyl/gfx/filters/meta"
 	"github.com/toxyl/gfx/image"
 )
+
+var Meta = meta.New("sepia", []*meta.FilterMetaDataArg{})
 
 func Apply(img *image.Image) *image.Image {
 	return img.ProcessRGBA(0, 0, img.W(), img.H(), func(x, y int, col *rgba.RGBA) (x2 int, y2 int, col2 *rgba.RGBA) {

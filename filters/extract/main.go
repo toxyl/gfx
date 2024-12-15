@@ -5,10 +5,23 @@ import (
 
 	"github.com/toxyl/gfx/color/filter"
 	"github.com/toxyl/gfx/color/hsla"
+	"github.com/toxyl/gfx/filters/meta"
 	"github.com/toxyl/gfx/image"
 	"github.com/toxyl/gfx/math"
 	"github.com/toxyl/gfx/vars"
 )
+
+var Meta = meta.New("extract", []*meta.FilterMetaDataArg{
+	{Name: "hue", Default: 0.0},
+	{Name: "hue-tolerance", Default: 180.0},
+	{Name: "hue-feather", Default: 0.0},
+	{Name: "sat", Default: 0.50},
+	{Name: "sat-tolerance", Default: 0.50},
+	{Name: "sat-feather", Default: 0.0},
+	{Name: "lum", Default: 0.50},
+	{Name: "lum-tolerance", Default: 0.50},
+	{Name: "lum-feather", Default: 0.0},
+})
 
 // prepHueRange normalizes and adjusts the boundaries of a FuzzyRange to operate
 // within a hue range of 0 to 360 degrees. It handles edge cases where the range
@@ -242,7 +255,7 @@ func (f *FuzzyRangeHSLA) Calc(c *hsla.HSLA) *hsla.HSLA {
 	return c
 }
 
-func Extract(i *image.Image, cf *filter.ColorFilter) *image.Image {
+func Apply(i *image.Image, cf *filter.ColorFilter) *image.Image {
 	fr := FuzzyRangeHSLA{
 		hue: prepHueRange(FuzzyRange{cf.MinThres.H(), cf.Min.H(), cf.Max.H(), cf.MaxThres.H(), false, false}),
 		sat: FuzzyRange{math.Clamp(cf.MinThres.S(), 0.0, 1.0), math.Clamp(cf.Min.S(), 0.0, 1.0), math.Clamp(cf.Max.S(), 0.0, 1.0), math.Clamp(cf.MaxThres.S(), 0.0, 1.0), false, false},

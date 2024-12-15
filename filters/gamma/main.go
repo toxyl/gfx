@@ -4,13 +4,18 @@ import (
 	"math"
 
 	"github.com/toxyl/gfx/color/rgba"
+	"github.com/toxyl/gfx/filters/meta"
 	"github.com/toxyl/gfx/image"
 )
 
-func Apply(img *image.Image, gamma float64) *image.Image {
+var Meta = meta.New("gamma", []*meta.FilterMetaDataArg{
+	{Name: "adjustment", Default: 1.0},
+})
+
+func Apply(img *image.Image, adjustment float64) *image.Image {
 	// Precompute gamma correction lookup table
 	lut := make([]uint8, 256)
-	invGamma := 1.0 / (gamma + 1)
+	invGamma := 1.0 / (adjustment + 1)
 	for i := 0; i < 256; i++ {
 		lut[i] = uint8(math.Min(255, math.Pow(float64(i)/255.0, invGamma)*255.0))
 	}

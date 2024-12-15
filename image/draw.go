@@ -6,7 +6,7 @@ import (
 )
 
 func (i *Image) Draw(src *Image, srcX, srcY, srcW, srcH, dstX, dstY, dstW, dstH int, mode blend.BlendMode, alpha float64) *Image {
-	s := src.Crop(srcX, srcY, srcW, srcH)
+	s := src.Crop(srcX, srcY, srcW, srcH, true)
 	if srcW != dstW || srcH != dstH {
 		s = s.Resize(dstW, dstH)
 	}

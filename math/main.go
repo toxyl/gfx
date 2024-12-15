@@ -102,3 +102,11 @@ func FormatNumber[N Number](number N, decimals int) string {
 
 	return fmt.Sprintf("%*.*f", 5+decimals, decimals, n/divisor) + suffix
 }
+
+func MaxLenStr(strs ...string) int {
+	l := 0
+	for _, s := range strs {
+		l = Max(l, len(s))
+	}
+	return l
+}

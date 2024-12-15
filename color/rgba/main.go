@@ -9,56 +9,56 @@ import (
 
 // RGBA is similar to color.RGBA but doesn't store RGB with premultiplied alpha
 type RGBA struct {
-	r uint8
-	g uint8
-	b uint8
-	a uint8
+	Red   uint8 `yaml:"r"`
+	Green uint8 `yaml:"g"`
+	Blue  uint8 `yaml:"b"`
+	Alpha uint8 `yaml:"a"`
 }
 
 func New[N math.Number](r, g, b, a N) *RGBA {
 	rgba := RGBA{
-		r: uint8(math.Round(r)),
-		g: uint8(math.Round(g)),
-		b: uint8(math.Round(b)),
-		a: uint8(math.Round(a)),
+		Red:   uint8(math.Round(r)),
+		Green: uint8(math.Round(g)),
+		Blue:  uint8(math.Round(b)),
+		Alpha: uint8(math.Round(a)),
 	}
 	return &rgba
 }
 
 func (rgba *RGBA) String() string {
-	return fmt.Sprintf("r: %d, g: %d, b: %d, a: %d", rgba.r, rgba.g, rgba.b, rgba.a)
+	return fmt.Sprintf("r: %d, g: %d, b: %d, a: %d", rgba.Red, rgba.Green, rgba.Blue, rgba.Alpha)
 }
 
-func (rgba *RGBA) R() uint8 { return rgba.r }
-func (rgba *RGBA) G() uint8 { return rgba.g }
-func (rgba *RGBA) B() uint8 { return rgba.b }
-func (rgba *RGBA) A() uint8 { return rgba.a }
+func (rgba *RGBA) R() uint8 { return rgba.Red }
+func (rgba *RGBA) G() uint8 { return rgba.Green }
+func (rgba *RGBA) B() uint8 { return rgba.Blue }
+func (rgba *RGBA) A() uint8 { return rgba.Alpha }
 
-func (rgba *RGBA) SetR(v uint8) *RGBA { rgba.r = v; return rgba }
-func (rgba *RGBA) SetG(v uint8) *RGBA { rgba.g = v; return rgba }
-func (rgba *RGBA) SetB(v uint8) *RGBA { rgba.b = v; return rgba }
-func (rgba *RGBA) SetA(v uint8) *RGBA { rgba.a = v; return rgba }
+func (rgba *RGBA) SetR(v uint8) *RGBA { rgba.Red = v; return rgba }
+func (rgba *RGBA) SetG(v uint8) *RGBA { rgba.Green = v; return rgba }
+func (rgba *RGBA) SetB(v uint8) *RGBA { rgba.Blue = v; return rgba }
+func (rgba *RGBA) SetA(v uint8) *RGBA { rgba.Alpha = v; return rgba }
 
 func (rgba *RGBA) RGB() RGBA {
-	return RGBA{r: rgba.r, g: rgba.g, b: rgba.b, a: 0xFF}
+	return RGBA{Red: rgba.Red, Green: rgba.Green, Blue: rgba.Blue, Alpha: 0xFF}
 }
 
 // RGBA returns a version of the color that is alpha-premultiplied.
 func (rgba *RGBA) RGBA() color.RGBA {
 	c := color.RGBA{
-		R: rgba.r,
-		G: rgba.g,
-		B: rgba.b,
+		R: rgba.Red,
+		G: rgba.Green,
+		B: rgba.Blue,
 		A: 0xFF,
 	}
 	if c.A == 0 { // Avoid division by zero if original alpha is zero
 		return color.RGBA{0, 0, 0, 0}
 	}
-	scale := float32(rgba.a) / float32(c.A)
+	scale := float32(rgba.Alpha) / float32(c.A)
 	return color.RGBA{
 		R: uint8(float32(c.R) * scale),
 		G: uint8(float32(c.G) * scale),
 		B: uint8(float32(c.B) * scale),
-		A: rgba.a,
+		A: rgba.Alpha,
 	}
 }

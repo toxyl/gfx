@@ -2,11 +2,16 @@ package lum
 
 import (
 	"github.com/toxyl/gfx/color/rgba"
+	"github.com/toxyl/gfx/filters/meta"
 	"github.com/toxyl/gfx/image"
 	"github.com/toxyl/gfx/math"
 )
 
-func Apply(img *image.Image, luminance float64) *image.Image {
+var Meta = meta.New("lum", []*meta.FilterMetaDataArg{
+	{Name: "shift", Default: 0.0},
+})
+
+func Apply(img *image.Image, shift float64) *image.Image {
 	return img.ProcessRGBA(0, 0, img.W(), img.H(), func(x, y int, col *rgba.RGBA) (x2 int, y2 int, col2 *rgba.RGBA) {
 		r := float64(col.R())
 		g := float64(col.G())
@@ -16,7 +21,7 @@ func Apply(img *image.Image, luminance float64) *image.Image {
 		Y := 0.299*r + 0.587*g + 0.114*b
 
 		// Adjust luminance
-		Y = math.Clamp(Y+luminance*255.0, 0.0, 255.0)
+		Y = math.Clamp(Y+shift*255.0, 0.0, 255.0)
 
 		// Calculate the new RGB values based on the adjusted luminance
 		factor := Y / (0.299*r + 0.587*g + 0.114*b)

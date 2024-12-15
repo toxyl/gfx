@@ -1,0 +1,26 @@
+[VARS]
+# this is a compiled filter that doesn't contain any variables anymore
+
+[FILTERS]
+filter4 { extract(230 20 20 0.55 0.45 0.05 0.5 0.4 0.1) }
+filter3 { extract(125 20 20 0.55 0.45 0.05 0.5 0.4 0.1) }
+filter2 { extract(60 30 30 0.6 0.4 0.2 0.5 0.2 0.2) }
+filter1 { extract(0 100 0 0.5 0.5 0 0.55 0.45 0.05) }
+filter0 { extract(25 60 60 0.75 0.25 0.2 0.7 0.3 0.2) }
+compFilter { enhance(1) alpha-map(`l` 0.01 0.04) }
+
+[COMPOSITION]
+name   = `Sun Spots (HMI)` 
+width  = 182
+height = 182
+color  = hsla(0.000000 0.000000 0.000000 1.000000) 
+filter = compFilter
+crop   = 0 0 0 0
+resize = 0 0
+
+[LAYERS]
+         average 1.0000          filter4    https://sdo.gsfc.nasa.gov/assets/img/latest/latest_512_HMIBC.jpg
+         average 1.0000          filter3    https://sdo.gsfc.nasa.gov/assets/img/latest/latest_512_HMIBC.jpg
+         average 1.0000          filter2    https://sdo.gsfc.nasa.gov/assets/img/latest/latest_512_HMIBC.jpg
+         overlay 1.0000          filter1    https://sdo.gsfc.nasa.gov/assets/img/latest/latest_512_HMII.jpg
+          normal 1.0000          filter0    https://sdo.gsfc.nasa.gov/assets/img/latest/latest_512_HMIIF.jpg

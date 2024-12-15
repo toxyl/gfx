@@ -2,9 +2,21 @@ package convolution
 
 import (
 	"github.com/toxyl/gfx/color/rgba"
+	"github.com/toxyl/gfx/filters/meta"
 	"github.com/toxyl/gfx/image"
 	"github.com/toxyl/gfx/math"
 )
+
+var Meta = meta.New("convolution", []*meta.FilterMetaDataArg{
+	{Name: "amount", Default: 1.0},
+	{Name: "bias", Default: 0.0},
+	{Name: "factor", Default: 1.0},
+	{Name: "matrix", Default: [][]float64{
+		{1.0, 1.0, 1.0},
+		{1.0, 8.0, 1.0},
+		{1.0, 1.0, 1.0},
+	}},
+})
 
 type FilterFn func(intensity float64) (matrix [][]float64)
 

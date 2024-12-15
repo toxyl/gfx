@@ -4,8 +4,15 @@ import (
 	"strings"
 
 	"github.com/toxyl/gfx/color/hsla"
+	"github.com/toxyl/gfx/filters/meta"
 	"github.com/toxyl/gfx/image"
 )
+
+var Meta = meta.New("alpha-map", []*meta.FilterMetaDataArg{
+	{Name: "source", Default: "l"},
+	{Name: "lower", Default: 0.0},
+	{Name: "upper", Default: 0.0},
+})
 
 func Apply(i *image.Image, source string, lowerThreshold, upperThreshold float64) *image.Image {
 	alphaSrc := strings.ToLower(source)

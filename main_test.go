@@ -9,20 +9,41 @@ import (
 	"github.com/toxyl/gfx/color/filter"
 	"github.com/toxyl/gfx/color/hsla"
 	"github.com/toxyl/gfx/color/rgba"
-	"github.com/toxyl/gfx/composition"
 	"github.com/toxyl/gfx/coordinates"
-	"github.com/toxyl/gfx/filters"
+	"github.com/toxyl/gfx/filters/alphamap"
+	"github.com/toxyl/gfx/filters/blur"
+	"github.com/toxyl/gfx/filters/brightness"
+	"github.com/toxyl/gfx/filters/colorshift"
+	"github.com/toxyl/gfx/filters/contrast"
+	"github.com/toxyl/gfx/filters/convolution"
+	"github.com/toxyl/gfx/filters/edgedetect"
+	"github.com/toxyl/gfx/filters/emboss"
+	"github.com/toxyl/gfx/filters/enhance"
 	"github.com/toxyl/gfx/filters/extract"
+	"github.com/toxyl/gfx/filters/gamma"
+	"github.com/toxyl/gfx/filters/gray"
+	"github.com/toxyl/gfx/filters/hue"
+	"github.com/toxyl/gfx/filters/huecontrast"
+	"github.com/toxyl/gfx/filters/invert"
+	"github.com/toxyl/gfx/filters/lum"
+	"github.com/toxyl/gfx/filters/lumcontrast"
+	"github.com/toxyl/gfx/filters/pastelize"
+	"github.com/toxyl/gfx/filters/sat"
+	"github.com/toxyl/gfx/filters/satcontrast"
+	"github.com/toxyl/gfx/filters/sepia"
+	"github.com/toxyl/gfx/filters/sharpen"
+	"github.com/toxyl/gfx/filters/threshold"
+	"github.com/toxyl/gfx/filters/vibrance"
 	"github.com/toxyl/gfx/image"
 	"github.com/toxyl/gfx/math"
+	"github.com/toxyl/gfx/parser"
 )
 
-func MakeTestImage(size int,
-	hue, hueTolerance, hueFeather,
-	sat, satTolerance, satFeather,
-	lum, lumTolerance, lumFeather,
-	hueShift float64,
-) *image.Image {
+var (
+	fAIAImage = image.NewFromURL("https://sdo.gsfc.nasa.gov/assets/img/latest/f_211_193_171pfss_512.jpg")
+)
+
+func makeTestImage(size int, hue, hueTolerance, hueFeather, sat, satTolerance, satFeather, lum, lumTolerance, lumFeather, hueShift float64) *image.Image {
 	var (
 		cf              = filter.ToColorFilter(hue, hueTolerance, hueFeather, sat, satTolerance, satFeather, lum, lumTolerance, lumFeather)
 		d               = float64(size)
@@ -183,18 +204,9 @@ func MakeTestImage(size int,
 	return img
 }
 
-func extractTest(
-	img *image.Image, w, h int,
-	hue, hueTolerance, hueFeather,
-	sat, satTolerance, satFeather,
-	lum, lumTolerance, lumFeather float64,
-) *image.Image {
-	return extract.Extract(img, filter.ToColorFilter(hue, hueTolerance, hueFeather, sat, satTolerance, satFeather, lum, lumTolerance, lumFeather)).Resize(w, h)
+func extractTest(img *image.Image, w, h int, hue, hueTolerance, hueFeather, sat, satTolerance, satFeather, lum, lumTolerance, lumFeather float64) *image.Image {
+	return extract.Apply(img, filter.ToColorFilter(hue, hueTolerance, hueFeather, sat, satTolerance, satFeather, lum, lumTolerance, lumFeather)).Resize(w, h)
 }
-
-var (
-	fAIAImage = image.NewFromURL("https://sdo.gsfc.nasa.gov/assets/img/latest/f_211_193_171pfss_512.jpg")
-)
 
 func renderTestImage(name string, size int, h, hTolerance, hFeather, s, sTolerance, sFeather, l, lTolerance, lFeather float64) {
 	var (
@@ -202,7 +214,7 @@ func renderTestImage(name string, size int, h, hTolerance, hFeather, s, sToleran
 		fImage = "test_data/main/debug/" + name + ".png"
 		fAIA   = "test_data/main/aia/" + name + ".png"
 	)
-	MakeTestImage(size, h, hTolerance, hFeather, s, sTolerance, sFeather, l, lTolerance, lFeather, 0).SaveAsPNG(fImage)
+	makeTestImage(size, h, hTolerance, hFeather, s, sTolerance, sFeather, l, lTolerance, lFeather, 0).SaveAsPNG(fImage)
 	extractTest(image.NewFromFile(fImage), size, size, h, hTolerance, hFeather, s, sTolerance, sFeather, l, lTolerance, lFeather).SaveAsPNG(f)
 	extractTest(fAIAImage.Clone(), size, size, h, hTolerance, hFeather, s, sTolerance, sFeather, l, lTolerance, lFeather).SaveAsPNG(fAIA)
 }
@@ -303,8 +315,8 @@ func TestImageRendering(t *testing.T) {
 }
 
 func TestImageBlending(t *testing.T) {
-	tstImg1 := MakeTestImage(512, 0, 90, 0, 0.5, 0.5, 0.0, 0.5, 0.5, 0.0, 0)
-	tstImg2 := MakeTestImage(512, 0, 90, 0, 0.5, 0.5, 0.0, 0.5, 0.5, 0.0, 180)
+	makeTestImage(512, 0, 90, 0, 0.5, 0.5, 0.0, 0.5, 0.5, 0.0, 0).SaveAsPNG("test_data/test1.png")
+	makeTestImage(512, 0, 90, 0, 0.5, 0.5, 0.0, 0.5, 0.5, 0.0, 180).SaveAsPNG("test_data/test2.png")
 
 	tests := []blend.BlendMode{
 		blend.NORMAL,
@@ -335,12 +347,15 @@ func TestImageBlending(t *testing.T) {
 	}
 
 	for _, tt := range tests {
-		cmpBlend := composition.New(
-			512, 512,
-			composition.NewLayerFromImage(tstImg1, 1.00, blend.NORMAL, nil),
-			composition.NewLayerFromImage(tstImg2, 1.00, tt, nil),
-		)
-		cmpBlend.Render().SaveAsPNG("test_data/blendmode/" + string(tt) + ".png")
+		c := parser.NewComposition("blend", 512, 512)
+		c.Layers = []*parser.Layer{
+			{Source: "test_data/test2.png", BlendMode: string(tt), Alpha: 1.0},
+			{Source: "test_data/test1.png", BlendMode: string(blend.NORMAL), Alpha: 1.0},
+		}
+		c.Render().SaveAsPNG("test_data/blendmode/" + string(tt) + ".png")
+		c.SaveYAML("test_data/compositions/blend-" + string(tt) + ".yaml")
+		c.SaveGFXS("test_data/compositions/blend-" + string(tt) + ".gfxs")
+
 	}
 }
 
@@ -349,13 +364,15 @@ func TestComposition(t *testing.T) {
 		name string
 		path string
 	}{
-		{"1", "test_data/compositions/1.yaml"},
-		{"2", "test_data/compositions/2.yaml"},
-		{"3", "test_data/compositions/3.yaml"},
+		{"sun", "test_data/compositions/sun.gfxs"},
+		{"sun_spots", "test_data/compositions/sun_spots.gfxs"},
+		{"lasco_c3", "test_data/compositions/lasco_c3.gfxs"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			composition.Load(tt.path).Render().SaveAsPNG("test_data/compositions/render/" + tt.name + ".png")
+			c := parser.NewComposition(tt.name, 0, 0).Load(tt.path)
+			c.Render().SaveAsPNG("test_data/compositions/render/" + tt.name + ".png")
+			c.SaveGFXS("test_data/compositions/render/" + tt.name + ".gfxs")
 		})
 	}
 }
@@ -430,6 +447,40 @@ func TestFilters(t *testing.T) {
 		}
 		noArgs    = map[string]any{}
 		amtNeg100 = map[string]any{"amount": -1.00}
+		amtNeg75  = map[string]any{"amount": -0.75}
+		amtNeg50  = map[string]any{"amount": -0.50}
+		amtNeg25  = map[string]any{"amount": -0.25}
+		amt0      = map[string]any{"amount": 0.00}
+		amtPos25  = map[string]any{"amount": 0.25}
+		amtPos50  = map[string]any{"amount": 0.50}
+		amtPos75  = map[string]any{"amount": 0.75}
+		amtPos100 = map[string]any{"amount": 1.00}
+		amtPos150 = map[string]any{"amount": 1.50}
+		amtPos200 = map[string]any{"amount": 2.00}
+
+		shiftNeg100      = map[string]any{"shift": -1.00}
+		shiftNeg75       = map[string]any{"shift": -0.75}
+		shiftNeg50       = map[string]any{"shift": -0.50}
+		shiftNeg25       = map[string]any{"shift": -0.25}
+		shift0           = map[string]any{"shift": 0.00}
+		shiftPos25       = map[string]any{"shift": 0.25}
+		shiftPos50       = map[string]any{"shift": 0.50}
+		shiftPos75       = map[string]any{"shift": 0.75}
+		shiftPos100      = map[string]any{"shift": 1.00}
+		shiftPos150      = map[string]any{"shift": 1.50}
+		shiftPos200      = map[string]any{"shift": 2.00}
+		adjustmentNeg100 = map[string]any{"adjustment": -1.00}
+		adjustmentNeg75  = map[string]any{"adjustment": -0.75}
+		adjustmentNeg50  = map[string]any{"adjustment": -0.50}
+		adjustmentNeg25  = map[string]any{"adjustment": -0.25}
+		adjustment0      = map[string]any{"adjustment": 0.00}
+		adjustmentPos25  = map[string]any{"adjustment": 0.25}
+		adjustmentPos50  = map[string]any{"adjustment": 0.50}
+		adjustmentPos75  = map[string]any{"adjustment": 0.75}
+		adjustmentPos100 = map[string]any{"adjustment": 1.00}
+		adjustmentPos125 = map[string]any{"adjustment": 1.25}
+		adjustmentPos150 = map[string]any{"adjustment": 1.50}
+		adjustmentPos200 = map[string]any{"adjustment": 2.00}
 	)
 	type filterConf struct {
 		name    string
@@ -438,297 +489,297 @@ func TestFilters(t *testing.T) {
 	}
 	testGroups := map[string][]filterConf{
 		"colorize": {
-			{"grayscale", filters.Gray, noArgs},
-			{"invert", filters.Invert, noArgs},
-			{"pastelize", filters.Pastelize, noArgs},
-			{"sepia", filters.Sepia, noArgs},
+			{"grayscale", gray.Meta.Name, noArgs},
+			{"invert", invert.Meta.Name, noArgs},
+			{"pastelize", pastelize.Meta.Name, noArgs},
+			{"sepia", sepia.Meta.Name, noArgs},
 		},
 		"hue": {
-			{"-1.00", filters.Hue, amtNeg100},
-			{"-0.75", filters.Hue, map[string]any{"amount": -0.75}},
-			{"-0.50", filters.Hue, map[string]any{"amount": -0.50}},
-			{"-0.25", filters.Hue, map[string]any{"amount": -0.25}},
-			{"0.00", filters.Hue, map[string]any{"amount": 0.00}},
-			{"0.25", filters.Hue, map[string]any{"amount": 0.25}},
-			{"0.50", filters.Hue, map[string]any{"amount": 0.50}},
-			{"0.75", filters.Hue, map[string]any{"amount": 0.75}},
-			{"1.00", filters.Hue, map[string]any{"amount": 1.00}},
-			{"1.50", filters.Hue, map[string]any{"amount": 1.50}},
-			{"2.00", filters.Hue, map[string]any{"amount": 2.00}},
+			{"-1.00", hue.Meta.Name, shiftNeg100},
+			{"-0.75", hue.Meta.Name, shiftNeg75},
+			{"-0.50", hue.Meta.Name, shiftNeg50},
+			{"-0.25", hue.Meta.Name, shiftNeg25},
+			{"0.00", hue.Meta.Name, shift0},
+			{"0.25", hue.Meta.Name, shiftPos25},
+			{"0.50", hue.Meta.Name, shiftPos50},
+			{"0.75", hue.Meta.Name, shiftPos75},
+			{"1.00", hue.Meta.Name, shiftPos100},
+			{"1.50", hue.Meta.Name, shiftPos150},
+			{"2.00", hue.Meta.Name, shiftPos200},
 		},
 		"sat": {
-			{"-1.00", filters.Sat, amtNeg100},
-			{"-0.75", filters.Sat, map[string]any{"amount": -0.75}},
-			{"-0.50", filters.Sat, map[string]any{"amount": -0.50}},
-			{"-0.25", filters.Sat, map[string]any{"amount": -0.25}},
-			{"0.00", filters.Sat, map[string]any{"amount": 0.00}},
-			{"0.25", filters.Sat, map[string]any{"amount": 0.25}},
-			{"0.50", filters.Sat, map[string]any{"amount": 0.50}},
-			{"0.75", filters.Sat, map[string]any{"amount": 0.75}},
-			{"1.00", filters.Sat, map[string]any{"amount": 1.00}},
-			{"1.50", filters.Sat, map[string]any{"amount": 1.50}},
-			{"2.00", filters.Sat, map[string]any{"amount": 2.00}},
+			{"-1.00", sat.Meta.Name, shiftNeg100},
+			{"-0.75", sat.Meta.Name, shiftNeg75},
+			{"-0.50", sat.Meta.Name, shiftNeg50},
+			{"-0.25", sat.Meta.Name, shiftNeg25},
+			{"0.00", sat.Meta.Name, shift0},
+			{"0.25", sat.Meta.Name, shiftPos25},
+			{"0.50", sat.Meta.Name, shiftPos50},
+			{"0.75", sat.Meta.Name, shiftPos75},
+			{"1.00", sat.Meta.Name, shiftPos100},
+			{"1.50", sat.Meta.Name, shiftPos150},
+			{"2.00", sat.Meta.Name, shiftPos100},
 		},
 		"lum": {
-			{"-1.00", filters.Lum, amtNeg100},
-			{"-0.75", filters.Lum, map[string]any{"amount": -0.75}},
-			{"-0.50", filters.Lum, map[string]any{"amount": -0.50}},
-			{"-0.25", filters.Lum, map[string]any{"amount": -0.25}},
-			{"0.00", filters.Lum, map[string]any{"amount": 0.00}},
-			{"0.25", filters.Lum, map[string]any{"amount": 0.25}},
-			{"0.50", filters.Lum, map[string]any{"amount": 0.50}},
-			{"0.75", filters.Lum, map[string]any{"amount": 0.75}},
-			{"1.00", filters.Lum, map[string]any{"amount": 1.00}},
-			{"1.50", filters.Lum, map[string]any{"amount": 1.50}},
-			{"2.00", filters.Lum, map[string]any{"amount": 2.00}},
+			{"-1.00", lum.Meta.Name, shiftNeg100},
+			{"-0.75", lum.Meta.Name, shiftNeg75},
+			{"-0.50", lum.Meta.Name, shiftNeg50},
+			{"-0.25", lum.Meta.Name, shiftNeg25},
+			{"0.00", lum.Meta.Name, shift0},
+			{"0.25", lum.Meta.Name, shiftPos25},
+			{"0.50", lum.Meta.Name, shiftPos50},
+			{"0.75", lum.Meta.Name, shiftPos75},
+			{"1.00", lum.Meta.Name, shiftPos100},
+			{"1.50", lum.Meta.Name, shiftPos150},
+			{"2.00", lum.Meta.Name, shiftPos200},
 		},
 		"hue-contrast": {
-			{"-1.00", filters.HueContrast, amtNeg100},
-			{"-0.75", filters.HueContrast, map[string]any{"amount": -0.75}},
-			{"-0.50", filters.HueContrast, map[string]any{"amount": -0.50}},
-			{"-0.25", filters.HueContrast, map[string]any{"amount": -0.25}},
-			{"0.00", filters.HueContrast, map[string]any{"amount": 0.00}},
-			{"0.25", filters.HueContrast, map[string]any{"amount": 0.25}},
-			{"0.50", filters.HueContrast, map[string]any{"amount": 0.50}},
-			{"0.75", filters.HueContrast, map[string]any{"amount": 0.75}},
-			{"1.00", filters.HueContrast, map[string]any{"amount": 1.00}},
-			{"1.50", filters.HueContrast, map[string]any{"amount": 1.50}},
-			{"2.00", filters.HueContrast, map[string]any{"amount": 2.00}},
+			{"-1.00", huecontrast.Meta.Name, adjustmentNeg100},
+			{"-0.75", huecontrast.Meta.Name, adjustmentNeg75},
+			{"-0.50", huecontrast.Meta.Name, adjustmentNeg50},
+			{"-0.25", huecontrast.Meta.Name, adjustmentNeg25},
+			{"0.00", huecontrast.Meta.Name, adjustment0},
+			{"0.25", huecontrast.Meta.Name, adjustmentPos25},
+			{"0.50", huecontrast.Meta.Name, adjustmentPos50},
+			{"0.75", huecontrast.Meta.Name, adjustmentPos75},
+			{"1.00", huecontrast.Meta.Name, adjustmentPos100},
+			{"1.50", huecontrast.Meta.Name, adjustmentPos150},
+			{"2.00", huecontrast.Meta.Name, adjustmentPos200},
 		},
 		"sat-contrast": {
-			{"-1.00", filters.SatContrast, amtNeg100},
-			{"-0.75", filters.SatContrast, map[string]any{"amount": -0.75}},
-			{"-0.50", filters.SatContrast, map[string]any{"amount": -0.50}},
-			{"-0.25", filters.SatContrast, map[string]any{"amount": -0.25}},
-			{"0.00", filters.SatContrast, map[string]any{"amount": 0.00}},
-			{"0.25", filters.SatContrast, map[string]any{"amount": 0.25}},
-			{"0.50", filters.SatContrast, map[string]any{"amount": 0.50}},
-			{"0.75", filters.SatContrast, map[string]any{"amount": 0.75}},
-			{"1.00", filters.SatContrast, map[string]any{"amount": 1.00}},
-			{"1.50", filters.SatContrast, map[string]any{"amount": 1.50}},
-			{"2.00", filters.SatContrast, map[string]any{"amount": 2.00}},
+			{"-1.00", satcontrast.Meta.Name, adjustmentNeg100},
+			{"-0.75", satcontrast.Meta.Name, adjustmentNeg75},
+			{"-0.50", satcontrast.Meta.Name, adjustmentNeg50},
+			{"-0.25", satcontrast.Meta.Name, adjustmentNeg25},
+			{"0.00", satcontrast.Meta.Name, adjustment0},
+			{"0.25", satcontrast.Meta.Name, adjustmentPos25},
+			{"0.50", satcontrast.Meta.Name, adjustmentPos50},
+			{"0.75", satcontrast.Meta.Name, adjustmentPos75},
+			{"1.00", satcontrast.Meta.Name, adjustmentPos100},
+			{"1.50", satcontrast.Meta.Name, adjustmentPos150},
+			{"2.00", satcontrast.Meta.Name, adjustmentPos200},
 		},
 		"lum-contrast": {
-			{"-1.00", filters.LumContrast, amtNeg100},
-			{"-0.75", filters.LumContrast, map[string]any{"amount": -0.75}},
-			{"-0.50", filters.LumContrast, map[string]any{"amount": -0.50}},
-			{"-0.25", filters.LumContrast, map[string]any{"amount": -0.25}},
-			{"0.00", filters.LumContrast, map[string]any{"amount": 0.00}},
-			{"0.25", filters.LumContrast, map[string]any{"amount": 0.25}},
-			{"0.50", filters.LumContrast, map[string]any{"amount": 0.50}},
-			{"0.75", filters.LumContrast, map[string]any{"amount": 0.75}},
-			{"1.00", filters.LumContrast, map[string]any{"amount": 1.00}},
-			{"1.50", filters.LumContrast, map[string]any{"amount": 1.50}},
-			{"2.00", filters.LumContrast, map[string]any{"amount": 2.00}},
+			{"-1.00", lumcontrast.Meta.Name, adjustmentNeg100},
+			{"-0.75", lumcontrast.Meta.Name, adjustmentNeg75},
+			{"-0.50", lumcontrast.Meta.Name, adjustmentNeg50},
+			{"-0.25", lumcontrast.Meta.Name, adjustmentNeg25},
+			{"0.00", lumcontrast.Meta.Name, adjustment0},
+			{"0.25", lumcontrast.Meta.Name, adjustmentPos25},
+			{"0.50", lumcontrast.Meta.Name, adjustmentPos50},
+			{"0.75", lumcontrast.Meta.Name, adjustmentPos75},
+			{"1.00", lumcontrast.Meta.Name, adjustmentPos100},
+			{"1.50", lumcontrast.Meta.Name, adjustmentPos150},
+			{"2.00", lumcontrast.Meta.Name, adjustmentPos200},
 		},
 		"color-shift": {
-			{"-1.00", filters.ColorShift, map[string]any{"hue": -1.00, "sat": -1.00, "lum": -1.00}},
-			{"-0.75", filters.ColorShift, map[string]any{"hue": -0.75, "sat": -0.75, "lum": -0.75}},
-			{"-0.50", filters.ColorShift, map[string]any{"hue": -0.50, "sat": -0.50, "lum": -0.50}},
-			{"-0.25", filters.ColorShift, map[string]any{"hue": -0.25, "sat": -0.25, "lum": -0.25}},
-			{"0.00", filters.ColorShift, map[string]any{"hue": 0.00, "sat": 0.00, "lum": 0.00}},
-			{"0.25", filters.ColorShift, map[string]any{"hue": 0.25, "sat": 0.25, "lum": 0.25}},
-			{"0.50", filters.ColorShift, map[string]any{"hue": 0.50, "sat": 0.50, "lum": 0.50}},
-			{"0.75", filters.ColorShift, map[string]any{"hue": 0.75, "sat": 0.75, "lum": 0.75}},
-			{"1.00", filters.ColorShift, map[string]any{"hue": 1.00, "sat": 1.00, "lum": 1.00}},
-			{"1.50", filters.ColorShift, map[string]any{"hue": 1.50, "sat": 1.50, "lum": 1.50}},
-			{"2.00", filters.ColorShift, map[string]any{"hue": 2.00, "sat": 2.00, "lum": 2.00}},
+			{"-1.00", colorshift.Meta.Name, map[string]any{"hue": -1.00, "sat": -1.00, "lum": -1.00}},
+			{"-0.75", colorshift.Meta.Name, map[string]any{"hue": -0.75, "sat": -0.75, "lum": -0.75}},
+			{"-0.50", colorshift.Meta.Name, map[string]any{"hue": -0.50, "sat": -0.50, "lum": -0.50}},
+			{"-0.25", colorshift.Meta.Name, map[string]any{"hue": -0.25, "sat": -0.25, "lum": -0.25}},
+			{"0.00", colorshift.Meta.Name, map[string]any{"hue": 0.00, "sat": 0.00, "lum": 0.00}},
+			{"0.25", colorshift.Meta.Name, map[string]any{"hue": 0.25, "sat": 0.25, "lum": 0.25}},
+			{"0.50", colorshift.Meta.Name, map[string]any{"hue": 0.50, "sat": 0.50, "lum": 0.50}},
+			{"0.75", colorshift.Meta.Name, map[string]any{"hue": 0.75, "sat": 0.75, "lum": 0.75}},
+			{"1.00", colorshift.Meta.Name, map[string]any{"hue": 1.00, "sat": 1.00, "lum": 1.00}},
+			{"1.50", colorshift.Meta.Name, map[string]any{"hue": 1.50, "sat": 1.50, "lum": 1.50}},
+			{"2.00", colorshift.Meta.Name, map[string]any{"hue": 2.00, "sat": 2.00, "lum": 2.00}},
 		},
 		"brightness": {
-			{"-1.00", filters.Brightness, amtNeg100},
-			{"-0.75", filters.Brightness, map[string]any{"amount": -0.75}},
-			{"-0.50", filters.Brightness, map[string]any{"amount": -0.50}},
-			{"-0.25", filters.Brightness, map[string]any{"amount": -0.25}},
-			{"0.00", filters.Brightness, map[string]any{"amount": 0.00}},
-			{"0.25", filters.Brightness, map[string]any{"amount": 0.25}},
-			{"0.50", filters.Brightness, map[string]any{"amount": 0.50}},
-			{"0.75", filters.Brightness, map[string]any{"amount": 0.75}},
-			{"1.00", filters.Brightness, map[string]any{"amount": 1.00}},
-			{"1.50", filters.Brightness, map[string]any{"amount": 1.50}},
-			{"2.00", filters.Brightness, map[string]any{"amount": 2.00}},
+			{"-1.00", brightness.Meta.Name, adjustmentNeg100},
+			{"-0.75", brightness.Meta.Name, adjustmentNeg75},
+			{"-0.50", brightness.Meta.Name, adjustmentNeg50},
+			{"-0.25", brightness.Meta.Name, adjustmentNeg25},
+			{"0.00", brightness.Meta.Name, adjustment0},
+			{"0.25", brightness.Meta.Name, adjustmentPos25},
+			{"0.50", brightness.Meta.Name, adjustmentPos50},
+			{"0.75", brightness.Meta.Name, adjustmentPos75},
+			{"1.00", brightness.Meta.Name, adjustmentPos100},
+			{"1.50", brightness.Meta.Name, adjustmentPos150},
+			{"2.00", brightness.Meta.Name, adjustmentPos200},
 		},
 		"contrast": {
-			{"-1.00", filters.Contrast, amtNeg100},
-			{"-0.75", filters.Contrast, map[string]any{"amount": -0.75}},
-			{"-0.50", filters.Contrast, map[string]any{"amount": -0.50}},
-			{"-0.25", filters.Contrast, map[string]any{"amount": -0.25}},
-			{"0.00", filters.Contrast, map[string]any{"amount": 0.00}},
-			{"0.25", filters.Contrast, map[string]any{"amount": 0.25}},
-			{"0.50", filters.Contrast, map[string]any{"amount": 0.50}},
-			{"0.75", filters.Contrast, map[string]any{"amount": 0.75}},
-			{"1.00", filters.Contrast, map[string]any{"amount": 1.00}},
-			{"1.25", filters.Contrast, map[string]any{"amount": 1.25}},
-			{"1.50", filters.Contrast, map[string]any{"amount": 1.50}},
-			{"2.00", filters.Contrast, map[string]any{"amount": 2.00}},
-			{"4.00", filters.Contrast, map[string]any{"amount": 4.00}},
-			{"8.00", filters.Contrast, map[string]any{"amount": 8.00}},
-			{"16.00", filters.Contrast, map[string]any{"amount": 16.00}},
-			{"32.00", filters.Contrast, map[string]any{"amount": 32.00}},
-			{"64.00", filters.Contrast, map[string]any{"amount": 64.00}},
-			{"128.00", filters.Contrast, map[string]any{"amount": 128.00}},
+			{"-1.00", contrast.Meta.Name, adjustmentNeg100},
+			{"-0.75", contrast.Meta.Name, adjustmentNeg75},
+			{"-0.50", contrast.Meta.Name, adjustmentNeg50},
+			{"-0.25", contrast.Meta.Name, adjustmentNeg25},
+			{"0.00", contrast.Meta.Name, adjustment0},
+			{"0.25", contrast.Meta.Name, adjustmentPos25},
+			{"0.50", contrast.Meta.Name, adjustmentPos50},
+			{"0.75", contrast.Meta.Name, adjustmentPos75},
+			{"1.00", contrast.Meta.Name, adjustmentPos100},
+			{"1.25", contrast.Meta.Name, adjustmentPos125},
+			{"1.50", contrast.Meta.Name, adjustmentPos150},
+			{"2.00", contrast.Meta.Name, map[string]any{"adjustment": 2.00}},
+			{"4.00", contrast.Meta.Name, map[string]any{"adjustment": 4.00}},
+			{"8.00", contrast.Meta.Name, map[string]any{"adjustment": 8.00}},
+			{"16.00", contrast.Meta.Name, map[string]any{"adjustment": 16.00}},
+			{"32.00", contrast.Meta.Name, map[string]any{"adjustment": 32.00}},
+			{"64.00", contrast.Meta.Name, map[string]any{"adjustment": 64.00}},
+			{"128.00", contrast.Meta.Name, map[string]any{"adjustment": 128.00}},
 		},
 		"gamma": {
-			{"-1.00", filters.Gamma, amtNeg100},
-			{"-0.75", filters.Gamma, map[string]any{"amount": -0.75}},
-			{"-0.50", filters.Gamma, map[string]any{"amount": -0.50}},
-			{"-0.25", filters.Gamma, map[string]any{"amount": -0.25}},
-			{"0.00", filters.Gamma, map[string]any{"amount": 0.00}},
-			{"0.25", filters.Gamma, map[string]any{"amount": 0.25}},
-			{"0.50", filters.Gamma, map[string]any{"amount": 0.50}},
-			{"0.75", filters.Gamma, map[string]any{"amount": 0.75}},
-			{"1.00", filters.Gamma, map[string]any{"amount": 1.00}},
-			{"1.50", filters.Gamma, map[string]any{"amount": 1.50}},
-			{"2.00", filters.Gamma, map[string]any{"amount": 2.00}},
+			{"-1.00", gamma.Meta.Name, adjustmentNeg100},
+			{"-0.75", gamma.Meta.Name, adjustmentNeg75},
+			{"-0.50", gamma.Meta.Name, adjustmentNeg50},
+			{"-0.25", gamma.Meta.Name, adjustmentNeg25},
+			{"0.00", gamma.Meta.Name, adjustment0},
+			{"0.25", gamma.Meta.Name, adjustmentPos25},
+			{"0.50", gamma.Meta.Name, adjustmentPos50},
+			{"0.75", gamma.Meta.Name, adjustmentPos75},
+			{"1.00", gamma.Meta.Name, adjustmentPos100},
+			{"1.50", gamma.Meta.Name, adjustmentPos150},
+			{"2.00", gamma.Meta.Name, adjustmentPos200},
 		},
 		"vibrance": {
-			{"-1.00", filters.Vibrance, amtNeg100},
-			{"-0.75", filters.Vibrance, map[string]any{"amount": -0.75}},
-			{"-0.50", filters.Vibrance, map[string]any{"amount": -0.50}},
-			{"-0.25", filters.Vibrance, map[string]any{"amount": -0.25}},
-			{"0.00", filters.Vibrance, map[string]any{"amount": 0.00}},
-			{"0.25", filters.Vibrance, map[string]any{"amount": 0.25}},
-			{"0.50", filters.Vibrance, map[string]any{"amount": 0.50}},
-			{"0.75", filters.Vibrance, map[string]any{"amount": 0.75}},
-			{"1.00", filters.Vibrance, map[string]any{"amount": 1.00}},
-			{"1.50", filters.Vibrance, map[string]any{"amount": 1.50}},
-			{"2.00", filters.Vibrance, map[string]any{"amount": 2.00}},
+			{"-1.00", vibrance.Meta.Name, adjustmentNeg100},
+			{"-0.75", vibrance.Meta.Name, adjustmentNeg75},
+			{"-0.50", vibrance.Meta.Name, adjustmentNeg50},
+			{"-0.25", vibrance.Meta.Name, adjustmentNeg25},
+			{"0.00", vibrance.Meta.Name, adjustment0},
+			{"0.25", vibrance.Meta.Name, adjustmentPos25},
+			{"0.50", vibrance.Meta.Name, adjustmentPos50},
+			{"0.75", vibrance.Meta.Name, adjustmentPos75},
+			{"1.00", vibrance.Meta.Name, adjustmentPos100},
+			{"1.50", vibrance.Meta.Name, adjustmentPos150},
+			{"2.00", vibrance.Meta.Name, adjustmentPos200},
 		},
 		"enhance": {
-			{"-1.00", filters.Enhance, amtNeg100},
-			{"-0.75", filters.Enhance, map[string]any{"amount": -0.75}},
-			{"-0.50", filters.Enhance, map[string]any{"amount": -0.50}},
-			{"-0.25", filters.Enhance, map[string]any{"amount": -0.25}},
-			{"0.00", filters.Enhance, map[string]any{"amount": 0.00}},
-			{"0.25", filters.Enhance, map[string]any{"amount": 0.25}},
-			{"0.50", filters.Enhance, map[string]any{"amount": 0.50}},
-			{"0.75", filters.Enhance, map[string]any{"amount": 0.75}},
-			{"1.00", filters.Enhance, map[string]any{"amount": 1.00}},
-			{"1.50", filters.Enhance, map[string]any{"amount": 1.50}},
-			{"2.00", filters.Enhance, map[string]any{"amount": 2.00}},
+			{"-1.00", enhance.Meta.Name, amtNeg100},
+			{"-0.75", enhance.Meta.Name, amtNeg75},
+			{"-0.50", enhance.Meta.Name, amtNeg50},
+			{"-0.25", enhance.Meta.Name, amtNeg25},
+			{"0.00", enhance.Meta.Name, amt0},
+			{"0.25", enhance.Meta.Name, amtPos25},
+			{"0.50", enhance.Meta.Name, amtPos50},
+			{"0.75", enhance.Meta.Name, amtPos75},
+			{"1.00", enhance.Meta.Name, amtPos100},
+			{"1.50", enhance.Meta.Name, amtPos150},
+			{"2.00", enhance.Meta.Name, amtPos200},
 		},
 		"sharpen": {
-			{"-1.00", filters.Sharpen, amtNeg100},
-			{"-0.75", filters.Sharpen, map[string]any{"amount": -0.75}},
-			{"-0.50", filters.Sharpen, map[string]any{"amount": -0.50}},
-			{"-0.25", filters.Sharpen, map[string]any{"amount": -0.25}},
-			{"0.00", filters.Sharpen, map[string]any{"amount": 0.00}},
-			{"0.25", filters.Sharpen, map[string]any{"amount": 0.25}},
-			{"0.50", filters.Sharpen, map[string]any{"amount": 0.50}},
-			{"0.75", filters.Sharpen, map[string]any{"amount": 0.75}},
-			{"1.00", filters.Sharpen, map[string]any{"amount": 1.00}},
-			{"1.50", filters.Sharpen, map[string]any{"amount": 1.50}},
-			{"2.00", filters.Sharpen, map[string]any{"amount": 2.00}},
+			{"-1.00", sharpen.Meta.Name, amtNeg100},
+			{"-0.75", sharpen.Meta.Name, amtNeg75},
+			{"-0.50", sharpen.Meta.Name, amtNeg50},
+			{"-0.25", sharpen.Meta.Name, amtNeg25},
+			{"0.00", sharpen.Meta.Name, amt0},
+			{"0.25", sharpen.Meta.Name, amtPos25},
+			{"0.50", sharpen.Meta.Name, amtPos50},
+			{"0.75", sharpen.Meta.Name, amtPos75},
+			{"1.00", sharpen.Meta.Name, amtPos100},
+			{"1.50", sharpen.Meta.Name, amtPos150},
+			{"2.00", sharpen.Meta.Name, amtPos200},
 		},
 		"blur": {
-			{"-1.00", filters.Blur, amtNeg100},
-			{"-0.75", filters.Blur, map[string]any{"amount": -0.75}},
-			{"-0.50", filters.Blur, map[string]any{"amount": -0.50}},
-			{"-0.25", filters.Blur, map[string]any{"amount": -0.25}},
-			{"0.00", filters.Blur, map[string]any{"amount": 0.00}},
-			{"0.25", filters.Blur, map[string]any{"amount": 0.25}},
-			{"0.50", filters.Blur, map[string]any{"amount": 0.50}},
-			{"0.75", filters.Blur, map[string]any{"amount": 0.75}},
-			{"1.00", filters.Blur, map[string]any{"amount": 1.00}},
-			{"1.50", filters.Blur, map[string]any{"amount": 1.50}},
-			{"2.00", filters.Blur, map[string]any{"amount": 2.00}},
+			{"-1.00", blur.Meta.Name, amtNeg100},
+			{"-0.75", blur.Meta.Name, amtNeg75},
+			{"-0.50", blur.Meta.Name, amtNeg50},
+			{"-0.25", blur.Meta.Name, amtNeg25},
+			{"0.00", blur.Meta.Name, amt0},
+			{"0.25", blur.Meta.Name, amtPos25},
+			{"0.50", blur.Meta.Name, amtPos50},
+			{"0.75", blur.Meta.Name, amtPos75},
+			{"1.00", blur.Meta.Name, amtPos100},
+			{"1.50", blur.Meta.Name, amtPos150},
+			{"2.00", blur.Meta.Name, amtPos200},
 		},
 		"edge-detection": {
-			{"-1.00", filters.EdgeDetect, amtNeg100},
-			{"-0.75", filters.EdgeDetect, map[string]any{"amount": -0.75}},
-			{"-0.50", filters.EdgeDetect, map[string]any{"amount": -0.50}},
-			{"-0.25", filters.EdgeDetect, map[string]any{"amount": -0.25}},
-			{"0.00", filters.EdgeDetect, map[string]any{"amount": 0.00}},
-			{"0.25", filters.EdgeDetect, map[string]any{"amount": 0.25}},
-			{"0.50", filters.EdgeDetect, map[string]any{"amount": 0.50}},
-			{"0.75", filters.EdgeDetect, map[string]any{"amount": 0.75}},
-			{"1.00", filters.EdgeDetect, map[string]any{"amount": 1.00}},
-			{"1.50", filters.EdgeDetect, map[string]any{"amount": 1.50}},
-			{"2.00", filters.EdgeDetect, map[string]any{"amount": 2.00}},
+			{"-1.00", edgedetect.Meta.Name, amtNeg100},
+			{"-0.75", edgedetect.Meta.Name, amtNeg75},
+			{"-0.50", edgedetect.Meta.Name, amtNeg50},
+			{"-0.25", edgedetect.Meta.Name, amtNeg25},
+			{"0.00", edgedetect.Meta.Name, amt0},
+			{"0.25", edgedetect.Meta.Name, amtPos25},
+			{"0.50", edgedetect.Meta.Name, amtPos50},
+			{"0.75", edgedetect.Meta.Name, amtPos75},
+			{"1.00", edgedetect.Meta.Name, amtPos100},
+			{"1.50", edgedetect.Meta.Name, amtPos150},
+			{"2.00", edgedetect.Meta.Name, amtPos200},
 		},
 		"emboss": {
-			{"-1.00", filters.Emboss, amtNeg100},
-			{"-0.75", filters.Emboss, map[string]any{"amount": -0.75}},
-			{"-0.50", filters.Emboss, map[string]any{"amount": -0.50}},
-			{"-0.25", filters.Emboss, map[string]any{"amount": -0.25}},
-			{"0.00", filters.Emboss, map[string]any{"amount": 0.00}},
-			{"0.25", filters.Emboss, map[string]any{"amount": 0.25}},
-			{"0.50", filters.Emboss, map[string]any{"amount": 0.50}},
-			{"0.75", filters.Emboss, map[string]any{"amount": 0.75}},
-			{"1.00", filters.Emboss, map[string]any{"amount": 1.00}},
-			{"1.50", filters.Emboss, map[string]any{"amount": 1.50}},
-			{"2.00", filters.Emboss, map[string]any{"amount": 2.00}},
+			{"-1.00", emboss.Meta.Name, amtNeg100},
+			{"-0.75", emboss.Meta.Name, amtNeg75},
+			{"-0.50", emboss.Meta.Name, amtNeg50},
+			{"-0.25", emboss.Meta.Name, amtNeg25},
+			{"0.00", emboss.Meta.Name, amt0},
+			{"0.25", emboss.Meta.Name, amtPos25},
+			{"0.50", emboss.Meta.Name, amtPos50},
+			{"0.75", emboss.Meta.Name, amtPos75},
+			{"1.00", emboss.Meta.Name, amtPos100},
+			{"1.50", emboss.Meta.Name, amtPos150},
+			{"2.00", emboss.Meta.Name, amtPos200},
 		},
 		"threshold": {
-			{"-1.00", filters.Threshold, amtNeg100},
-			{"-0.75", filters.Threshold, map[string]any{"amount": -0.75}},
-			{"-0.50", filters.Threshold, map[string]any{"amount": -0.50}},
-			{"-0.25", filters.Threshold, map[string]any{"amount": -0.25}},
-			{"0.00", filters.Threshold, map[string]any{"amount": 0.00}},
-			{"0.25", filters.Threshold, map[string]any{"amount": 0.25}},
-			{"0.50", filters.Threshold, map[string]any{"amount": 0.50}},
-			{"0.75", filters.Threshold, map[string]any{"amount": 0.75}},
-			{"1.00", filters.Threshold, map[string]any{"amount": 1.00}},
-			{"1.50", filters.Threshold, map[string]any{"amount": 1.50}},
-			{"2.00", filters.Threshold, map[string]any{"amount": 2.00}},
+			{"-1.00", threshold.Meta.Name, amtNeg100},
+			{"-0.75", threshold.Meta.Name, amtNeg75},
+			{"-0.50", threshold.Meta.Name, amtNeg50},
+			{"-0.25", threshold.Meta.Name, amtNeg25},
+			{"0.00", threshold.Meta.Name, amt0},
+			{"0.25", threshold.Meta.Name, amtPos25},
+			{"0.50", threshold.Meta.Name, amtPos50},
+			{"0.75", threshold.Meta.Name, amtPos75},
+			{"1.00", threshold.Meta.Name, amtPos100},
+			{"1.50", threshold.Meta.Name, amtPos150},
+			{"2.00", threshold.Meta.Name, amtPos200},
 		},
 		"alpha-map-s": {
-			{"0.00", filters.AlphaMap, map[string]any{"source": "s", "lower": 0.00, "upper": 1.0}},
-			{"0.25", filters.AlphaMap, map[string]any{"source": "s", "lower": 0.25, "upper": 1.0}},
-			{"0.50", filters.AlphaMap, map[string]any{"source": "s", "lower": 0.50, "upper": 1.0}},
-			{"0.75", filters.AlphaMap, map[string]any{"source": "s", "lower": 0.75, "upper": 1.0}},
-			{"1.00", filters.AlphaMap, map[string]any{"source": "s", "lower": 1.00, "upper": 1.0}},
+			{"0.00", alphamap.Meta.Name, map[string]any{"source": "s", "lower": 0.00, "upper": 1.0}},
+			{"0.25", alphamap.Meta.Name, map[string]any{"source": "s", "lower": 0.25, "upper": 1.0}},
+			{"0.50", alphamap.Meta.Name, map[string]any{"source": "s", "lower": 0.50, "upper": 1.0}},
+			{"0.75", alphamap.Meta.Name, map[string]any{"source": "s", "lower": 0.75, "upper": 1.0}},
+			{"1.00", alphamap.Meta.Name, map[string]any{"source": "s", "lower": 1.00, "upper": 1.0}},
 		},
 		"alpha-map-l": {
-			{"0.00", filters.AlphaMap, map[string]any{"source": "l", "lower": 0.00, "upper": 1.0}},
-			{"0.25", filters.AlphaMap, map[string]any{"source": "l", "lower": 0.25, "upper": 1.0}},
-			{"0.50", filters.AlphaMap, map[string]any{"source": "l", "lower": 0.50, "upper": 1.0}},
-			{"0.75", filters.AlphaMap, map[string]any{"source": "l", "lower": 0.75, "upper": 1.0}},
-			{"1.00", filters.AlphaMap, map[string]any{"source": "l", "lower": 1.00, "upper": 1.0}},
+			{"0.00", alphamap.Meta.Name, map[string]any{"source": "l", "lower": 0.00, "upper": 1.0}},
+			{"0.25", alphamap.Meta.Name, map[string]any{"source": "l", "lower": 0.25, "upper": 1.0}},
+			{"0.50", alphamap.Meta.Name, map[string]any{"source": "l", "lower": 0.50, "upper": 1.0}},
+			{"0.75", alphamap.Meta.Name, map[string]any{"source": "l", "lower": 0.75, "upper": 1.0}},
+			{"1.00", alphamap.Meta.Name, map[string]any{"source": "l", "lower": 1.00, "upper": 1.0}},
 		},
 		"alpha-map-sl": {
-			{"0.00", filters.AlphaMap, map[string]any{"source": "s*l", "lower": 0.00, "upper": 1.00}},
-			{"0.25", filters.AlphaMap, map[string]any{"source": "s*l", "lower": 0.25, "upper": 1.00}},
-			{"0.50", filters.AlphaMap, map[string]any{"source": "s*l", "lower": 0.50, "upper": 1.00}},
-			{"0.75", filters.AlphaMap, map[string]any{"source": "s*l", "lower": 0.75, "upper": 1.00}},
-			{"1.00", filters.AlphaMap, map[string]any{"source": "s*l", "lower": 1.00, "upper": 1.00}},
+			{"0.00", alphamap.Meta.Name, map[string]any{"source": "s*l", "lower": 0.00, "upper": 1.00}},
+			{"0.25", alphamap.Meta.Name, map[string]any{"source": "s*l", "lower": 0.25, "upper": 1.00}},
+			{"0.50", alphamap.Meta.Name, map[string]any{"source": "s*l", "lower": 0.50, "upper": 1.00}},
+			{"0.75", alphamap.Meta.Name, map[string]any{"source": "s*l", "lower": 0.75, "upper": 1.00}},
+			{"1.00", alphamap.Meta.Name, map[string]any{"source": "s*l", "lower": 1.00, "upper": 1.00}},
 		},
 		"alpha-map-s-inv": {
-			{"0.00", filters.AlphaMap, map[string]any{"source": "s", "lower": 1.00, "upper": 0.00}},
-			{"0.25", filters.AlphaMap, map[string]any{"source": "s", "lower": 1.00, "upper": 0.25}},
-			{"0.50", filters.AlphaMap, map[string]any{"source": "s", "lower": 1.00, "upper": 0.50}},
-			{"0.75", filters.AlphaMap, map[string]any{"source": "s", "lower": 1.00, "upper": 0.75}},
-			{"1.00", filters.AlphaMap, map[string]any{"source": "s", "lower": 1.00, "upper": 1.00}},
+			{"0.00", alphamap.Meta.Name, map[string]any{"source": "s", "lower": 1.00, "upper": 0.00}},
+			{"0.25", alphamap.Meta.Name, map[string]any{"source": "s", "lower": 1.00, "upper": 0.25}},
+			{"0.50", alphamap.Meta.Name, map[string]any{"source": "s", "lower": 1.00, "upper": 0.50}},
+			{"0.75", alphamap.Meta.Name, map[string]any{"source": "s", "lower": 1.00, "upper": 0.75}},
+			{"1.00", alphamap.Meta.Name, map[string]any{"source": "s", "lower": 1.00, "upper": 1.00}},
 		},
 		"alpha-map-l-inv": {
-			{"0.00", filters.AlphaMap, map[string]any{"source": "l", "lower": 1.00, "upper": 0.00}},
-			{"0.25", filters.AlphaMap, map[string]any{"source": "l", "lower": 1.00, "upper": 0.25}},
-			{"0.50", filters.AlphaMap, map[string]any{"source": "l", "lower": 1.00, "upper": 0.50}},
-			{"0.75", filters.AlphaMap, map[string]any{"source": "l", "lower": 1.00, "upper": 0.75}},
-			{"1.00", filters.AlphaMap, map[string]any{"source": "l", "lower": 1.00, "upper": 1.00}},
+			{"0.00", alphamap.Meta.Name, map[string]any{"source": "l", "lower": 1.00, "upper": 0.00}},
+			{"0.25", alphamap.Meta.Name, map[string]any{"source": "l", "lower": 1.00, "upper": 0.25}},
+			{"0.50", alphamap.Meta.Name, map[string]any{"source": "l", "lower": 1.00, "upper": 0.50}},
+			{"0.75", alphamap.Meta.Name, map[string]any{"source": "l", "lower": 1.00, "upper": 0.75}},
+			{"1.00", alphamap.Meta.Name, map[string]any{"source": "l", "lower": 1.00, "upper": 1.00}},
 		},
 		"alpha-map-sl-inv": {
-			{"0.00", filters.AlphaMap, map[string]any{"source": "s*l", "lower": 1.00, "upper": 0.00}},
-			{"0.25", filters.AlphaMap, map[string]any{"source": "s*l", "lower": 1.00, "upper": 0.25}},
-			{"0.50", filters.AlphaMap, map[string]any{"source": "s*l", "lower": 1.00, "upper": 0.50}},
-			{"0.75", filters.AlphaMap, map[string]any{"source": "s*l", "lower": 1.00, "upper": 0.75}},
-			{"1.00", filters.AlphaMap, map[string]any{"source": "s*l", "lower": 1.00, "upper": 1.00}},
+			{"0.00", alphamap.Meta.Name, map[string]any{"source": "s*l", "lower": 1.00, "upper": 0.00}},
+			{"0.25", alphamap.Meta.Name, map[string]any{"source": "s*l", "lower": 1.00, "upper": 0.25}},
+			{"0.50", alphamap.Meta.Name, map[string]any{"source": "s*l", "lower": 1.00, "upper": 0.50}},
+			{"0.75", alphamap.Meta.Name, map[string]any{"source": "s*l", "lower": 1.00, "upper": 0.75}},
+			{"1.00", alphamap.Meta.Name, map[string]any{"source": "s*l", "lower": 1.00, "upper": 1.00}},
 		},
 		"convolution": {
-			{"-1.00", filters.Convolution, map[string]any{"matrix": customFilter, "bias": 0.00, "factor": -1.00}},
-			{"-0.75", filters.Convolution, map[string]any{"matrix": customFilter, "bias": 0.00, "factor": -0.75}},
-			{"-0.50", filters.Convolution, map[string]any{"matrix": customFilter, "bias": 0.00, "factor": -0.50}},
-			{"-0.25", filters.Convolution, map[string]any{"matrix": customFilter, "bias": 0.00, "factor": -0.25}},
-			{"0.00", filters.Convolution, map[string]any{"matrix": customFilter, "bias": 0.00, "factor": 0.00}},
-			{"0.25", filters.Convolution, map[string]any{"matrix": customFilter, "bias": 0.00, "factor": 0.25}},
-			{"0.50", filters.Convolution, map[string]any{"matrix": customFilter, "bias": 0.00, "factor": 0.50}},
-			{"0.75", filters.Convolution, map[string]any{"matrix": customFilter, "bias": 0.00, "factor": 0.75}},
-			{"1.00", filters.Convolution, map[string]any{"matrix": customFilter, "bias": 0.00, "factor": 1.00}},
+			{"-1.00", convolution.Meta.Name, map[string]any{"matrix": customFilter, "bias": 0.00, "factor": -1.00}},
+			{"-0.75", convolution.Meta.Name, map[string]any{"matrix": customFilter, "bias": 0.00, "factor": -0.75}},
+			{"-0.50", convolution.Meta.Name, map[string]any{"matrix": customFilter, "bias": 0.00, "factor": -0.50}},
+			{"-0.25", convolution.Meta.Name, map[string]any{"matrix": customFilter, "bias": 0.00, "factor": -0.25}},
+			{"0.00", convolution.Meta.Name, map[string]any{"matrix": customFilter, "bias": 0.00, "factor": 0.00}},
+			{"0.25", convolution.Meta.Name, map[string]any{"matrix": customFilter, "bias": 0.00, "factor": 0.25}},
+			{"0.50", convolution.Meta.Name, map[string]any{"matrix": customFilter, "bias": 0.00, "factor": 0.50}},
+			{"0.75", convolution.Meta.Name, map[string]any{"matrix": customFilter, "bias": 0.00, "factor": 0.75}},
+			{"1.00", convolution.Meta.Name, map[string]any{"matrix": customFilter, "bias": 0.00, "factor": 1.00}},
 		},
 	}
 	for k, tests := range testGroups {
 		for i, tt := range tests {
 			t.Run(tt.name, func(t *testing.T) {
-				res := filters.NewImageFilter(tt.filter, tt.options).Apply(testImage.Clone())
+				res := parser.NewImageFilter(tt.filter, tt.options).Apply(testImage.Clone())
 				res.SaveAsPNG(fmt.Sprintf("test_data/filters/%s-%03d-%s.png", k, i, tt.name))
 			})
 		}

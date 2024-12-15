@@ -2,9 +2,14 @@ package enhance
 
 import (
 	"github.com/toxyl/gfx/filters/convolution"
+	"github.com/toxyl/gfx/filters/meta"
 	"github.com/toxyl/gfx/image"
 	"github.com/toxyl/gfx/math"
 )
+
+var Meta = meta.New("enhance", []*meta.FilterMetaDataArg{
+	{Name: "amount", Default: 1.0},
+})
 
 func Apply(img *image.Image, amount float64) *image.Image {
 	return convolution.NewCustomFilter(

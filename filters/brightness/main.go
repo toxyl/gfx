@@ -2,9 +2,14 @@ package brightness
 
 import (
 	"github.com/toxyl/gfx/color/rgba"
+	"github.com/toxyl/gfx/filters/meta"
 	"github.com/toxyl/gfx/image"
 	"github.com/toxyl/gfx/math"
 )
+
+var Meta = meta.New("brightness", []*meta.FilterMetaDataArg{
+	{Name: "adjustment", Default: 1.0},
+})
 
 func Apply(img *image.Image, adjustment float64) *image.Image {
 	return img.ProcessRGBA(0, 0, img.W(), img.H(), func(x, y int, col *rgba.RGBA) (x2 int, y2 int, col2 *rgba.RGBA) {
