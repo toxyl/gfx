@@ -1,34 +1,50 @@
 # gfx
 
+## Run test suite
 ```bash
-go run app/filter/main.go filters
+go test
+```
+See `main_test.go` for details as to which files will be created in `test_data/`.
+
+## Test Filter app
+```bash
+./test-filter-app.sh
 ```
 
+Should return a list like this (order might be different):
 ```
 Available filters
 -----------------
-gray
-invert
-pastelize
-sepia
-hue::amount=0.5
-sat::amount=1.0
-lum::amount=1.0
-hue-contrast::amount=1.0
-sat-contrast::amount=1.0
-lum-contrast::amount=1.0
-color-shift::hue=180.0::sat=0.1::lum=0.7
-brightness::amount=1.0
-contrast::amount=1.0
-gamma::amount=1.0
-vibrance::amount=1.0
-enhance::amount=1.0
-sharpen::amount=1.0
-blur::amount=1.0
-edge-detect::amount=1.0
-emboss::amount=1.0
-threshold::amount=1.0
-alpha-map::source=s*l::lower=0.1::upper=0.7
-extract::hue=180.0::hue-tolerance=90.0::hue-feather=90.0::sat=0.50::sat-tolerance=0.25::sat-feather=0.25::lum=0.50::lum-tolerance=0.25::lum-feather=0.25
-convolution::matrix=1.0,1.0,1.0,1.0,8.0,1.0,1.0,1.0,1.0
+sharpen(amount=0)
+blur(amount=1)
+edge-detect(amount=1)
+invert()
+brightness(adjustment=1)
+contrast(adjustment=1)
+vibrance(adjustment=0)
+color-shift(hue=0 sat=0 lum=0)
+gamma(adjustment=1)
+threshold(amount=0)
+alpha-map(source=l lower=0 upper=0)
+sepia()
+lum(shift=0)
+hue-contrast(adjustment=0)
+sat-contrast(adjustment=0)
+convolution(amount=1 bias=0 factor=1 matrix=[[1 1 1] [1 8 1] [1 1 1]])
+pastelize()
+hue(shift=0)
+emboss(amount=1)
+extract(hue=0 hue-tolerance=180 hue-feather=0 sat=0.5 sat-tolerance=0.5 sat-feather=0 lum=0.5 lum-tolerance=0.5 lum-feather=0)
+gray()
+sat(shift=0)
+lum-contrast(adjustment=0)
+enhance(amount=1)
 ```
+After the test `test_data/filter_app/` must contain `test1.png`, `test2.png`, `test3.png`. 
+
+## Test Composer app
+```bash
+./test-composer-app.sh
+```
+Once complete, `test_data/composer_app/` must contain `sun.png`, `sun_spots.png`, `lasco_c3.png`. 
+
