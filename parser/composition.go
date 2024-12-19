@@ -92,7 +92,7 @@ func (c *Composition) String() string {
 	}
 	return spf(
 		`%s%s%s
-# this is a compiled filter that doesn't contain any variables anymore
+# none defined
 
 %s%s%s
 %s
@@ -188,7 +188,7 @@ func (c *Composition) Render() *image.Image {
 		res = res.Crop(c.Crop.X, c.Crop.Y, c.Crop.W, c.Crop.H, true)
 	}
 	if c.Resize != nil && c.Resize.W > 0 && c.Resize.H > 0 {
-		res = res.Resize(c.Resize.W, c.Resize.H)
+		return res.Resize(c.Resize.W, c.Resize.H)
 	}
 	return res.Resize(w, h)
 }

@@ -11,6 +11,7 @@ func parseInt(s string) int {
 }
 
 func parseLayer(line string, filters map[string]*CompiledFilter) Layer {
+	line = strings.TrimSpace(line)
 	parts := strings.Fields(line)
 	blendMode := parts[0]
 	alpha, _ := strconv.ParseFloat(parts[1], 64)

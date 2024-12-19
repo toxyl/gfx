@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GFXS Renderer</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/mode/simple.min.js"></script>
+    <script src="gfxs-mode.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css">
+</head>
+<body>
+    <div class="container">
+        <h1>GFXS Renderer</h1>
+        <div class="editor-output">
+            <textarea id="gfxs-editor"># GFXScript Editor Example
+[VARS]
+h1 = -60
+h2 = -150
+h3 = -190
+h4 = 5
+s4 = -0.05
+l4 = 0.01
+
+[FILTERS]
+filter1    { blur(amount=4.0) }
+filter2    { enhance(1.02) }
+filter3    { use(filter2) blur(amount=1.5) }
+filter4    { color-shift(hue=h1 sat = 0 lum=0) enhance() }
+filter5    { color-shift(hue=h2 sat = 0 lum=0) enhance() }
+filter6    { color-shift(hue=h3 sat = 0 lum=0) enhance() }
+filter7    { color-shift(h4 s4 l4) enhance() }
+compFilter { enhance() alpha-map(lower=0.01 upper=0.25 source=`l`) }
+
+[COMPOSITION]
+name   = `Sun (GOES)`
+width  = 640		
+height = 640
+color  = hsla(240 0.5 0.25 1.0)
+filter = compFilter
+crop   = 40 40 560 560
+resize = 150 150
+
+[LAYERS]
+ pin-light 0.5000 filter7 https://services.swpc.noaa.gov/images/animations/suvi/secondary/171/latest.png
+   average 0.5000 filter6 https://services.swpc.noaa.gov/images/animations/suvi/primary/171/latest.png
+ pin-light 0.7500 filter5 https://services.swpc.noaa.gov/images/animations/suvi/secondary/131/latest.png
+    darken 0.5000 filter4 https://services.swpc.noaa.gov/images/animations/suvi/primary/131/latest.png
+    darken 0.7500 filter2 https://services.swpc.noaa.gov/images/animations/suvi/secondary/195/latest.png
+difference 0.7500 filter2 https://services.swpc.noaa.gov/images/animations/suvi/primary/195/latest.png
+   average 0.5000 filter3 https://services.swpc.noaa.gov/images/animations/suvi/secondary/094/latest.png
+   average 0.5000 filter2 https://services.swpc.noaa.gov/images/animations/suvi/primary/094/latest.png
+difference 1.0000       * https://services.swpc.noaa.gov/images/animations/suvi/secondary/304/latest.png
+difference 1.0000       * https://services.swpc.noaa.gov/images/animations/suvi/primary/304/latest.png
+  multiply 1.0000 filter1 https://services.swpc.noaa.gov/images/animations/suvi/secondary/284/latest.png
+  multiply 1.0000       * https://services.swpc.noaa.gov/images/animations/suvi/primary/284/latest.png
+            </textarea>
+            <div id="output">
+                <img id="rendered-image" alt="Rendered Output" />
+            </div>
+        </div>
+        <button id="render-btn">Render</button>
+    </div>
+    <script src="gfxs-mode.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>
