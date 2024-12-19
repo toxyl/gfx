@@ -4,7 +4,10 @@ import (
 	"fmt"
 	"strings"
 
+	"github.com/toxyl/flo"
+	"github.com/toxyl/gfx/color/blend"
 	"github.com/toxyl/gfx/color/hsla"
+	"github.com/toxyl/gfx/image"
 	"github.com/toxyl/gfx/math"
 )
 
@@ -120,6 +123,74 @@ func (c *Composition) String() string {
 		STR_LBRACKET, strings.ToUpper(SECTION_LAYERS), STR_RBRACKET,
 		strings.Join(layers, "\n"),
 	)
+}
+
+func (c *Composition) LoadYAML(path string) *Composition {
+	if err := flo.File(path).LoadYAML(&c); err != nil {
+		panic("failed to load composition from YAML: " + err.Error())
+	}
+	return c
+}
+
+func (c *Composition) LoadGFXS(path string) *Composition {
+	str := ""
+	if err := flo.File(path).LoadString(&str); err != nil {
+		panic("failed to load composition: " + err.Error())
+	}
+	comp, err := ParseComposition(str)
+	if err != nil {
+		panic("failed to parse composition: " + err.Error())
+	}
+	c = comp
+	return c
+}
+
+func (c *Composition) SaveYAML(path string) *Composition {
+	if err := flo.File(path).StoreYAML(&c); err != nil {
+		panic("failed to save composition as YAML: " + err.Error())
+	}
+	return c
+}
+
+func (c *Composition) SaveGFXS(path string) *Composition {
+	if err := flo.File(path).StoreString(c.String()); err != nil {
+		panic("failed to save composition: " + err.Error())
+	}
+	return c
+}
+
+func (c *Composition) Render() *image.Image {
+	w, h := c.Width, c.Height
+	res := image.New(w, h)
+	if c.Color != nil {
+		res.FillHSLA(0, 0, w, h, c.Color)
+	}
+	numLayers := len(c.Layers)
+	for i := numLayers - 1; i >= 0; i-- {
+		l := c.Layers[i]
+		scaled := l.Render(w, h)
+		res.Draw(
+			scaled,
+			0, 0, w, h,
+			0, 0, w, h,
+			blend.BlendMode(l.BlendMode),
+			l.Alpha,
+		)
+	}
+	if c.Filter != nil {
+		for _, filter := range c.Filter.Get() {
+			if filter != nil {
+				res = filter.Apply(res)
+			}
+		}
+	}
+	if c.Crop != nil && c.Crop.W > 0 && c.Crop.H > 0 {
+		res = res.Crop(c.Crop.X, c.Crop.Y, c.Crop.W, c.Crop.H, true)
+	}
+	if c.Resize != nil && c.Resize.W > 0 && c.Resize.H > 0 {
+		res = res.Resize(c.Resize.W, c.Resize.H)
+	}
+	return res.Resize(w, h)
 }
 
 func NewComposition(name string, w, h int) *Composition {

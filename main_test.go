@@ -370,7 +370,7 @@ func TestComposition(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			c := parser.NewComposition(tt.name, 0, 0).Load(tt.path)
+			c := parser.NewComposition(tt.name, 0, 0).LoadGFXS(tt.path)
 			c.Render().SaveAsPNG("test_data/compositions/render/" + tt.name + ".png")
 			c.SaveGFXS("test_data/compositions/render/" + tt.name + ".gfxs")
 		})

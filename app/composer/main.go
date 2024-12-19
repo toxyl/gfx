@@ -30,7 +30,7 @@ func main() {
 		return
 	}
 
-	comp := parser.NewComposition("", 0, 0).Load(*fileIn)
+	comp := parser.NewComposition("", 0, 0).LoadGFXS(*fileIn)
 	f := *fileOut
 	fl := strings.ToLower(f)
 

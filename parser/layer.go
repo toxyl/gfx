@@ -1,8 +1,11 @@
 package parser
 
 import (
+	"flag"
 	"fmt"
+	"strconv"
 
+	"github.com/toxyl/gfx/color/blend"
 	"github.com/toxyl/gfx/image"
 )
 
@@ -65,4 +68,81 @@ func (l *Layer) String(compHasCrop, compHasResize, compHasOffset, compHasFilter 
 		offset,
 		l.Source,
 	)
+}
+
+func (l *Layer) load() {
+	if l.Source != "" {
+		if l.Source[0] == CHAR_CLI_ARG {
+			if i, err := strconv.Atoi(l.Source[1:]); err == nil {
+				l.Source = flag.Arg(i)
+				if l.Source == "" {
+					panic("missing argument $" + fmt.Sprint(i) + " (hint: numbering starts at 0)")
+				}
+			}
+		}
+		l.data = image.NewFromURL(l.Source)
+		if l.data == nil {
+			// this wasn't a URL, maybe it's a file
+			l.data = image.NewFromFile(l.Source)
+		}
+	}
+}
+
+func (l *Layer) LoadFromImage(i *image.Image) *Layer {
+	l.data = i
+	return l
+}
+
+func (l *Layer) SetFilters(filters ...*ImageFilter) *Layer {
+	l.Filter = &CompiledFilter{
+		Name:    "",
+		Filters: filters,
+	}
+	return l
+}
+
+func (l *Layer) SetBlendmode(mode string) *Layer {
+	l.BlendMode = mode
+	return l
+}
+
+func (l *Layer) SetAlpha(alpha float64) *Layer {
+	l.Alpha = alpha
+	return l
+}
+
+func (l *Layer) Render(w, h int) *image.Image {
+	l.load()
+	res := l.data.Resize(w, h)
+	if l.Filter != nil {
+		for _, filter := range l.Filter.Get() {
+			if filter != nil {
+				res = filter.Apply(res)
+			}
+		}
+	}
+	if l.Resize != nil && l.Resize.W > 0 && l.Resize.H > 0 {
+		res = res.Resize(l.Resize.W, l.Resize.H)
+	}
+	if l.Crop != nil && l.Crop.W > 0 && l.Crop.H > 0 {
+		res = res.Crop(l.Crop.X, l.Crop.Y, l.Crop.W, l.Crop.H, false)
+	}
+	if l.Offset != nil && l.Offset.X > 0 && l.Offset.Y > 0 {
+		res = res.Offset(l.Offset.X, l.Offset.Y)
+	}
+	return res
+}
+
+func NewLayer() *Layer {
+	l := Layer{
+		data:      nil,
+		Source:    "",
+		BlendMode: string(blend.NORMAL),
+		Alpha:     1,
+		Crop:      nil,
+		Offset:    nil,
+		Resize:    nil,
+		Filter:    nil,
+	}
+	return &l
 }
