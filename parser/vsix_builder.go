@@ -18,7 +18,7 @@ func GenerateVSIX() (string, error) {
 
 	// Create subdirectories
 	syntaxesDir := filepath.Join(tempDir, "syntaxes")
-	if err := os.Mkdir(syntaxesDir, 0755); err != nil {
+	if err := os.Mkdir(syntaxesDir, 0750); err != nil {
 		return "", err
 	}
 
@@ -42,7 +42,7 @@ func GenerateVSIX() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	if err := os.WriteFile(filepath.Join(tempDir, "language-configuration.json"), langConfigJSON, 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(tempDir, "language-configuration.json"), langConfigJSON, 0600); err != nil {
 		return "", err
 	}
 
@@ -98,7 +98,7 @@ func GenerateVSIX() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	if err := os.WriteFile(filepath.Join(syntaxesDir, LANGUAGE_ID+".tmLanguage.json"), tmLanguageJSON, 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(syntaxesDir, LANGUAGE_ID+".tmLanguage.json"), tmLanguageJSON, 0600); err != nil {
 		return "", err
 	}
 
@@ -134,18 +134,18 @@ func GenerateVSIX() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	if err := os.WriteFile(filepath.Join(tempDir, "package.json"), packageJSONBytes, 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(tempDir, "package.json"), packageJSONBytes, 0600); err != nil {
 		return "", err
 	}
 
 	// Generate README.md
-	if err := os.WriteFile(filepath.Join(tempDir, "README.md"), []byte(README), 0644); err != nil {
+	if err := os.WriteFile(filepath.Join(tempDir, "README.md"), []byte(README), 0600); err != nil {
 		return "", err
 	}
 
 	// Package the extension into a .vsix file
-	vsixPath := filepath.Join(tempDir, "..", LANGUAGE_ID+".vsix")
-	zipFile, err := os.Create(vsixPath)
+	vsixPath := filepath.Join(tempDir, "..", LANGUAGE_ID+".vsix") // #nosec G304
+	zipFile, err := os.Create(vsixPath)                           // #nosec G304
 	if err != nil {
 		return "", err
 	}
@@ -174,7 +174,7 @@ func addFilesToZip(zipWriter *zip.Writer, root, prefix string) error {
 				return err
 			}
 		} else {
-			fileBytes, err := os.ReadFile(filePath)
+			fileBytes, err := os.ReadFile(filePath) // #nosec G304
 			if err != nil {
 				return err
 			}

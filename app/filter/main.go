@@ -80,8 +80,11 @@ func main() {
 			filterChain.Append(chain...)
 		}
 		if saveChain {
-			filterChain.Save(*fileChain)
-			fmt.Printf("Filter chain saved to %s.\n", *fileOut)
+			if err := filterChain.Save(*fileChain); err != nil {
+				fmt.Printf("Error saving filter chain: %s.\n", err)
+			} else {
+				fmt.Printf("Filter chain saved to %s.\n", *fileOut)
+			}
 		}
 		res := filterChain.Apply(image.NewFromFile(*fileIn))
 		ft := strings.ToLower(*fileOut)

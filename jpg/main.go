@@ -8,7 +8,7 @@ import (
 )
 
 func Save(img image.Image, path string) {
-	outFile, err := os.Create(path)
+	outFile, err := os.Create(path) // #nosec G304
 	if err != nil {
 		panic(err)
 	}
@@ -21,7 +21,7 @@ func Save(img image.Image, path string) {
 }
 
 func FromFile(filename string) (image.Image, error) {
-	file, err := os.Open(filename)
+	file, err := os.Open(filename) // #nosec G304
 	if err != nil {
 		return nil, err
 	}

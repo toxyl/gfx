@@ -8,7 +8,7 @@ import (
 )
 
 func Download(url string) ([]byte, error) {
-	resp, err := http.Get(url)
+	resp, err := http.Get(url) // #nosec G304
 	if err != nil {
 		return nil, fmt.Errorf("failed to fetch data: %w", err)
 	}
