@@ -122,7 +122,9 @@ func (l *Layer) Render(w, h int) *image.Image {
 		}
 	}
 	if l.Resize != nil && l.Resize.W > 0 && l.Resize.H > 0 {
-		res = res.Resize(l.Resize.W, l.Resize.H)
+		res2 := image.New(w, h)
+		res2.Draw(res.Resize(l.Resize.W, l.Resize.H), 0, 0, l.Resize.W, l.Resize.H, (w-l.Resize.W)/2, (h-l.Resize.H)/2, l.Resize.W, l.Resize.H, blend.NORMAL, 1)
+		res = res2
 	}
 	if l.Crop != nil && l.Crop.W > 0 && l.Crop.H > 0 {
 		res = res.Crop(l.Crop.X, l.Crop.Y, l.Crop.W, l.Crop.H, false)

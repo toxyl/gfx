@@ -31,8 +31,8 @@ func (i *Image) Crop(x, y, w, h int, fullCrop bool) *Image {
 	iw := i.W()
 	ih := i.H()
 	dst := image.NewRGBA(image.Rect(0, 0, iw, ih))
-	for yDst := x; yDst < h; yDst++ {
-		for xDst := y; xDst < w; xDst++ {
+	for yDst := y; yDst < h; yDst++ {
+		for xDst := x; xDst < w; xDst++ {
 			dst.Set(xDst, yDst, i.raw.RGBAAt(xDst, yDst))
 		}
 	}
