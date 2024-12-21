@@ -2,6 +2,8 @@ package main
 
 import (
 	_ "embed"
+	"flag"
+	"fmt"
 	"image/png"
 
 	"github.com/gofiber/fiber/v2"
@@ -22,6 +24,9 @@ var script string
 var gfxsmode string
 
 func main() {
+	fport := flag.Uint("p", 8080, "The port to run the server on, defaults to 8080.")
+	flag.Parse()
+
 	app := fiber.New()
 	app.Use(cors.New())
 
@@ -53,5 +58,5 @@ func main() {
 		return png.Encode(c.Response().BodyWriter(), comp.Render().Get())
 	})
 
-	app.Listen(":8080")
+	app.Listen(":" + fmt.Sprint(*fport))
 }

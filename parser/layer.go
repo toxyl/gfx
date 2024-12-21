@@ -127,7 +127,7 @@ func (l *Layer) Render(w, h int) *image.Image {
 	if l.Crop != nil && l.Crop.W > 0 && l.Crop.H > 0 {
 		res = res.Crop(l.Crop.X, l.Crop.Y, l.Crop.W, l.Crop.H, false)
 	}
-	if l.Offset != nil && l.Offset.X > 0 && l.Offset.Y > 0 {
+	if l.Offset != nil && (l.Offset.X != 0 || l.Offset.Y != 0) {
 		res = res.Offset(l.Offset.X, l.Offset.Y)
 	}
 	return res
