@@ -11,20 +11,7 @@ body {
     min-height: 100vh;
 }
 
-.container {
-    width: 96vw;
-}
-
-.editor-output {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-}
-
 textarea {
-    flex: 1;
-    width: 50vw;
-    height: 75vh;
     background: #44475a;
     color: #f8f8f2;
     border: none;
@@ -35,34 +22,47 @@ textarea {
 }
 
 #output {
-    flex: 1;
+    position: fixed;
+    left: 50vw;
+    top: 0;
+    width: 50vw;
+    height: 100vh;
     display: flex;
-    flex-direction: column;
-    align-items: center;
     justify-content: center;
+    align-items: center;
+    background-color: #282a36;
+}
+
+#image-container {
+    position: relative;
+    display: inline-block;
+    background-color: #ffffff;
+    background-image: linear-gradient(45deg, #ddd 25%, transparent 25%, transparent 50%, #ddd 50%, #ddd 75%, transparent 75%, transparent);
+    background-size: 20px 20px;
+    border: 1px solid #6272a4;
+    border-radius: 5px;
 }
 
 #output img {
-    /* width: 100%; */
-    border: 2px solid #6272a4;
-    border-radius: 5px;
+    display: block;
+    max-width: 100%;
+    max-height: 100%;
 }
 
-button {
-    background: #6272a4;
-    color: #f8f8f2;
-    border: none;
-    padding: 10px 20px;
-    font-size: 16px;
-    cursor: pointer;
-    border-radius: 5px;
-    margin-top: 20px;
-}
-
-button:hover {
-    background: #44475a;
+#output.loading {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh; 
+    background: rgba(0, 0, 0, 0.1);
+    font-size: 1.2rem;
+    color: #555;
 }
 
 .CodeMirror {
-    height: 75vh !important;
+    position: fixed !important;
+    left: 0vw !important;
+    top: 0vh !important;
+    width: 50vw !important;
+    height: 100vh !important;
 }

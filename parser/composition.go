@@ -169,6 +169,10 @@ func (c *Composition) Render() *image.Image {
 	for i := numLayers - 1; i >= 0; i-- {
 		l := c.Layers[i]
 		scaled := l.Render(w, h)
+		if scaled == nil {
+			fmt.Printf("WARN: failed to render layer source %s, ignoring layer.\n", l.Source)
+			continue // rendering failed, maybe URL or file wasn't available
+		}
 		res.Draw(
 			scaled,
 			0, 0, w, h,

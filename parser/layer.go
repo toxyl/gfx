@@ -7,6 +7,7 @@ import (
 
 	"github.com/toxyl/gfx/color/blend"
 	"github.com/toxyl/gfx/image"
+	"github.com/toxyl/gfx/net"
 )
 
 type Layer struct {
@@ -80,6 +81,9 @@ func (l *Layer) load() {
 				}
 			}
 		}
+		if net.IsURL(l.Source) {
+			return // URL failed to load
+		}
 		l.data = image.NewFromURL(l.Source)
 		if l.data == nil {
 			// this wasn't a URL, maybe it's a file
@@ -113,6 +117,9 @@ func (l *Layer) SetAlpha(alpha float64) *Layer {
 
 func (l *Layer) Render(w, h int) *image.Image {
 	l.load()
+	if l.data == nil {
+		return nil
+	}
 	res := l.data.Resize(w, h)
 	if l.Filter != nil {
 		for _, filter := range l.Filter.Get() {
