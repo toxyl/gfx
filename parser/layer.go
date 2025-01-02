@@ -81,10 +81,10 @@ func (l *Layer) load() {
 				}
 			}
 		}
-		if net.IsURL(l.Source) {
+		l.data = image.NewFromURL(l.Source)
+		if l.data == nil && net.IsURL(l.Source) {
 			return // URL failed to load
 		}
-		l.data = image.NewFromURL(l.Source)
 		if l.data == nil {
 			// this wasn't a URL, maybe it's a file
 			l.data = image.NewFromFile(l.Source)
