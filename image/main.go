@@ -4,6 +4,7 @@ import (
 	"image"
 	"image/draw"
 	"sync"
+	"time"
 
 	"github.com/toxyl/gfx/color/rgba"
 	"github.com/toxyl/gfx/jpg"
@@ -152,9 +153,25 @@ func NewFromURL(url string) *Image {
 	if !net.IsURL(url) {
 		return nil
 	}
-	if i, err := loadFromURL(url); err == nil {
-		return &Image{raw: toRGBAImage(i), mu: &sync.Mutex{}}
+
+	const maxAttempts = 3
+	delay := time.Second
+
+	var img image.Image
+	var err error
+
+	for attempt := 0; attempt < maxAttempts; attempt++ {
+		img, err = loadFromURL(url)
+		if err == nil {
+			return &Image{raw: toRGBAImage(img), mu: &sync.Mutex{}}
+		}
+
+		if attempt < maxAttempts-1 {
+			time.Sleep(delay)
+			delay *= 2
+		}
 	}
+
 	return nil
 }
 
