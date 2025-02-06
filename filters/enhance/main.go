@@ -21,5 +21,5 @@ func Apply(img *image.Image, amount float64) *image.Image {
 				{-0.5 / a / 4.0, 1 / a / 6.0, -0.5 / a / 4.0},
 			}
 		},
-	).Apply(img)
+	).Apply3x3(img)
 }
