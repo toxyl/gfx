@@ -23,5 +23,9 @@ func Apply(img *image.Image, amount float64) *image.Image {
 			matrix[i][j] = 1.0 / float64(kernelSize*kernelSize)
 		}
 	}
-	return convolution.NewConvolutionMatrix(matrix, 1, 0).Apply(img)
+	cm := convolution.NewConvolutionMatrix(matrix, 1, 0)
+	if kernelSize == 3 {
+		return cm.Apply3x3(img)
+	}
+	return cm.Apply(img)
 }
