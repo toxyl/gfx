@@ -43,6 +43,7 @@ func loadFromFile(path string) (image.Image, error) {
 	return nil, errors.Newf("unknown format: %s", path)
 }
 
+// loadFromBytes generates an image from byte data using the given type. Available types: png, jpg and jpeg
 func loadFromBytes(typ string, data []byte) (image.Image, error) {
 	u := strings.ToLower(typ)
 	if u == "png" {

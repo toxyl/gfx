@@ -18,5 +18,5 @@ func (i *Image) Offset(dx, dy int) *Image {
 			res.Set(dx+x, dy+y, i.GetRGBA(x, y).RGBA())
 		}
 	}
-	return &Image{raw: res, mu: &sync.Mutex{}}
+	return &Image{raw: res, path: i.path, mu: &sync.Mutex{}}
 }

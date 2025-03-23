@@ -29,6 +29,7 @@ func parseFilterBlock(line string, scanner *bufio.Scanner) (string, []string) {
 			inQuote := false
 			isEnd := false
 			for i, c := range nextLine {
+				shouldBreak := false
 				switch c {
 				case CHAR_QUOTE:
 					if inQuote && nextLine[i-1] == CHAR_ESCAPE {
@@ -38,8 +39,11 @@ func parseFilterBlock(line string, scanner *bufio.Scanner) (string, []string) {
 					if !inQuote {
 						// this is the end of the filter block
 						isEnd = true
-						break
+						shouldBreak = true
 					}
+				}
+				if shouldBreak {
+					break
 				}
 			}
 			if isEnd {

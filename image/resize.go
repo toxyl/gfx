@@ -28,5 +28,22 @@ func (i *Image) Resize(w, h int) *Image {
 			res.Set(x, y, rgba.New(uint8(r/257), uint8(g/257), uint8(b/257), uint8(a/257)).RGBA())
 		}
 	}
-	return &Image{raw: res, mu: &sync.Mutex{}}
+	return &Image{raw: res, path: i.path, mu: &sync.Mutex{}}
+}
+
+func (i *Image) ResizeToMaxMP(mpMax int) *Image {
+	w := i.W()
+	h := i.H()
+	ow := w
+	oh := h
+	mp := w * h
+	for mp > mpMax {
+		w >>= 1
+		h >>= 1
+		mp = w * h
+	}
+	if ow != w || oh != h {
+		i = i.Resize(w, h)
+	}
+	return i
 }

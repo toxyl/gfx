@@ -18,9 +18,7 @@ func (f *CompiledFilter) String() string {
 }
 
 func (f *CompiledFilter) Append(filters ...*ImageFilter) *CompiledFilter {
-	for _, filter := range filters {
-		f.Filters = append(f.Filters, filter)
-	}
+	f.Filters = append(f.Filters, filters...)
 	return f
 }
 

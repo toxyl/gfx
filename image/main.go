@@ -3,6 +3,7 @@ package image
 import (
 	"image"
 	"image/draw"
+	"path/filepath"
 	"sync"
 	"time"
 
@@ -113,16 +114,26 @@ func toRGBAImage(img image.Image) *image.RGBA {
 }
 
 type Image struct {
-	mu  *sync.Mutex
-	raw *image.RGBA
+	mu   *sync.Mutex
+	path string
+	raw  *image.RGBA
 }
 
-func (i *Image) SaveAsPNG(path string) { png.Save(i.raw, path) }
-func (i *Image) SaveAsJPG(path string) { jpg.Save(i.raw, path) }
-func (i *Image) W() int                { return i.raw.Bounds().Dx() }
-func (i *Image) H() int                { return i.raw.Bounds().Dy() }
-func (i *Image) Lock()                 { i.mu.Lock() }
-func (i *Image) Unlock()               { i.mu.Unlock() }
+func (i *Image) Path() string {
+	if abs, err := filepath.Abs(i.path); err == nil {
+		return abs
+	} else {
+		return i.path
+	}
+}
+func (i *Image) SaveAsPNG(path string) *Image { png.Save(i.raw, path); i.path = path; return i }
+func (i *Image) SaveAsJPG(path string) *Image { jpg.Save(i.raw, path); i.path = path; return i }
+func (i *Image) W() int                       { return i.raw.Bounds().Dx() }
+func (i *Image) H() int                       { return i.raw.Bounds().Dy() }
+func (i *Image) CW() int                      { return i.raw.Bounds().Dx() >> 1 }
+func (i *Image) CH() int                      { return i.raw.Bounds().Dy() >> 1 }
+func (i *Image) Lock()                        { i.mu.Lock() }
+func (i *Image) Unlock()                      { i.mu.Unlock() }
 
 func (i *Image) Set(img *image.RGBA) {
 	if img == nil {
@@ -140,12 +151,12 @@ func (i *Image) Get() *image.RGBA {
 }
 
 func New(w, h int) *Image {
-	i := &Image{raw: image.NewRGBA(image.Rect(0, 0, w, h)), mu: &sync.Mutex{}}
+	i := &Image{raw: image.NewRGBA(image.Rect(0, 0, w, h)), path: "", mu: &sync.Mutex{}}
 	return i.FillRGBA(0, 0, w, h, rgba.New(0, 0, 0, 0))
 }
 
 func NewWithColor(w, h int, col rgba.RGBA) *Image {
-	i := &Image{raw: image.NewRGBA(image.Rect(0, 0, w, h)), mu: &sync.Mutex{}}
+	i := &Image{raw: image.NewRGBA(image.Rect(0, 0, w, h)), path: "", mu: &sync.Mutex{}}
 	return i.FillRGBA(0, 0, w, h, &col)
 }
 
@@ -163,7 +174,7 @@ func NewFromURL(url string) *Image {
 	for attempt := 0; attempt < maxAttempts; attempt++ {
 		img, err = loadFromURL(url)
 		if err == nil {
-			return &Image{raw: toRGBAImage(img), mu: &sync.Mutex{}}
+			return &Image{raw: toRGBAImage(img), path: url, mu: &sync.Mutex{}}
 		}
 
 		if attempt < maxAttempts-1 {
@@ -177,18 +188,19 @@ func NewFromURL(url string) *Image {
 
 func NewFromFile(path string) *Image {
 	if i, err := loadFromFile(path); err == nil {
-		return &Image{raw: toRGBAImage(i), mu: &sync.Mutex{}}
+		return &Image{raw: toRGBAImage(i), path: path, mu: &sync.Mutex{}}
 	}
 	return nil
 }
 
+// NewFromBytes generates an image from byte data using the given type. Available types: png, jpg and jpeg
 func NewFromBytes(typ string, b []byte) *Image {
 	if i, err := loadFromBytes(typ, b); err == nil {
-		return &Image{raw: toRGBAImage(i), mu: &sync.Mutex{}}
+		return &Image{raw: toRGBAImage(i), path: "", mu: &sync.Mutex{}}
 	}
 	return nil
 }
 
 func NewFromImage(img image.Image) *Image {
-	return &Image{raw: toRGBAImage(img), mu: &sync.Mutex{}}
+	return &Image{raw: toRGBAImage(img), path: "", mu: &sync.Mutex{}}
 }

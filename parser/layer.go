@@ -56,7 +56,6 @@ func (l *Layer) String(compHasCrop, compHasResize, compHasOffset, compHasFilter 
 		wfilter = 0
 	}
 	if l.Filter != nil {
-		filter = l.Filter.Name
 		filter = fmt.Sprintf("%*s", wfilter, l.Filter.Name)
 	}
 	return fmt.Sprintf(

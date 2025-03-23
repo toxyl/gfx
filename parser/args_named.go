@@ -34,7 +34,6 @@ func parseNamedArgs(args string, filter *ImageFilter, vars map[string]string) {
 					args = strings.TrimSpace(args[idx+1:])
 					idx = 0
 					complete = true
-					break
 				}
 			}
 			if complete {

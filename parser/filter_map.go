@@ -11,10 +11,14 @@ import (
 	"github.com/toxyl/gfx/filters/colorshift"
 	"github.com/toxyl/gfx/filters/contrast"
 	"github.com/toxyl/gfx/filters/convolution"
+	"github.com/toxyl/gfx/filters/crop"
+	"github.com/toxyl/gfx/filters/cropcircle"
 	"github.com/toxyl/gfx/filters/edgedetect"
 	"github.com/toxyl/gfx/filters/emboss"
 	"github.com/toxyl/gfx/filters/enhance"
 	"github.com/toxyl/gfx/filters/extract"
+	"github.com/toxyl/gfx/filters/fliph"
+	"github.com/toxyl/gfx/filters/flipv"
 	"github.com/toxyl/gfx/filters/gamma"
 	"github.com/toxyl/gfx/filters/gray"
 	"github.com/toxyl/gfx/filters/hue"
@@ -24,11 +28,16 @@ import (
 	"github.com/toxyl/gfx/filters/lumcontrast"
 	"github.com/toxyl/gfx/filters/meta"
 	"github.com/toxyl/gfx/filters/pastelize"
+	"github.com/toxyl/gfx/filters/rotate"
 	"github.com/toxyl/gfx/filters/sat"
 	"github.com/toxyl/gfx/filters/satcontrast"
+	"github.com/toxyl/gfx/filters/scale"
 	"github.com/toxyl/gfx/filters/sepia"
 	"github.com/toxyl/gfx/filters/sharpen"
 	"github.com/toxyl/gfx/filters/threshold"
+	"github.com/toxyl/gfx/filters/transform"
+	"github.com/toxyl/gfx/filters/translate"
+	"github.com/toxyl/gfx/filters/translatewrap"
 	"github.com/toxyl/gfx/filters/vibrance"
 	"github.com/toxyl/gfx/image"
 	"github.com/toxyl/gfx/math"
@@ -71,6 +80,63 @@ func NewFilterMap(entries ...*FilterMapEntry) *FilterMap {
 
 var (
 	Filters = NewFilterMap(
+		NewFilterMapEntry(flipv.Meta, func(s *Filter, i *Image, m *MetaData) {
+			flipv.Apply(i)
+		}),
+		NewFilterMapEntry(fliph.Meta, func(s *Filter, i *Image, m *MetaData) {
+			fliph.Apply(i)
+		}),
+		NewFilterMapEntry(rotate.Meta, func(s *Filter, i *Image, m *MetaData) {
+			rotate.Apply(i,
+				s.GetOptionFloat64(m.NameOf(0), m.DefaultOf(0)),
+				s.GetOptionFloat64(m.NameOf(1), m.DefaultOf(1)),
+				s.GetOptionFloat64(m.NameOf(2), m.DefaultOf(2)),
+			)
+		}),
+		NewFilterMapEntry(crop.Meta, func(s *Filter, i *Image, m *MetaData) {
+			crop.Apply(i,
+				s.GetOptionFloat64(m.NameOf(0), m.DefaultOf(0)),
+				s.GetOptionFloat64(m.NameOf(1), m.DefaultOf(1)),
+				s.GetOptionFloat64(m.NameOf(2), m.DefaultOf(2)),
+				s.GetOptionFloat64(m.NameOf(3), m.DefaultOf(3)),
+			)
+		}),
+		NewFilterMapEntry(cropcircle.Meta, func(s *Filter, i *Image, m *MetaData) {
+			cropcircle.Apply(i,
+				s.GetOptionFloat64(m.NameOf(0), m.DefaultOf(0)),
+				s.GetOptionFloat64(m.NameOf(1), m.DefaultOf(1)),
+				s.GetOptionFloat64(m.NameOf(2), m.DefaultOf(2)),
+			)
+		}),
+		NewFilterMapEntry(translate.Meta, func(s *Filter, i *Image, m *MetaData) {
+			translate.Apply(i,
+				s.GetOptionFloat64(m.NameOf(0), m.DefaultOf(0)),
+				s.GetOptionFloat64(m.NameOf(1), m.DefaultOf(1)),
+			)
+		}),
+		NewFilterMapEntry(translatewrap.Meta, func(s *Filter, i *Image, m *MetaData) {
+			translatewrap.Apply(i,
+				s.GetOptionFloat64(m.NameOf(0), m.DefaultOf(0)),
+				s.GetOptionFloat64(m.NameOf(1), m.DefaultOf(1)),
+			)
+		}),
+		NewFilterMapEntry(scale.Meta, func(s *Filter, i *Image, m *MetaData) {
+			scale.Apply(i,
+				s.GetOptionFloat64(m.NameOf(0), m.DefaultOf(0)),
+				s.GetOptionFloat64(m.NameOf(1), m.DefaultOf(1)),
+				s.GetOptionFloat64(m.NameOf(2), m.DefaultOf(2)),
+			)
+		}),
+		NewFilterMapEntry(transform.Meta, func(s *Filter, i *Image, m *MetaData) {
+			transform.Apply(i,
+				s.GetOptionFloat64(m.NameOf(0), m.DefaultOf(0)),
+				s.GetOptionFloat64(m.NameOf(1), m.DefaultOf(1)),
+				s.GetOptionFloat64(m.NameOf(2), m.DefaultOf(2)),
+				s.GetOptionFloat64(m.NameOf(3), m.DefaultOf(3)),
+				s.GetOptionFloat64(m.NameOf(4), m.DefaultOf(4)),
+				s.GetOptionFloat64(m.NameOf(5), m.DefaultOf(5)),
+			)
+		}),
 		NewFilterMapEntry(gray.Meta, func(s *Filter, i *Image, m *MetaData) {
 			gray.Apply(i)
 		}),

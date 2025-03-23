@@ -27,13 +27,12 @@ func (i *Image) GetRGBA(x, y int) *rgba.RGBA {
 }
 
 func (i *Image) GetHSLA(x, y int) *hsla.HSLA {
-	cc := vars.COLOR_TRANSPARENT_RGBA
 	col := i.raw.RGBAAt(x, y)
 	if col.A == 0 {
 		return vars.COLOR_TRANSPARENT
 	}
 	scale := 255.0 / float32(col.A)
-	cc = rgba.New(
+	cc := rgba.New(
 		float32(col.R)*scale,
 		float32(col.G)*scale,
 		float32(col.B)*scale,
