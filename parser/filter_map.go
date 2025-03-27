@@ -35,6 +35,7 @@ import (
 	"github.com/toxyl/gfx/filters/sepia"
 	"github.com/toxyl/gfx/filters/sharpen"
 	"github.com/toxyl/gfx/filters/threshold"
+	"github.com/toxyl/gfx/filters/topolar"
 	"github.com/toxyl/gfx/filters/transform"
 	"github.com/toxyl/gfx/filters/translate"
 	"github.com/toxyl/gfx/filters/translatewrap"
@@ -227,6 +228,13 @@ var (
 					return s.GetOptionMatrix(m.NameOf(3), m.DefaultOf(3).([][]float64))
 				},
 			).Apply(i)
+		}),
+		NewFilterMapEntry(topolar.Meta, func(s *Filter, i *Image, m *MetaData) {
+			topolar.Apply(i,
+				s.GetOptionFloat64(m.NameOf(0), m.DefaultOf(0)),
+				s.GetOptionFloat64(m.NameOf(1), m.DefaultOf(1)),
+				s.GetOptionFloat64(m.NameOf(2), m.DefaultOf(2)),
+			)
 		}),
 	)
 )

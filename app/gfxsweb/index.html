@@ -1,64 +1,81 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GFXS Renderer</title>
-    <link rel="stylesheet" href="styles.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js" integrity="sha512-sSWQXoxIkE0G4/xqLngx5C53oOZCgFRxWE79CvMX2X0IKx14W3j9Dpz/2MpRh58xb2W/h+Y4WAHJQA0qMMuxJg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/mode/simple.min.js" integrity="sha512-CGM6DWPHs250F/m90YZ9NEiEUhd9a4+u8wAzeKC6uHzZbYyt9/e2dLC5BGGB6Y0HtEdZQdSDYjDsoTyNGdMrMA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="gfxs-mode.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css" integrity="sha512-uf06llspW44/LZpHzHT6qBOIVODjWtv4MxCricRxkzvopAlSWnTf6hpZTFxuuZcuNE9CBQhqE0Seu1CoRk84nQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GFXS Renderer</title>
+  <link rel="stylesheet" href="styles.css">
+  <!-- CodeMirror CSS & JS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.css" integrity="sha512-uf06llspW44/LZpHzHT6qBOIVODjWtv4MxCricRxkzvopAlSWnTf6hpZTFxuuZcuNE9CBQhqE0Seu1CoRk84nQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/codemirror.min.js" integrity="sha512-sSWQXoxIkE0G4/xqLngx5C53oOZCgFRxWE79CvMX2X0IKx14W3j9Dpz/2MpRh58xb2W/h+Y4WAHJQA0qMMuxJg==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.13/addon/mode/simple.min.js" integrity="sha512-CGM6DWPHs250F/m90YZ9NEiEUhd9a4+u8wAzeKC6uHzZbYyt9/e2dLC5BGGB6Y0HtEdZQdSDYjDsoTyNGdMrMA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+  <script src="gfxs-mode.js"></script>
+  <!-- Split.js for resizable panes -->
+  <script src="https://unpkg.com/split.js/dist/split.min.js"></script>
 </head>
 <body>
-    <textarea id="gfxs-editor"># GFXScript Editor Example
-[VARS]
-h1 = -60
-h2 = -150
-h3 = -190
-h4 = 5
-s4 = -0.05
-l4 = 0.01
-
-[FILTERS]
-filter1    { blur(amount=4.0) }
-filter2    { enhance(1.02) }
-filter3    { use(filter2) blur(amount=1.5) }
-filter4    { color-shift(hue=h1 sat = 0 lum=0) enhance() }
-filter5    { color-shift(hue=h2 sat = 0 lum=0) enhance() }
-filter6    { color-shift(hue=h3 sat = 0 lum=0) enhance() }
-filter7    { color-shift(h4 s4 l4) enhance() }
-compFilter { enhance() alpha-map(lower=0.01 upper=0.25 source=`l`) }
-
-[COMPOSITION]
-name   = `Sun (GOES)`
-width  = 640		
-height = 640
-color  = hsla(240 0.5 0.25 1.0)
-filter = compFilter
-crop   = 40 40 560 560
-resize = 150 150
-
-[LAYERS]
-pin-light 0.5000 filter7 https://services.swpc.noaa.gov/images/animations/suvi/secondary/171/latest.png
-average 0.5000 filter6 https://services.swpc.noaa.gov/images/animations/suvi/primary/171/latest.png
-pin-light 0.7500 filter5 https://services.swpc.noaa.gov/images/animations/suvi/secondary/131/latest.png
-darken 0.5000 filter4 https://services.swpc.noaa.gov/images/animations/suvi/primary/131/latest.png
-darken 0.7500 filter2 https://services.swpc.noaa.gov/images/animations/suvi/secondary/195/latest.png
-difference 0.7500 filter2 https://services.swpc.noaa.gov/images/animations/suvi/primary/195/latest.png
-average 0.5000 filter3 https://services.swpc.noaa.gov/images/animations/suvi/secondary/094/latest.png
-average 0.5000 filter2 https://services.swpc.noaa.gov/images/animations/suvi/primary/094/latest.png
-difference 1.0000       * https://services.swpc.noaa.gov/images/animations/suvi/secondary/304/latest.png
-difference 1.0000       * https://services.swpc.noaa.gov/images/animations/suvi/primary/304/latest.png
-multiply 1.0000 filter1 https://services.swpc.noaa.gov/images/animations/suvi/secondary/284/latest.png
-multiply 1.0000       * https://services.swpc.noaa.gov/images/animations/suvi/primary/284/latest.png
-    </textarea>
-    <div id="output">
-        <div id="image-container"> 
-            <img id="rendered-image" alt="Rendered Output" />
+  <div id="main-container">
+    <!-- Editors Container -->
+    <div id="editors-container">
+      <div class="editor-section" id="composition-section">
+        <div class="section-header">Composition</div>
+        <div id="filter-controls">
+          <select id="filter-dropdown">
+            <option value="">-- Select a composition --</option>
+          </select>
+          <button id="save-filter-btn">Save</button>
+          <button id="force-render-btn">Render</button>
         </div>
+        <textarea id="gfxse-composition"></textarea>
+      </div>
+      <div class="editor-section" id="vars-section">
+        <div class="section-header">Vars</div>
+        <textarea id="gfxse-vars"></textarea>
+      </div>
+      <div class="editor-section" id="layers-section">
+        <div class="section-header">Layers</div>
+        <textarea id="gfxse-layers"></textarea>
+      </div>
+      <div class="editor-section" id="filters-section">
+        <div class="section-header">Filters</div>
+        <textarea id="gfxse-filters"></textarea>
+      </div>
     </div>
-    <script src="gfxs-mode.js"></script>
-    <script src="script.js"></script>
+    <!-- Preview Container -->
+    <div id="preview-container">
+      <div id="preview-tabs">
+        <button class="tab-button active" data-mode="side-by-side">Side by Side</button>
+        <button class="tab-button" data-mode="both">Both</button>
+        <div id="auto-render-timer"></div>
+      </div>
+      <!-- Side-by-Side Mode: Two Panes arranged left-to-right -->
+      <div id="preview-side-by-side" class="preview-mode">
+        <div class="pane">
+          <div class="tab-header">Original</div>
+          <div class="image-wrapper">
+            <img id="original-image" alt="Original" />
+          </div>
+        </div>
+        <div class="pane">
+          <div class="tab-header">Processed</div>
+          <div class="image-wrapper">
+            <img id="processed-image" alt="Processed" />
+          </div>
+        </div>
+      </div>
+      <!-- Both Mode: Single Pane -->
+      <div id="preview-both" class="preview-mode" style="display:none;">
+        <div class="image-wrapper">
+          <img id="preview-image" alt="Processed Output" />
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Full-screen overlay for batch processing -->
+  <div id="overlay-full" class="overlay" style="display:none;">
+    <div class="overlay-content">Processing... please wait</div>
+  </div>
+  <script src="gfxs-mode.js"></script>
+  <script src="script.js"></script>
 </body>
 </html>
