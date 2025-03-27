@@ -31,7 +31,7 @@ vibrance = 0.1
 # sepia()
 # sharpen(amount=0)
 # threshold(amount=0)
-# to-polar(angle-start=0 angle-end=360 rotation=0) # Converts a rectangular image to a polar coordinate representation with the specified angular range. Rotation can be used to align the range. 
+# to-polar(angle-start=0 angle-end=360 rotation=0 fisheye=0) # Converts a rectangular image to a polar coordinate representation with the specified angular range. Rotation can be used to align the range. 
 # transform(transform-x=0 transform-y=0 rotate=0 scale=0 offset-x=0 offset-y=0) # transform: -1..1 (-100% to 100%); rotate: degrees (-360..360); scale: -1..n (0 = no change, 0.5 = 50% up, -0.5 = 50% down); offsets: -1..1 (-100% to 100%), measured from the image center, define the center for all transformations
 # translate(x=0 y=0) # x and y: -1..1 (-100% to 100%), translates the image without wrap-around
 # translate-wrap(x=0 y=0) # x and y: -1..1 (-100% to 100%), translates the image with wrap-around enabled

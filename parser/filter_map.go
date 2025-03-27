@@ -234,6 +234,7 @@ var (
 				s.GetOptionFloat64(m.NameOf(0), m.DefaultOf(0)),
 				s.GetOptionFloat64(m.NameOf(1), m.DefaultOf(1)),
 				s.GetOptionFloat64(m.NameOf(2), m.DefaultOf(2)),
+				s.GetOptionFloat64(m.NameOf(3), m.DefaultOf(3)),
 			)
 		}),
 	)

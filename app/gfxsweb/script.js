@@ -190,17 +190,6 @@ document.addEventListener("DOMContentLoaded", () => {
     renderGFXS(true);
   });
 
-  // --- In "both" Mode: Click-and-Hold to Toggle Image ---
-  previewImage.addEventListener("mousedown", () => {
-    previewImage.src = "/original?ts=" + Date.now();
-  });
-  previewImage.addEventListener("mouseup", () => {
-    previewImage.src = "/processed?ts=" + currentTimestamp;
-  });
-  previewImage.addEventListener("mouseleave", () => {
-    previewImage.src = "/processed?ts=" + currentTimestamp;
-  });
-
   // --- Filter Management Events ---
   filterDropdown.addEventListener("change", () => {
     const name = filterDropdown.value;
