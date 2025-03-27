@@ -70,7 +70,7 @@ func (i *Image) ToPolar(angleStart, angleEnd, rotation float64) *Image {
 
 			// Map radial distance to vertical coordinate in the source image.
 			srcY := int(r / maxR * float64(h-1))
-			srcX := max(w-int(proportion*float64(w-1)), 0)
+			srcX := max(int(proportion*float64(w-1)), 0)
 			if srcX >= w {
 				srcX = w - 1
 			}
