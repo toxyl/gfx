@@ -1,11 +1,11 @@
 package text
 
 import (
-	"github.com/toxyl/gfx/color/blend"
-	"github.com/toxyl/gfx/image"
-	"github.com/toxyl/gfx/vars"
+	"github.com/toxyl/gfx/config"
+	"github.com/toxyl/gfx/core/blendmodes"
+	"github.com/toxyl/gfx/core/image"
 )
 
-func Draw(img *image.Image, x, y int, text string, mode blend.BlendMode) {
-	img.DrawText(text, x, y, *vars.COLOR_FONT, false, mode)
+func Draw(img *image.Image, x, y int, text string, mode blendmodes.IBlendMode) error {
+	return img.DrawText(text, x, y, *config.COLOR_FONT, false, mode)
 }

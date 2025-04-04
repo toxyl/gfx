@@ -2,139 +2,118 @@ package parser
 
 import (
 	"fmt"
+	"image/color"
+	"path/filepath"
+	"sort"
 	"strings"
 
-	"github.com/toxyl/flo"
-	"github.com/toxyl/gfx/color/blend"
-	"github.com/toxyl/gfx/color/hsla"
-	"github.com/toxyl/gfx/image"
-	"github.com/toxyl/gfx/math"
+	"github.com/toxyl/gfx/config"
+	"github.com/toxyl/gfx/core/blendmodes/registry"
+	"github.com/toxyl/gfx/core/colormodels/hsl"
+	"github.com/toxyl/gfx/core/image"
+	"github.com/toxyl/gfx/fs"
+	"github.com/toxyl/math"
 )
 
 type Composition struct {
-	Name   string          `yaml:"name,omitempty"`
-	Width  int             `yaml:"width,omitempty"`
-	Height int             `yaml:"height,omitempty"`
-	Layers []*Layer        `yaml:"layers,omitempty"`
-	Color  *hsla.HSLA      `yaml:"color,omitempty"`
-	Crop   *Crop           `yaml:"crop,omitempty"`
-	Resize *Resize         `yaml:"resize,omitempty"`
-	Filter *CompiledFilter `yaml:"filter,omitempty"`
+	Width  int
+	Height int
+	Color  *hsl.HSL
+	Crop   *Crop
+	Resize *Resize
+	Filter *Filter
+	Vars   []*Var
+	Layers []*Layer
 }
 
 func (c *Composition) String() string {
-	maxLenOp := math.MaxLenStr(COMPOSITION...)
+	maxLenName := math.MaxLenStr(config.COMPOSITION...)
 	spf := fmt.Sprintf
 	spfPad := func(l int, s string) string { return spf("%-*s", l, s) }
-	color := STR_COMMENT + " no " + COMP_COLOR + " defined"
-	filter := STR_COMMENT + " no " + COMP_FILTER + " defined"
-	resize := STR_COMMENT + " no " + COMP_RESIZE + " defined"
-	crop := STR_COMMENT + " no " + COMP_CROP + " defined"
-	name := STR_COMMENT + " no " + COMP_NAME + " defined"
-	width := STR_COMMENT + " no " + COMP_WIDTH + " defined"
-	height := STR_COMMENT + " no " + COMP_HEIGHT + " defined"
-	if c.Color != nil {
-		color = spf("%s %s hsla%s%f %f %f %f%s", spfPad(maxLenOp, COMP_COLOR), STR_ASSIGN, STR_LPAREN, c.Color.H(), c.Color.S(), c.Color.L(), c.Color.A(), STR_RPAREN)
-	}
-	if c.Filter != nil {
-		filter = spf("%s %s %s", spfPad(maxLenOp, COMP_FILTER), STR_ASSIGN, c.Filter.Name)
-	}
-	if c.Crop != nil {
-		crop = spf("%s %s %d %d %d %d", spfPad(maxLenOp, COMP_CROP), STR_ASSIGN, c.Crop.X, c.Crop.Y, c.Crop.W, c.Crop.H)
-	}
-	if c.Resize != nil {
-		resize = spf("%s %s %d %d", spfPad(maxLenOp, COMP_RESIZE), STR_ASSIGN, c.Resize.W, c.Resize.H)
-	}
-	if c.Name != "" {
-		name = spf("%s %s %s", spfPad(maxLenOp, COMP_NAME), STR_ASSIGN, STR_QUOTE+c.Name+STR_QUOTE)
-	}
+	comp := []string{}
 	if c.Width != 0 {
-		width = spf("%s %s %d", spfPad(maxLenOp, COMP_WIDTH), STR_ASSIGN, c.Width)
+		comp = append(comp, spf("%s %s %d",
+			spfPad(maxLenName, config.COMP_WIDTH), config.ASSIGN, c.Width))
 	}
 	if c.Height != 0 {
-		height = spf("%s %s %d", spfPad(maxLenOp, COMP_HEIGHT), STR_ASSIGN, c.Height)
+		comp = append(comp, spf("%s %s %d",
+			spfPad(maxLenName, config.COMP_HEIGHT), config.ASSIGN, c.Height))
 	}
+	if c.Color != nil {
+		comp = append(comp, spf("%s %s hsla%s%f %f %f %f%s",
+			spfPad(maxLenName, config.COMP_COLOR), config.ASSIGN, config.LPAREN, c.Color.H(), c.Color.S(), c.Color.L(), c.Color.A(), config.RPAREN))
+	}
+	if c.Filter != nil {
+		comp = append(comp, spf("%s %s %s",
+			spfPad(maxLenName, config.COMP_FILTER), config.ASSIGN, c.Filter.Name))
+	}
+	if c.Crop != nil {
+		comp = append(comp, spf("%s %s %d %d %d %d",
+			spfPad(maxLenName, config.COMP_CROP), config.ASSIGN, c.Crop.X, c.Crop.Y, c.Crop.W, c.Crop.H))
+	}
+	if c.Resize != nil {
+		comp = append(comp, spf("%s %s %d %d",
+			spfPad(maxLenName, config.COMP_RESIZE), config.ASSIGN, c.Resize.W, c.Resize.H))
+	}
+	vars := []string{}
 	filters := []string{}
 	layers := []string{}
+	collectedFilters := map[string]struct{}{}
 	if c.Layers != nil {
-		hasCrop, hasResize, hasOffset, hasFilter := false, false, false, false
 		for _, l := range c.Layers {
 			if l == nil {
 				continue
 			}
-			if l.Crop != nil {
-				hasCrop = true
-			}
-			if l.Resize != nil {
-				hasResize = true
-			}
-			if l.Offset != nil {
-				hasOffset = true
-			}
-			if l.Filter != nil {
-				hasFilter = true
-			}
 		}
-
 		for _, l := range c.Layers {
 			if l == nil {
 				continue
 			}
-
-			layers = append(layers, l.String(hasCrop, hasResize, hasOffset, hasFilter))
+			layers = append(layers, l.String())
 			if l.Filter != nil {
-				filters = append(filters, l.Filter.String())
+				if _, ok := collectedFilters[l.Filter.Name]; !ok {
+					filters = append(filters, l.Filter.String())
+					collectedFilters[l.Filter.Name] = struct{}{}
+				}
 			}
 		}
+	}
+	sort.Slice(c.Vars, func(i, j int) bool {
+		return c.Vars[i].Name < c.Vars[j].Name
+	})
+	for _, v := range c.Vars {
+		vars = append(vars, v.String())
 	}
 	if c.Filter != nil {
 		filters = append(filters, c.Filter.String())
 	}
 	return spf(
 		`%s%s%s
-# none defined
-
-%s%s%s
 %s
 
 %s%s%s
-%s 
 %s
-%s
-%s 
-%s
-%s
+
+%s%s%s
 %s
 
 %s%s%s
 %s
 `,
-		STR_LBRACKET, strings.ToUpper(SECTION_VARS), STR_RBRACKET,
-		STR_LBRACKET, strings.ToUpper(SECTION_FILTERS), STR_RBRACKET,
-		strings.Join(filters, "\n"),
-		STR_LBRACKET, strings.ToUpper(SECTION_COMPOSITION), STR_RBRACKET,
-		name,
-		width,
-		height,
-		color,
-		filter,
-		crop,
-		resize,
-		STR_LBRACKET, strings.ToUpper(SECTION_LAYERS), STR_RBRACKET,
+		config.LBRACKET, strings.ToUpper(config.SECTION_COMPOSITION), config.RBRACKET,
+		strings.Join(comp, "\n"),
+		config.LBRACKET, strings.ToUpper(config.SECTION_LAYERS), config.RBRACKET,
 		strings.Join(layers, "\n"),
+		config.LBRACKET, strings.ToUpper(config.SECTION_VARS), config.RBRACKET,
+		strings.Join(vars, "\n"),
+		config.LBRACKET, strings.ToUpper(config.SECTION_FILTERS), config.RBRACKET,
+		strings.Join(filters, "\n"),
 	)
 }
 
-func (c *Composition) LoadYAML(path string) *Composition {
-	if err := flo.File(path).LoadYAML(&c); err != nil {
-		panic("failed to load composition from YAML: " + err.Error())
-	}
-	return c
-}
-
-func (c *Composition) LoadGFXS(path string) *Composition {
+func (c *Composition) Load(path string) *Composition {
 	str := ""
-	if err := flo.File(path).LoadString(&str); err != nil {
+	if err := fs.LoadStringInto(path, &str); err != nil {
 		panic("failed to load composition: " + err.Error())
 	}
 	comp, err := ParseComposition(str)
@@ -145,61 +124,102 @@ func (c *Composition) LoadGFXS(path string) *Composition {
 	return c
 }
 
-func (c *Composition) SaveYAML(path string) *Composition {
-	if err := flo.File(path).StoreYAML(&c); err != nil {
-		panic("failed to save composition as YAML: " + err.Error())
-	}
-	return c
-}
-
-func (c *Composition) SaveGFXS(path string) *Composition {
-	if err := flo.File(path).StoreString(c.String()); err != nil {
+func (c *Composition) Save(path string) *Composition {
+	if err := fs.SaveString(path, c.String()); err != nil {
 		panic("failed to save composition: " + err.Error())
 	}
 	return c
 }
 
-func (c *Composition) Render() *image.Image {
+func (c *Composition) Render(images ...string) (*image.Image, error) {
 	w, h := c.Width, c.Height
-	res := image.New(w, h)
-	if c.Color != nil {
-		res.FillHSLA(0, 0, w, h, c.Color)
+	res, err := image.New(w, h)
+	if err != nil {
+		return nil, fmt.Errorf("failed to create image: %w", err)
 	}
+
+	if c.Color != nil {
+		// Use Process to fill with color
+		err = res.Process(func(x, y int, _ *color.RGBA64) (*color.RGBA64, error) {
+			return &color.RGBA64{
+				R: c.Color.R(),
+				G: c.Color.G(),
+				B: c.Color.B(),
+				A: c.Color.A(),
+			}, nil
+		})
+		if err != nil {
+			return nil, fmt.Errorf("failed to fill image with color: %w", err)
+		}
+	}
+
 	numLayers := len(c.Layers)
 	for i := numLayers - 1; i >= 0; i-- {
 		l := c.Layers[i]
-		scaled := l.Render(w, h)
-		if scaled == nil {
-			fmt.Printf("WARN: failed to render layer source %s, ignoring layer.\n", l.Source)
+		l.Source = strings.TrimSpace(l.Source)
+
+		for i, img := range images {
+			placeholder := "$IMG" + fmt.Sprint(i+1)
+			if l.Source == placeholder {
+				absImagePath, err := filepath.Abs(img)
+				if err != nil {
+					absImagePath = img
+				}
+				l.Source = strings.ReplaceAll(l.Source, placeholder, absImagePath)
+			}
+		}
+
+		scaled, err := l.Render(w, h)
+		if err != nil || scaled == nil {
+			fmt.Printf("WARN: failed to render layer source %s, ignoring layer: %v\n", l.Source, err)
 			continue // rendering failed, maybe URL or file wasn't available
 		}
-		res.Draw(
-			scaled,
-			0, 0, w, h,
-			0, 0, w, h,
-			blend.BlendMode(l.BlendMode),
-			l.Alpha,
-		)
+
+		// Use Blend method for drawing one image onto another
+		blendMode := registry.Get(l.BlendMode)
+		err = res.Blend(scaled, 0, 0, w, h, 0, 0, w, h, blendMode, l.Alpha)
+		if err != nil {
+			return nil, fmt.Errorf("failed to blend layer: %w", err)
+		}
 	}
+
 	if c.Filter != nil {
 		for _, filter := range c.Filter.Get() {
 			if filter != nil {
-				res = filter.Apply(res)
+				// Apply filter will need to be updated to return error
+				var filterErr error
+				res, filterErr = filter.Apply(res)
+				if filterErr != nil {
+					return nil, fmt.Errorf("failed to apply filter: %w", filterErr)
+				}
 			}
 		}
 	}
+
 	if c.Crop != nil && c.Crop.W > 0 && c.Crop.H > 0 {
-		res = res.Crop(c.Crop.X, c.Crop.Y, c.Crop.W, c.Crop.H, true)
+		res, err = res.Crop(c.Crop.X, c.Crop.Y, c.Crop.W, c.Crop.H)
+		if err != nil {
+			return nil, fmt.Errorf("failed to crop image: %w", err)
+		}
 	}
+
 	if c.Resize != nil && c.Resize.W > 0 && c.Resize.H > 0 {
-		return res.Resize(c.Resize.W, c.Resize.H)
+		res, err = res.Resize(c.Resize.W, c.Resize.H, image.ResizeBilinear)
+		if err != nil {
+			return nil, fmt.Errorf("failed to resize image: %w", err)
+		}
+		return res, nil
 	}
-	return res.Resize(w, h)
+
+	resized, err := res.Resize(w, h, image.ResizeBilinear)
+	if err != nil {
+		return nil, fmt.Errorf("failed to resize image: %w", err)
+	}
+	return resized, nil
 }
 
-func NewComposition(name string, w, h int) *Composition {
+func NewComposition(w, h int) *Composition {
 	c := Composition{
-		Name:   name,
 		Width:  w,
 		Height: h,
 		Layers: []*Layer{},
