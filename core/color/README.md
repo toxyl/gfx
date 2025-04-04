@@ -180,7 +180,6 @@ if err != nil {
 3. **Wavelength-based Models**
    - λSL (Wavelength, Saturation, Lightness)
    - λSB (Wavelength, Saturation, Brightness)
-
 4. **Device-independent Models**
    - LAB (CIELAB)
    - XYZ (CIE XYZ)
@@ -188,9 +187,9 @@ if err != nil {
    - HCL (Hue, Chroma, Lightness)
 
 5. **Video/Television Models**
-   - YUV
-   - YIQ
-   - YCbCr
+   - YUV (Luma, Blue Projection, Red Projection)
+   - YIQ (Luma, In-phase, Quadrature)
+   - YCbCr (Luma, Blue-difference, Red-difference)
 
 6. **Printing Models**
    - CMY (Cyan, Magenta, Yellow)
