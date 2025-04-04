@@ -99,27 +99,27 @@ func (i *Image) Resize(width, height int, method ResizeMethod) (*Image, error) {
 			}
 
 			// Bilinear interpolation
-			r := lerp(
-				lerp(c00.R, c10.R, wx),
-				lerp(c01.R, c11.R, wx),
+			r := math.Lerp(
+				math.Lerp(c00.R, c10.R, wx),
+				math.Lerp(c01.R, c11.R, wx),
 				wy,
 			)
 
-			g := lerp(
-				lerp(c00.G, c10.G, wx),
-				lerp(c01.G, c11.G, wx),
+			g := math.Lerp(
+				math.Lerp(c00.G, c10.G, wx),
+				math.Lerp(c01.G, c11.G, wx),
 				wy,
 			)
 
-			b := lerp(
-				lerp(c00.B, c10.B, wx),
-				lerp(c01.B, c11.B, wx),
+			b := math.Lerp(
+				math.Lerp(c00.B, c10.B, wx),
+				math.Lerp(c01.B, c11.B, wx),
 				wy,
 			)
 
-			a := lerp(
-				lerp(c00.A, c10.A, wx),
-				lerp(c01.A, c11.A, wx),
+			a := math.Lerp(
+				math.Lerp(c00.A, c10.A, wx),
+				math.Lerp(c01.A, c11.A, wx),
 				wy,
 			)
 
@@ -284,10 +284,10 @@ func (i *Image) Rotate(angleDegrees float64) (*Image, error) {
 			return nil, err
 		}
 
-		r := lerp(lerp(c00.R, c10.R, wx), lerp(c01.R, c11.R, wx), wy)
-		g := lerp(lerp(c00.G, c10.G, wx), lerp(c01.G, c11.G, wx), wy)
-		b := lerp(lerp(c00.B, c10.B, wx), lerp(c01.B, c11.B, wx), wy)
-		a := lerp(lerp(c00.A, c10.A, wx), lerp(c01.A, c11.A, wx), wy)
+		r := math.Lerp(math.Lerp(c00.R, c10.R, wx), math.Lerp(c01.R, c11.R, wx), wy)
+		g := math.Lerp(math.Lerp(c00.G, c10.G, wx), math.Lerp(c01.G, c11.G, wx), wy)
+		b := math.Lerp(math.Lerp(c00.B, c10.B, wx), math.Lerp(c01.B, c11.B, wx), wy)
+		a := math.Lerp(math.Lerp(c00.A, c10.A, wx), math.Lerp(c01.A, c11.A, wx), wy)
 
 		resultColor, err := color.NewRGBA64(r, g, b, a)
 		if err != nil {
@@ -453,7 +453,3 @@ func (i *Image) Translate(xOffset, yOffset int) (*Image, error) {
 	return newImg, nil
 }
 
-// lerp performs linear interpolation between a and b with weight t
-func lerp(a, b, t float64) float64 {
-	return a + t*(b-a)
-}
