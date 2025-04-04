@@ -18,6 +18,7 @@ import (
 
 	"github.com/toxyl/gfx/core/blendmodes"
 	"github.com/toxyl/gfx/core/color"
+	"github.com/toxyl/math"
 )
 
 // Image represents a 2D grid of pixels, each with color information.
@@ -185,6 +186,15 @@ func (i *Image) Clone() (*Image, error) {
 // The function receives the x, y coordinates and current color,
 // and should return a new color for the pixel.
 func (i *Image) Process(processor func(x, y int, c *color.RGBA64) (*color.RGBA64, error)) error {
+	// By default, use parallel processing for better performance
+	return i.ProcessParallel(processor)
+}
+
+// ProcessSequential applies a function sequentially to each pixel of the image.
+// The function receives the x, y coordinates and current color,
+// and should return a new color for the pixel.
+// This method is useful when order of processing matters.
+func (i *Image) ProcessSequential(processor func(x, y int, c *color.RGBA64) (*color.RGBA64, error)) error {
 	i.mu.Lock()
 	defer i.mu.Unlock()
 
@@ -278,8 +288,8 @@ func (i *Image) Blend(other *Image, mode *blendmodes.IBlendMode, alpha float64) 
 	dstW, dstH := i.Size()
 
 	// Find the intersection
-	width := min(srcW, dstW)
-	height := min(srcH, dstH)
+	width := math.Min(srcW, dstW)
+	height := math.Min(srcH, dstH)
 
 	// Process each pixel in the intersection
 	return i.Process(func(x, y int, dstColor *color.RGBA64) (*color.RGBA64, error) {
@@ -299,12 +309,4 @@ func (i *Image) Blend(other *Image, mode *blendmodes.IBlendMode, alpha float64) 
 
 		return result, nil
 	})
-}
-
-// min returns the smaller of two integers
-func min(a, b int) int {
-	if a < b {
-		return a
-	}
-	return b
 }

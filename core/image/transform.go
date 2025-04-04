@@ -4,9 +4,9 @@ import (
 	"fmt"
 	stdImage "image"
 	"image/draw"
-	"math"
 
 	"github.com/toxyl/gfx/core/color"
+	"github.com/toxyl/math"
 )
 
 // ResizeMethod represents different methods of image resizing
@@ -52,14 +52,14 @@ func (i *Image) Resize(width, height int, method ResizeMethod) (*Image, error) {
 	// Process each pixel in the target image
 	err = newImg.Process(func(x, y int, _ *color.RGBA64) (*color.RGBA64, error) {
 		// Map the target coordinates to source coordinates
-		var color *color.RGBA64
+		var c *color.RGBA64
 		var err error
 
 		switch method {
 		case ResizeNearest:
 			srcX := int(float64(x) * xScale)
 			srcY := int(float64(y) * yScale)
-			color, err = i.GetPixel(srcX, srcY)
+			c, err = i.GetPixel(srcX, srcY)
 			if err != nil {
 				return nil, err
 			}
@@ -71,7 +71,7 @@ func (i *Image) Resize(width, height int, method ResizeMethod) (*Image, error) {
 
 			// Get the four surrounding pixels
 			x0, y0 := int(srcX), int(srcY)
-			x1, y1 := min(x0+1, srcW-1), min(y0+1, srcH-1)
+			x1, y1 := math.Min(x0+1, srcW-1), math.Min(y0+1, srcH-1)
 
 			// Calculate interpolation weights
 			wx := srcX - float64(x0)
@@ -123,7 +123,12 @@ func (i *Image) Resize(width, height int, method ResizeMethod) (*Image, error) {
 				wy,
 			)
 
-			color = &color.RGBA64{R: r, G: g, B: b, A: a}
+			// Create a new color using the calculated values
+			newColor, err := color.NewRGBA64(r, g, b, a)
+			if err != nil {
+				return nil, err
+			}
+			c = newColor
 
 		case ResizeBicubic, ResizeLanczos:
 			// These are more complex and would be implemented with a proper image
@@ -132,7 +137,7 @@ func (i *Image) Resize(width, height int, method ResizeMethod) (*Image, error) {
 			return nil, fmt.Errorf("resize method not implemented: %v", method)
 		}
 
-		return color, nil
+		return c, nil
 	})
 
 	if err != nil {
@@ -246,12 +251,16 @@ func (i *Image) Rotate(angleDegrees float64) (*Image, error) {
 		// Check if the source pixel is within bounds
 		if srcX < 0 || srcX >= srcW || srcY < 0 || srcY >= srcH {
 			// Transparent pixel for out-of-bounds coordinates
-			return &color.RGBA64{R: 0, G: 0, B: 0, A: 0}, nil
+			transparentColor, err := color.NewRGBA64(0, 0, 0, 0)
+			if err != nil {
+				return nil, fmt.Errorf("failed to create transparent color: %w", err)
+			}
+			return transparentColor, nil
 		}
 
 		// Use bilinear interpolation for better quality
 		x0, y0 := int(srcX), int(srcY)
-		x1, y1 := min(x0+1, int(srcW)-1), min(y0+1, int(srcH)-1)
+		x1, y1 := math.Min(x0+1, int(srcW)-1), math.Min(y0+1, int(srcH)-1)
 
 		wx, wy := srcX-float64(x0), srcY-float64(y0)
 
@@ -280,7 +289,11 @@ func (i *Image) Rotate(angleDegrees float64) (*Image, error) {
 		b := lerp(lerp(c00.B, c10.B, wx), lerp(c01.B, c11.B, wx), wy)
 		a := lerp(lerp(c00.A, c10.A, wx), lerp(c01.A, c11.A, wx), wy)
 
-		return &color.RGBA64{R: r, G: g, B: b, A: a}, nil
+		resultColor, err := color.NewRGBA64(r, g, b, a)
+		if err != nil {
+			return nil, fmt.Errorf("failed to create result color: %w", err)
+		}
+		return resultColor, nil
 	})
 
 	if err != nil {
@@ -406,7 +419,11 @@ func (i *Image) Translate(xOffset, yOffset int) (*Image, error) {
 		// Check if the source pixel is within bounds
 		if srcX < 0 || srcX >= i.width || srcY < 0 || srcY >= i.height {
 			// Use transparent pixel for out-of-bounds
-			return &color.RGBA64{R: 0, G: 0, B: 0, A: 0}, nil
+			transparentColor, err := color.NewRGBA64(0, 0, 0, 0)
+			if err != nil {
+				return nil, fmt.Errorf("failed to create transparent color: %w", err)
+			}
+			return transparentColor, nil
 		}
 
 		// Copy the pixel from the source image
