@@ -2,55 +2,76 @@ package models
 
 import (
 	"image"
-	stdcolor "image/color"
-	"image/draw"
-	"math"
+	"image/color"
 
-	"github.com/toxyl/gfx/core/color"
 	"github.com/toxyl/gfx/core/fx"
+	"github.com/toxyl/gfx/core/meta"
+	"github.com/toxyl/math"
 )
 
-// BrightnessFunction represents a function that adjusts the brightness of an image
-type BrightnessFunction struct {
-	*fx.BaseFunction
-	amount float64
+// Brightness represents a brightness adjustment effect.
+type Brightness struct {
+	Amount float64 // Amount of brightness adjustment (-1.0 to 1.0)
+	meta   *fx.EffectMeta
 }
 
-// NewBrightness creates a new brightness adjustment function
-func NewBrightness(amount float64) *BrightnessFunction {
-	return &BrightnessFunction{
-		BaseFunction: fx.NewBaseFunction("brightness", "Applies brightness transformation to an image", color.New(0, 0, 0, 1), nil),
-		amount:       amount,
+// NewBrightness creates a new brightness effect.
+func NewBrightness(amount float64) *Brightness {
+	b := &Brightness{
+		Amount: amount,
+		meta: fx.NewEffectMeta(
+			"Brightness",
+			"Adjusts the brightness of an image",
+			meta.NewChannelMeta("Amount", -1.0, 1.0, "", "Amount of brightness adjustment (-1.0 to 1.0)"),
+		),
 	}
+	b.Amount = fx.ClampParameter(amount, b.meta.Parameters[0])
+	return b
 }
 
-// Apply implements the Function interface
-func (f *BrightnessFunction) Apply(img *image.Image) (*image.Image, error) {
-	bounds := (*img).Bounds()
+// Apply applies the brightness effect to an image.
+func (b *Brightness) Apply(img image.Image) image.Image {
+	bounds := img.Bounds()
 	dst := image.NewRGBA(bounds)
-	draw.Draw(dst, bounds, *img, bounds.Min, draw.Src)
 
 	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
 		for x := bounds.Min.X; x < bounds.Max.X; x++ {
-			col := f.ProcessPixel(x, y, img)
-			dst.Set(x, y, col.ToUint8())
+			r, g, blue, a := img.At(x, y).RGBA()
+
+			// Convert to float64 for calculations
+			rf := float64(r) / 0xFFFF
+			gf := float64(g) / 0xFFFF
+			bf := float64(blue) / 0xFFFF
+
+			// Apply brightness adjustment
+			if b.Amount > 0 {
+				rf = rf + (1.0-rf)*b.Amount
+				gf = gf + (1.0-gf)*b.Amount
+				bf = bf + (1.0-bf)*b.Amount
+			} else {
+				rf = rf * (1.0 + b.Amount)
+				gf = gf * (1.0 + b.Amount)
+				bf = bf * (1.0 + b.Amount)
+			}
+
+			// Convert back to uint32
+			r = uint32(math.Max(0, math.Min(0xFFFF, rf*0xFFFF)))
+			g = uint32(math.Max(0, math.Min(0xFFFF, gf*0xFFFF)))
+			blue = uint32(math.Max(0, math.Min(0xFFFF, bf*0xFFFF)))
+
+			dst.Set(x, y, color.RGBA64{
+				R: uint16(r),
+				G: uint16(g),
+				B: uint16(blue),
+				A: uint16(a),
+			})
 		}
 	}
-	var result image.Image = dst
-	return &result, nil
+
+	return dst
 }
 
-// ProcessPixel implements the ImageFunction interface
-func (f *BrightnessFunction) ProcessPixel(x, y int, img *image.Image) *color.Color64 {
-	col := color.New(0, 0, 0, 1)
-	rgba := (*img).At(x, y).(stdcolor.RGBA)
-	col.SetUint8(rgba)
-
-	// Add brightness amount directly in [0,1] range
-	col.R = math.Max(0.0, math.Min(1.0, col.R+f.amount))
-	col.G = math.Max(0.0, math.Min(1.0, col.G+f.amount))
-	col.B = math.Max(0.0, math.Min(1.0, col.B+f.amount))
-	col.A = 1.0 // Ensure alpha is always 1.0 as per test expectations
-
-	return col
+// Meta returns the effect metadata.
+func (b *Brightness) Meta() *fx.EffectMeta {
+	return b.meta
 }

@@ -2,50 +2,70 @@ package models
 
 import (
 	"image"
-	stdcolor "image/color"
-	"image/draw"
+	"image/color"
 
-	"github.com/toxyl/gfx/core/color"
 	"github.com/toxyl/gfx/core/fx"
+	"github.com/toxyl/gfx/core/meta"
+	"github.com/toxyl/math"
 )
 
-// InvertFunction represents a function that inverts the colors of an image
-type InvertFunction struct {
-	*fx.BaseFunction
+// Invert represents an invert effect.
+type Invert struct {
+	Amount float64 // Invert amount (0.0 to 1.0)
+	meta   *fx.EffectMeta
 }
 
-// NewInvert creates a new color inversion function
-func NewInvert() *InvertFunction {
-	return &InvertFunction{
-		BaseFunction: fx.NewBaseFunction("invert", "Inverts image colors", color.New(0, 0, 0, 1), nil),
+// NewInvertEffect creates a new invert effect.
+func NewInvertEffect(amount float64) *Invert {
+	i := &Invert{
+		Amount: amount,
+		meta: fx.NewEffectMeta(
+			"Invert",
+			"Inverts the colors of an image",
+			meta.NewChannelMeta("Amount", 0.0, 1.0, "", "Invert amount (0.0 to 1.0)"),
+		),
 	}
+	i.Amount = fx.ClampParameter(amount, i.meta.Parameters[0])
+	return i
 }
 
-// Apply implements the Function interface
-func (f *InvertFunction) Apply(img *image.Image) (*image.Image, error) {
-	bounds := (*img).Bounds()
+// Apply applies the invert effect to an image.
+func (i *Invert) Apply(img image.Image) image.Image {
+	bounds := img.Bounds()
 	dst := image.NewRGBA(bounds)
-	draw.Draw(dst, bounds, *img, bounds.Min, draw.Src)
 
 	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
 		for x := bounds.Min.X; x < bounds.Max.X; x++ {
-			col := f.ProcessPixel(x, y, img)
-			dst.Set(x, y, col.ToUint8())
+			r, g, b, a := img.At(x, y).RGBA()
+
+			// Convert to float64 for calculations
+			rf := float64(r) / 0xFFFF
+			gf := float64(g) / 0xFFFF
+			bf := float64(b) / 0xFFFF
+
+			// Invert colors
+			rf = rf + (1.0-rf-rf)*i.Amount
+			gf = gf + (1.0-gf-gf)*i.Amount
+			bf = bf + (1.0-bf-bf)*i.Amount
+
+			// Convert back to uint32
+			r = uint32(math.Max(0, math.Min(0xFFFF, rf*0xFFFF)))
+			g = uint32(math.Max(0, math.Min(0xFFFF, gf*0xFFFF)))
+			b = uint32(math.Max(0, math.Min(0xFFFF, bf*0xFFFF)))
+
+			dst.Set(x, y, color.RGBA64{
+				R: uint16(r),
+				G: uint16(g),
+				B: uint16(b),
+				A: uint16(a),
+			})
 		}
 	}
-	*img = dst
-	return img, nil
+
+	return dst
 }
 
-// ProcessPixel implements the ImageFunction interface
-func (f *InvertFunction) ProcessPixel(x, y int, img *image.Image) *color.Color64 {
-	col := color.New(0, 0, 0, 1)
-	col.SetUint8((*img).At(x, y).(stdcolor.RGBA))
-
-	// Invert each color channel
-	col.R = 1.0 - col.R
-	col.G = 1.0 - col.G
-	col.B = 1.0 - col.B
-
-	return col
+// Meta returns the effect metadata.
+func (i *Invert) Meta() *fx.EffectMeta {
+	return i.meta
 }

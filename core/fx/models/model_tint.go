@@ -9,30 +9,37 @@ import (
 	"github.com/toxyl/math"
 )
 
-// Sepia represents a sepia effect.
-type Sepia struct {
-	Amount float64 // Sepia amount (0.0 to 1.0)
+// Tint represents a tint effect.
+type Tint struct {
+	Color  color.RGBA64 // Tint color
+	Amount float64      // Tint amount (0.0 to 1.0)
 	meta   *fx.EffectMeta
 }
 
-// NewSepiaEffect creates a new sepia effect.
-func NewSepiaEffect(amount float64) *Sepia {
-	s := &Sepia{
+// NewTintEffect creates a new tint effect.
+func NewTintEffect(tintColor color.RGBA64, amount float64) *Tint {
+	t := &Tint{
+		Color:  tintColor,
 		Amount: amount,
 		meta: fx.NewEffectMeta(
-			"Sepia",
-			"Applies a sepia tone to an image",
-			meta.NewChannelMeta("Amount", 0.0, 1.0, "", "Sepia amount (0.0 to 1.0)"),
+			"Tint",
+			"Applies a color tint to an image",
+			meta.NewChannelMeta("Amount", 0.0, 1.0, "", "Tint amount (0.0 to 1.0)"),
 		),
 	}
-	s.Amount = fx.ClampParameter(amount, s.meta.Parameters[0])
-	return s
+	t.Amount = fx.ClampParameter(amount, t.meta.Parameters[0])
+	return t
 }
 
-// Apply applies the sepia effect to an image.
-func (s *Sepia) Apply(img image.Image) image.Image {
+// Apply applies the tint effect to an image.
+func (t *Tint) Apply(img image.Image) image.Image {
 	bounds := img.Bounds()
 	dst := image.NewRGBA(bounds)
+
+	// Convert tint color to float64
+	tr := float64(t.Color.R) / 0xFFFF
+	tg := float64(t.Color.G) / 0xFFFF
+	tb := float64(t.Color.B) / 0xFFFF
 
 	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
 		for x := bounds.Min.X; x < bounds.Max.X; x++ {
@@ -46,10 +53,10 @@ func (s *Sepia) Apply(img image.Image) image.Image {
 			// Calculate luminance
 			luminance := 0.299*rf + 0.587*gf + 0.114*bf
 
-			// Apply sepia tone
-			rf = luminance + (0.393*rf-luminance)*s.Amount
-			gf = luminance + (0.769*gf-luminance)*s.Amount
-			bf = luminance + (0.189*bf-luminance)*s.Amount
+			// Apply tint
+			rf = luminance + (tr-luminance)*t.Amount
+			gf = luminance + (tg-luminance)*t.Amount
+			bf = luminance + (tb-luminance)*t.Amount
 
 			// Convert back to uint32
 			r = uint32(math.Max(0, math.Min(0xFFFF, rf*0xFFFF)))
@@ -69,6 +76,6 @@ func (s *Sepia) Apply(img image.Image) image.Image {
 }
 
 // Meta returns the effect metadata.
-func (s *Sepia) Meta() *fx.EffectMeta {
-	return s.meta
+func (t *Tint) Meta() *fx.EffectMeta {
+	return t.meta
 }

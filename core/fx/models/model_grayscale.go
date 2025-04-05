@@ -9,28 +9,28 @@ import (
 	"github.com/toxyl/math"
 )
 
-// Sepia represents a sepia effect.
-type Sepia struct {
-	Amount float64 // Sepia amount (0.0 to 1.0)
+// Grayscale represents a grayscale effect.
+type Grayscale struct {
+	Amount float64 // Grayscale amount (0.0 to 1.0)
 	meta   *fx.EffectMeta
 }
 
-// NewSepiaEffect creates a new sepia effect.
-func NewSepiaEffect(amount float64) *Sepia {
-	s := &Sepia{
+// NewGrayscaleEffect creates a new grayscale effect.
+func NewGrayscaleEffect(amount float64) *Grayscale {
+	gs := &Grayscale{
 		Amount: amount,
 		meta: fx.NewEffectMeta(
-			"Sepia",
-			"Applies a sepia tone to an image",
-			meta.NewChannelMeta("Amount", 0.0, 1.0, "", "Sepia amount (0.0 to 1.0)"),
+			"Grayscale",
+			"Converts an image to grayscale",
+			meta.NewChannelMeta("Amount", 0.0, 1.0, "", "Grayscale amount (0.0 to 1.0)"),
 		),
 	}
-	s.Amount = fx.ClampParameter(amount, s.meta.Parameters[0])
-	return s
+	gs.Amount = fx.ClampParameter(amount, gs.meta.Parameters[0])
+	return gs
 }
 
-// Apply applies the sepia effect to an image.
-func (s *Sepia) Apply(img image.Image) image.Image {
+// Apply applies the grayscale effect to an image.
+func (gs *Grayscale) Apply(img image.Image) image.Image {
 	bounds := img.Bounds()
 	dst := image.NewRGBA(bounds)
 
@@ -43,13 +43,13 @@ func (s *Sepia) Apply(img image.Image) image.Image {
 			gf := float64(g) / 0xFFFF
 			bf := float64(b) / 0xFFFF
 
-			// Calculate luminance
+			// Calculate luminance using standard weights
 			luminance := 0.299*rf + 0.587*gf + 0.114*bf
 
-			// Apply sepia tone
-			rf = luminance + (0.393*rf-luminance)*s.Amount
-			gf = luminance + (0.769*gf-luminance)*s.Amount
-			bf = luminance + (0.189*bf-luminance)*s.Amount
+			// Blend between original and grayscale based on amount
+			rf = rf + (luminance-rf)*gs.Amount
+			gf = gf + (luminance-gf)*gs.Amount
+			bf = bf + (luminance-bf)*gs.Amount
 
 			// Convert back to uint32
 			r = uint32(math.Max(0, math.Min(0xFFFF, rf*0xFFFF)))
@@ -69,6 +69,6 @@ func (s *Sepia) Apply(img image.Image) image.Image {
 }
 
 // Meta returns the effect metadata.
-func (s *Sepia) Meta() *fx.EffectMeta {
-	return s.meta
+func (gs *Grayscale) Meta() *fx.EffectMeta {
+	return gs.meta
 }

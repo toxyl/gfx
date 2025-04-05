@@ -9,28 +9,28 @@ import (
 	"github.com/toxyl/math"
 )
 
-// Gamma represents a gamma correction effect.
-type Gamma struct {
-	Amount float64 // Gamma correction value (0.1 to 5.0)
+// Saturation represents a saturation adjustment effect.
+type Saturation struct {
+	Amount float64 // Saturation adjustment value (-1.0 to 1.0)
 	meta   *fx.EffectMeta
 }
 
-// NewGamma creates a new gamma correction effect.
-func NewGamma(amount float64) *Gamma {
-	g := &Gamma{
+// NewSaturationEffect creates a new saturation adjustment effect.
+func NewSaturationEffect(amount float64) *Saturation {
+	s := &Saturation{
 		Amount: amount,
 		meta: fx.NewEffectMeta(
-			"Gamma",
-			"Applies gamma correction to an image",
-			meta.NewChannelMeta("Amount", 0.1, 5.0, "", "Gamma correction value (0.1 to 5.0)"),
+			"Saturation",
+			"Adjusts the saturation of an image",
+			meta.NewChannelMeta("Amount", -1.0, 1.0, "", "Saturation adjustment value (-1.0 to 1.0)"),
 		),
 	}
-	g.Amount = fx.ClampParameter(amount, g.meta.Parameters[0])
-	return g
+	s.Amount = fx.ClampParameter(amount, s.meta.Parameters[0])
+	return s
 }
 
-// Apply applies the gamma correction effect to an image.
-func (g *Gamma) Apply(img image.Image) image.Image {
+// Apply applies the saturation adjustment effect to an image.
+func (s *Saturation) Apply(img image.Image) image.Image {
 	bounds := img.Bounds()
 	dst := image.NewRGBA(bounds)
 
@@ -43,10 +43,13 @@ func (g *Gamma) Apply(img image.Image) image.Image {
 			gf := float64(green) / 0xFFFF
 			bf := float64(blue) / 0xFFFF
 
-			// Apply gamma correction
-			rf = math.Pow(rf, 1.0/g.Amount)
-			gf = math.Pow(gf, 1.0/g.Amount)
-			bf = math.Pow(bf, 1.0/g.Amount)
+			// Calculate grayscale value (luminance)
+			gray := 0.299*rf + 0.587*gf + 0.114*bf
+
+			// Apply saturation adjustment
+			rf = gray + (rf-gray)*(1.0+s.Amount)
+			gf = gray + (gf-gray)*(1.0+s.Amount)
+			bf = gray + (bf-gray)*(1.0+s.Amount)
 
 			// Convert back to uint32
 			r = uint32(math.Max(0, math.Min(0xFFFF, rf*0xFFFF)))
@@ -66,6 +69,6 @@ func (g *Gamma) Apply(img image.Image) image.Image {
 }
 
 // Meta returns the effect metadata.
-func (g *Gamma) Meta() *fx.EffectMeta {
-	return g.meta
+func (s *Saturation) Meta() *fx.EffectMeta {
+	return s.meta
 }
