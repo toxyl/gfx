@@ -32,39 +32,36 @@ func NewScaleEffect(scaleX, scaleY float64) *Scale {
 	return s
 }
 
-// Apply applies the scale effect to an image.
-func (s *Scale) Apply(img image.Image) image.Image {
+// Apply applies the scaling effect to an image.
+func (s *Scale) Apply(img image.Image) (image.Image, error) {
 	bounds := img.Bounds()
-	width := bounds.Max.X - bounds.Min.X
-	height := bounds.Max.Y - bounds.Min.Y
+	width := bounds.Dx()
+	height := bounds.Dy()
 
 	// Calculate new dimensions
 	newWidth := int(float64(width) * s.ScaleX)
 	newHeight := int(float64(height) * s.ScaleY)
 
-	// Create new image with scaled dimensions
+	// Create new image
 	dst := image.NewRGBA(image.Rect(0, 0, newWidth, newHeight))
 
-	// Calculate inverse scale for sampling
-	invScaleX := float64(width) / float64(newWidth)
-	invScaleY := float64(height) / float64(newHeight)
-
+	// Scale each pixel
 	for y := 0; y < newHeight; y++ {
 		for x := 0; x < newWidth; x++ {
 			// Calculate source coordinates
-			srcX := int(float64(x) * invScaleX)
-			srcY := int(float64(y) * invScaleY)
+			srcX := int(float64(x) / s.ScaleX)
+			srcY := int(float64(y) / s.ScaleY)
 
-			// Ensure source coordinates are within bounds
+			// Check if source coordinates are within bounds
 			if srcX >= 0 && srcX < width && srcY >= 0 && srcY < height {
-				dst.Set(x, y, img.At(srcX+bounds.Min.X, srcY+bounds.Min.Y))
+				dst.Set(x, y, img.At(srcX, srcY))
 			} else {
-				dst.Set(x, y, color.RGBA64{})
+				dst.Set(x, y, color.Transparent)
 			}
 		}
 	}
 
-	return dst
+	return dst, nil
 }
 
 // Meta returns the effect metadata.

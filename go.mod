@@ -6,7 +6,7 @@ require (
 	github.com/gofiber/fiber/v2 v2.52.5
 	github.com/toxyl/errors v0.0.0-20240410073853-96b96b437ed5
 	github.com/toxyl/flo v0.0.0-20240412132929-869b69ff6976
-	github.com/toxyl/math v0.0.1-alpha.3
+	github.com/toxyl/math v0.0.1-alpha.4
 	github.com/yuin/goldmark v1.7.8
 )
 

@@ -52,6 +52,9 @@ func validateRegistration(name, description, category string, blend func(bottom,
 	if err := validateBlendModeName(name); err != nil {
 		return err
 	}
+	if strings.TrimSpace(description) == "" {
+		return fmt.Errorf("blend mode description cannot be empty")
+	}
 	if err := validateCategory(category); err != nil {
 		return err
 	}

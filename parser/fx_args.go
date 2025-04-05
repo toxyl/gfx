@@ -8,7 +8,7 @@ import (
 	"github.com/toxyl/gfx/core/fx"
 )
 
-func parseNamedArgs(argsStr string, filter fx.Function, vars map[string]string) {
+func parseNamedArgs(argsStr string, filter fx.Effect, vars map[string]string) {
 	// named args always show up in pairs (key = value) and there can be several on a single line
 	// so we first have to identify the pairs, the left hand side is easy because it can't be a string
 	// so there are no spaces to consider. once we get to the right hand side we do have to take
@@ -72,7 +72,7 @@ func parseNamedArgs(argsStr string, filter fx.Function, vars map[string]string) 
 	}
 }
 
-func parseUnnamedArgs(argsStr string, filter fx.Function, vars map[string]string) error {
+func parseUnnamedArgs(argsStr string, filter fx.Effect, vars map[string]string) error {
 	argsList := filter.GetArgs()
 	values := make([]any, len(argsList))
 	valuesRaw := make([]any, len(argsList))

@@ -4,10 +4,10 @@ import (
 	"image"
 	stdcolor "image/color"
 	"image/draw"
-	"math"
 
 	"github.com/toxyl/gfx/core/color"
 	"github.com/toxyl/gfx/core/fx"
+	"github.com/toxyl/math"
 )
 
 // EdgeFunction represents a function that detects edges in an image
@@ -99,13 +99,7 @@ func (f *EdgeFunction) applySobel(x, y int, img *image.Image) *color.Color64 {
 	return color.New(magR, magG, magB, 1.0)
 }
 
-// edgeClamp ensures a value is between 0 and 1
+// edgeClamp restricts value to be within the range [0, 1].
 func edgeClamp(v float64) float64 {
-	if v < 0 {
-		return 0
-	}
-	if v > 1 {
-		return 1
-	}
-	return v
+	return math.Clamp(v, 0.0, 1.0)
 }

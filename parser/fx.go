@@ -9,7 +9,7 @@ import (
 
 type FX struct {
 	Name  string
-	Funcs []fx.Function
+	Funcs []fx.Effect
 }
 
 func (f *FX) String() string {
@@ -20,19 +20,19 @@ func (f *FX) String() string {
 	return f.Name + constants.SPACE + constants.LBRACE + "\n" + constants.TAB + strings.Join(conf, "\n"+constants.TAB) + "\n" + constants.RBRACE + "\n"
 }
 
-func (f *FX) Append(filters ...fx.Function) *FX {
+func (f *FX) Append(filters ...fx.Effect) *FX {
 	f.Funcs = append(f.Funcs, filters...)
 	return f
 }
 
-func (f *FX) Get() []fx.Function {
+func (f *FX) Get() []fx.Effect {
 	return f.Funcs
 }
 
 func NewFX(name string) *FX {
 	f := FX{
 		Name:  name,
-		Funcs: []fx.Function{},
+		Funcs: []fx.Effect{},
 	}
 	return &f
 }

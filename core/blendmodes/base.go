@@ -283,14 +283,3 @@ func finalizeColor(c *color.RGBA64) *color.RGBA64 {
 	})
 	return result
 }
-
-// clamp ensures a value is within the specified range
-func clamp(value, min, max float64) float64 {
-	if value < min {
-		return min
-	}
-	if value > max {
-		return max
-	}
-	return value
-}

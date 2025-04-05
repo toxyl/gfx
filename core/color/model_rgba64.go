@@ -93,21 +93,14 @@ func (c *RGBA64) To16bit() color.RGBA64 {
 	}
 }
 
-// Clamp clamps all channels to valid ranges.
+// Clamp returns a new RGBA64 color with all channels clamped to [0, 1].
 func (c *RGBA64) Clamp() *RGBA64 {
-	c.A = math.Clamp(c.A, 0.0, 1.0)
-	a := c.A
-	if c.isPremultiplied {
-		// Premultiplied RGB must be ≤ A and ≥ 0
-		c.R = math.Clamp(c.R, 0.0, a)
-		c.G = math.Clamp(c.G, 0.0, a)
-		c.B = math.Clamp(c.B, 0.0, a)
-	} else {
-		c.R = math.Clamp(c.R, 0.0, 1.0)
-		c.G = math.Clamp(c.G, 0.0, 1.0)
-		c.B = math.Clamp(c.B, 0.0, 1.0)
+	return &RGBA64{
+		R: math.Clamp(c.R, 0.0, 1.0),
+		G: math.Clamp(c.G, 0.0, 1.0),
+		B: math.Clamp(c.B, 0.0, 1.0),
+		A: math.Clamp(c.A, 0.0, 1.0),
 	}
-	return c
 }
 
 // unpremultiply converts a premultiplied color to an unpremultiplied color.

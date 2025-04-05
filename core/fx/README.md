@@ -1,81 +1,56 @@
 # FX Package
 
-The FX package provides a comprehensive set of image processing effects and filters. It is designed to be extensible and maintainable, with a consistent model-based architecture.
+The fx package provides a comprehensive set of image effects and filters.
 
 ## Structure
 
-- `models/` - Effect model definitions and implementations
-- `utils/` - Utility functions and helpers
-- `meta.go` - Metadata and parameter validation
-- `registry.go` - Effect registration and management
+- Effect models
+- Filter implementations
+- Effect utilities
 
 ## Usage
 
 ```go
-// Example: Applying a brightness effect
+// Example: Applying an effect
 img := image.NewRGBA(...)
-effect := models.NewBrightnessEffect(0.5) // 50% brightness increase
+effect := fx.NewVibranceEffect(0.5) // 50% vibrance
 result := effect.Apply(img)
 ```
 
-## Effect Types
+## Effects
 
-### Color Effects
-- Brightness
-- Color Balance
-- Color Temperature
-- Colorize
-- Contrast
-- Curves
-- Gamma
-- Grayscale
-- Hue
-- Invert
-- Levels
-- Luminance
-- Luminance Contrast
-- Pastelize
-- Saturation
-- Saturation Contrast
-- Sepia
-- Threshold
-- Tint
-- Vibrance
+- Color adjustments:
+  - Brightness
+  - Contrast
+  - Saturation
+  - Vibrance
+  - Colorize
+  - Tint
+- Geometric transformations:
+  - Scale
+  - Rotate
+  - Translate
+  - Flip
+  - Crop
+- Special effects:
+  - Blur
+  - Sharpen
+  - Emboss
+  - Enhance
+  - Extract
+- Color space effects:
+  - Grayscale
+  - Sepia
+  - Invert
+  - Threshold
 
-### Geometric Effects
-- Crop (Rectangular)
-- Crop (Circular)
-- Flip (Horizontal)
-- Flip (Vertical)
-- Rotate
-- Scale
-- ToPolar/FromPolar
-- Transform
-- Translate
+## Implementation Details
 
-### Spatial Effects
-- Convolution
-- Emboss
-- Enhance
-- Extract
-
-## Extending
-
-New effects can be added by implementing the `Effect` interface in the models package:
-
-```go
-type Effect interface {
-    Apply(image.Image) image.Image
-    Meta() *EffectMeta
-}
-```
-
-Each effect should:
-1. Define its parameters using the meta package
-2. Implement parameter validation
-3. Include comprehensive documentation
-4. Handle image bounds properly
-5. Preserve alpha channel when appropriate
+Each effect:
+1. Implements the Effect interface
+2. Uses the meta package for parameter validation
+3. Preserves image quality during processing
+4. Handles edge cases appropriately
 
 ## Testing
 

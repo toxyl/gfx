@@ -30,100 +30,39 @@ func NewEnhanceEffect(amount float64) *Enhance {
 }
 
 // Apply applies the enhance effect to an image.
-func (e *Enhance) Apply(img image.Image) image.Image {
+func (e *Enhance) Apply(img image.Image) (image.Image, error) {
 	bounds := img.Bounds()
 	dst := image.NewRGBA(bounds)
 
-	// Unsharp mask parameters
-	radius := 1
-	threshold := 0.0
-	amount := e.Amount * 2.0 // Scale amount for better effect
-
-	// Create blurred version
-	blurred := image.NewRGBA(bounds)
-	for y := bounds.Min.Y + radius; y < bounds.Max.Y-radius; y++ {
-		for x := bounds.Min.X + radius; x < bounds.Max.X-radius; x++ {
-			var r, g, b float64
-			count := 0
-
-			// Apply box blur
-			for ky := -radius; ky <= radius; ky++ {
-				for kx := -radius; kx <= radius; kx++ {
-					px := x + kx
-					py := y + ky
-					pr, pg, pb, _ := img.At(px, py).RGBA()
-
-					r += float64(pr) / 0xFFFF
-					g += float64(pg) / 0xFFFF
-					b += float64(pb) / 0xFFFF
-					count++
-				}
-			}
-
-			r /= float64(count)
-			g /= float64(count)
-			b /= float64(count)
-
-			blurred.Set(x, y, color.RGBA64{
-				R: uint16(r * 0xFFFF),
-				G: uint16(g * 0xFFFF),
-				B: uint16(b * 0xFFFF),
-				A: 0xFFFF,
-			})
-		}
-	}
-
-	// Apply unsharp mask
 	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
 		for x := bounds.Min.X; x < bounds.Max.X; x++ {
-			// Get original and blurred colors
-			or, og, ob, oa := img.At(x, y).RGBA()
-			br, bg, bb, _ := blurred.At(x, y).RGBA()
+			r, g, b, a := img.At(x, y).RGBA()
 
-			// Convert to float64 and normalize
-			orf := float64(or) / 0xFFFF
-			ogf := float64(og) / 0xFFFF
-			obf := float64(ob) / 0xFFFF
-			brf := float64(br) / 0xFFFF
-			bgf := float64(bg) / 0xFFFF
-			bbf := float64(bb) / 0xFFFF
-
-			// Calculate difference
-			dr := orf - brf
-			dg := ogf - bgf
-			db := obf - bbf
-
-			// Apply threshold
-			if math.Abs(dr) < threshold {
-				dr = 0
-			}
-			if math.Abs(dg) < threshold {
-				dg = 0
-			}
-			if math.Abs(db) < threshold {
-				db = 0
-			}
+			// Convert to float64 for calculations
+			rf := float64(r) / 0xFFFF
+			gf := float64(g) / 0xFFFF
+			bf := float64(b) / 0xFFFF
 
 			// Apply enhancement
-			r := orf + dr*amount
-			g := ogf + dg*amount
-			b := obf + db*amount
+			rf = math.Max(0, math.Min(1, rf*e.Amount))
+			gf = math.Max(0, math.Min(1, gf*e.Amount))
+			bf = math.Max(0, math.Min(1, bf*e.Amount))
 
-			// Clamp values
-			r = math.Max(0, math.Min(1, r))
-			g = math.Max(0, math.Min(1, g))
-			b = math.Max(0, math.Min(1, b))
+			// Convert back to uint32
+			r = uint32(math.Max(0, math.Min(0xFFFF, rf*0xFFFF)))
+			g = uint32(math.Max(0, math.Min(0xFFFF, gf*0xFFFF)))
+			b = uint32(math.Max(0, math.Min(0xFFFF, bf*0xFFFF)))
 
 			dst.Set(x, y, color.RGBA64{
-				R: uint16(r * 0xFFFF),
-				G: uint16(g * 0xFFFF),
-				B: uint16(b * 0xFFFF),
-				A: uint16(oa),
+				R: uint16(r),
+				G: uint16(g),
+				B: uint16(b),
+				A: uint16(a),
 			})
 		}
 	}
 
-	return dst
+	return dst, nil
 }
 
 // Meta returns the effect metadata.

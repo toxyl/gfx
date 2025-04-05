@@ -34,7 +34,7 @@ func NewChannelMeta[N math.Number](name string, min, max N, unit, description st
 		panic("channel name cannot be empty")
 	}
 	if float64(min) >= float64(max) {
-		panic(fmt.Sprintf("invalid channel range: min (%f) must be less than max (%f)", min, max))
+		panic(fmt.Sprintf("invalid channel range: min (%v) must be less than max (%v)", min, max))
 	}
 	if description == "" {
 		panic("channel description cannot be empty")
@@ -117,17 +117,9 @@ func ValidateChannelValue(value float64, channel *ChannelMeta) error {
 	return nil
 }
 
-// ClampChannelValue clamps a value to the valid range for a channel.
-// Returns the clamped value.
-//
-// Parameters:
-//   - value: The value to clamp
-//   - channel: The channel metadata
-//
-// Returns:
-//   - The clamped value
+// ClampChannelValue restricts value to be within the channel's range.
 func ClampChannelValue(value float64, channel *ChannelMeta) float64 {
-	return math.Max(channel.Min, math.Min(channel.Max, value))
+	return math.Clamp(value, channel.Min, channel.Max)
 }
 
 // BlendModeMeta holds metadata for a blend mode.

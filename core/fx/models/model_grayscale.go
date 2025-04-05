@@ -30,7 +30,7 @@ func NewGrayscaleEffect(amount float64) *Grayscale {
 }
 
 // Apply applies the grayscale effect to an image.
-func (gs *Grayscale) Apply(img image.Image) image.Image {
+func (gs *Grayscale) Apply(img image.Image) (image.Image, error) {
 	bounds := img.Bounds()
 	dst := image.NewRGBA(bounds)
 
@@ -65,7 +65,7 @@ func (gs *Grayscale) Apply(img image.Image) image.Image {
 		}
 	}
 
-	return dst
+	return dst, nil
 }
 
 // Meta returns the effect metadata.

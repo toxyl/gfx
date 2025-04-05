@@ -125,8 +125,8 @@ func parseVarsSection(line string, vars map[string]string) {
 	vars[key] = value
 }
 
-func parseFilter(script []string, vars map[string]string, fns map[string]*FX) (fn []fx.Function, needsHoisting bool) {
-	parsedFilters := []fx.Function{}
+func parseFilter(script []string, vars map[string]string, fns map[string]*FX) (fn []fx.Effect, needsHoisting bool) {
+	parsedFilters := []fx.Effect{}
 	lkw := len(constants.KEYWORD_USE) + 1
 	for _, line := range script {
 		line = strings.TrimSpace(line)

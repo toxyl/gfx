@@ -9,6 +9,7 @@ import (
 
 	"github.com/toxyl/gfx/core/color"
 	"github.com/toxyl/gfx/core/fx"
+	"github.com/toxyl/math"
 )
 
 // NoiseFunction represents a function that adds noise to an image
@@ -60,13 +61,7 @@ func (f *NoiseFunction) ProcessPixel(x, y int, img *image.Image) *color.Color64 
 	return col
 }
 
-// noiseClamp ensures a value is between 0 and 1
+// noiseClamp restricts value to be within the range [0, 1].
 func noiseClamp(v float64) float64 {
-	if v < 0 {
-		return 0
-	}
-	if v > 1 {
-		return 1
-	}
-	return v
+	return math.Clamp(v, 0.0, 1.0)
 }

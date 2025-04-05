@@ -4,7 +4,6 @@ package color
 import (
 	"fmt"
 
-	"github.com/toxyl/gfx/core/color/constants"
 	"github.com/toxyl/gfx/core/color/utils"
 	"github.com/toxyl/math"
 )
@@ -14,80 +13,6 @@ import (
 //////////////////////////////////////////////////////
 
 var _ iColor = (*HCL)(nil) // Ensure HCL implements the ColorModel interface.
-
-//////////////////////////////////////////////////////
-// Conversion utilities
-//////////////////////////////////////////////////////
-
-// labToHcl converts LAB to HCL color space.
-func labToHcl(l, a, b float64) (h, c, l2 float64) {
-	// Handle exact white
-	if math.Abs(l-100) < constants.HCL_WhiteThreshold && math.Abs(a) < constants.HCL_WhiteThreshold && math.Abs(b) < constants.HCL_WhiteThreshold {
-		return 0, 0, 100
-	}
-
-	// Handle near-white colors
-	if math.Abs(l-100) < constants.HCL_NearWhiteThreshold && math.Abs(a) < constants.HCL_WhiteThreshold && math.Abs(b) < constants.HCL_WhiteThreshold {
-		return 0, 0, l
-	}
-
-	// Handle gray colors (a and b close to zero)
-	if math.Abs(a) < constants.HCL_WhiteThreshold && math.Abs(b) < constants.HCL_WhiteThreshold {
-		return 0, 0, l
-	}
-
-	c = math.Sqrt(a*a + b*b)
-
-	// Handle very small chroma values
-	if c < constants.HCL_ChromaThreshold {
-		return 0, 0, l
-	}
-
-	h = math.Atan2(b, a) * constants.HCL_DegreesPerRadian
-
-	if h < 0 {
-		h += constants.HCL_DegreesPerCircle
-	}
-
-	return h, c, l
-}
-
-// hclToLab converts HCL to LAB color space.
-func hclToLab(h, c, l float64) (l2, a, b float64) {
-	// Handle exact white
-	if math.Abs(l-100) < constants.HCL_WhiteThreshold && math.Abs(c) < constants.HCL_WhiteThreshold {
-		return 100, 0, 0
-	}
-
-	// Handle near-white colors
-	if math.Abs(l-100) < constants.HCL_NearWhiteThreshold && math.Abs(c) < constants.HCL_WhiteThreshold {
-		return l, 0, 0
-	}
-
-	// Handle gray colors (chroma close to zero)
-	if math.Abs(c) < constants.HCL_ChromaThreshold {
-		return l, 0, 0
-	}
-
-	h = h * constants.HCL_RadiansPerDegree
-	a = c * math.Cos(h)
-	b = c * math.Sin(h)
-
-	return l, a, b
-}
-
-// hclToRgb converts HCL to RGB color space.
-func hclToRgb(h, c, l float64) (r, g, b float64) {
-	// First convert to LAB
-	l2, a, b := utils.LCHToLAB(l, c, h)
-
-	// Then convert to XYZ
-	x, y, z := utils.LABToXYZ(l2, a, b)
-
-	// Finally convert to RGB
-	r, g, b = utils.XYZToRGB(x, y, z)
-	return r, g, b
-}
 
 //////////////////////////////////////////////////////
 // Constructors

@@ -30,7 +30,7 @@ func NewSepiaEffect(amount float64) *Sepia {
 }
 
 // Apply applies the sepia effect to an image.
-func (s *Sepia) Apply(img image.Image) image.Image {
+func (s *Sepia) Apply(img image.Image) (image.Image, error) {
 	bounds := img.Bounds()
 	dst := image.NewRGBA(bounds)
 
@@ -65,7 +65,7 @@ func (s *Sepia) Apply(img image.Image) image.Image {
 		}
 	}
 
-	return dst
+	return dst, nil
 }
 
 // Meta returns the effect metadata.

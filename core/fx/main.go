@@ -5,7 +5,7 @@ import (
 )
 
 // Apply applies a function to an image
-func Apply(img image.Image, f Function) image.Image {
+func Apply(img image.Image, f Effect) image.Image {
 	if f == nil {
 		return img
 	}
@@ -14,12 +14,12 @@ func Apply(img image.Image, f Function) image.Image {
 }
 
 // Register registers a function with the default registry
-func Register(f Function) error {
+func Register(f Effect) error {
 	return DefaultRegistry.Register(f)
 }
 
 // Get returns a function by name from the default registry
-func Get(name string) Function {
+func Get(name string) Effect {
 	return DefaultRegistry.Get(name)
 }
 

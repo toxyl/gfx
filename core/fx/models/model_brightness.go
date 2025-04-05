@@ -30,7 +30,7 @@ func NewBrightness(amount float64) *Brightness {
 }
 
 // Apply applies the brightness effect to an image.
-func (b *Brightness) Apply(img image.Image) image.Image {
+func (b *Brightness) Apply(img image.Image) (image.Image, error) {
 	bounds := img.Bounds()
 	dst := image.NewRGBA(bounds)
 
@@ -68,7 +68,7 @@ func (b *Brightness) Apply(img image.Image) image.Image {
 		}
 	}
 
-	return dst
+	return dst, nil
 }
 
 // Meta returns the effect metadata.

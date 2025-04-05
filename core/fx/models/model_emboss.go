@@ -30,17 +30,15 @@ func NewEmbossEffect(amount float64) *Emboss {
 }
 
 // Apply applies the emboss effect to an image.
-func (e *Emboss) Apply(img image.Image) image.Image {
+func (e *Emboss) Apply(img image.Image) (image.Image, error) {
 	bounds := img.Bounds()
-
-	// Create new image with same dimensions
 	dst := image.NewRGBA(bounds)
 
-	// Emboss kernel
+	// Define emboss kernel
 	kernel := [3][3]float64{
-		{-1, -1, 0},
+		{-2, -1, 0},
 		{-1, 1, 1},
-		{0, 1, 1},
+		{0, 1, 2},
 	}
 
 	for y := bounds.Min.Y + 1; y < bounds.Max.Y-1; y++ {
@@ -96,7 +94,7 @@ func (e *Emboss) Apply(img image.Image) image.Image {
 		}
 	}
 
-	return dst
+	return dst, nil
 }
 
 // Meta returns the effect metadata.

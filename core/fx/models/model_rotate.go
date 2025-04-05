@@ -30,72 +30,52 @@ func NewRotateEffect(angle float64) *Rotate {
 }
 
 // Apply applies the rotation effect to an image.
-func (r *Rotate) Apply(img image.Image) image.Image {
+func (r *Rotate) Apply(img image.Image) (image.Image, error) {
 	bounds := img.Bounds()
-	width := bounds.Max.X - bounds.Min.X
-	height := bounds.Max.Y - bounds.Min.Y
+	width := bounds.Dx()
+	height := bounds.Dy()
 
 	// Convert angle to radians
 	angle := r.Angle * math.Pi / 180.0
+
+	// Calculate new dimensions
 	cos := math.Cos(angle)
 	sin := math.Sin(angle)
 
-	// Calculate new dimensions
-	// We need to find the bounding box of the rotated image
-	halfWidth := float64(width) / 2
-	halfHeight := float64(height) / 2
+	// Calculate new image dimensions
+	newWidth := int(math.Abs(float64(width)*cos) + math.Abs(float64(height)*sin))
+	newHeight := int(math.Abs(float64(width)*sin) + math.Abs(float64(height)*cos))
 
-	// Calculate the corners of the rotated image
-	corners := [][2]float64{
-		{-halfWidth, -halfHeight},
-		{halfWidth, -halfHeight},
-		{halfWidth, halfHeight},
-		{-halfWidth, halfHeight},
-	}
-
-	// Rotate corners and find min/max coordinates
-	minX, minY := math.Inf(1), math.Inf(1)
-	maxX, maxY := math.Inf(-1), math.Inf(-1)
-
-	for _, corner := range corners {
-		rotX := corner[0]*cos - corner[1]*sin
-		rotY := corner[0]*sin + corner[1]*cos
-		minX = math.Min(minX, rotX)
-		minY = math.Min(minY, rotY)
-		maxX = math.Max(maxX, rotX)
-		maxY = math.Max(maxY, rotY)
-	}
-
-	newWidth := int(maxX - minX)
-	newHeight := int(maxY - minY)
-
-	// Create new image with calculated dimensions
+	// Create new image
 	dst := image.NewRGBA(image.Rect(0, 0, newWidth, newHeight))
 
-	// Calculate center of new image
-	centerX := float64(newWidth) / 2
-	centerY := float64(newHeight) / 2
+	// Calculate center points
+	centerX := float64(width) / 2
+	centerY := float64(height) / 2
+	newCenterX := float64(newWidth) / 2
+	newCenterY := float64(newHeight) / 2
 
+	// Rotate each pixel
 	for y := 0; y < newHeight; y++ {
 		for x := 0; x < newWidth; x++ {
-			// Convert to coordinates relative to center
-			relX := float64(x) - centerX
-			relY := float64(y) - centerY
+			// Calculate original coordinates
+			dx := float64(x) - newCenterX
+			dy := float64(y) - newCenterY
 
-			// Rotate back to original coordinates
-			srcX := relX*cos + relY*sin + halfWidth
-			srcY := -relX*sin + relY*cos + halfHeight
+			// Rotate coordinates
+			srcX := int(centerX + dx*cos + dy*sin)
+			srcY := int(centerY - dx*sin + dy*cos)
 
-			// Ensure source coordinates are within bounds
-			if srcX >= 0 && srcX < float64(width) && srcY >= 0 && srcY < float64(height) {
-				dst.Set(x, y, img.At(int(srcX)+bounds.Min.X, int(srcY)+bounds.Min.Y))
+			// Check if source coordinates are within bounds
+			if srcX >= 0 && srcX < width && srcY >= 0 && srcY < height {
+				dst.Set(x, y, img.At(srcX, srcY))
 			} else {
-				dst.Set(x, y, color.RGBA64{})
+				dst.Set(x, y, color.Transparent)
 			}
 		}
 	}
 
-	return dst
+	return dst, nil
 }
 
 // Meta returns the effect metadata.

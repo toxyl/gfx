@@ -41,7 +41,7 @@ type FunctionMeta struct {
 }
 
 // FunctionRegistry is a map of function names to their implementations
-type FunctionRegistry map[string]Function
+type FunctionRegistry map[string]Effect
 
 // ImageFunction represents a function that operates on an image
 type ImageFunction interface {

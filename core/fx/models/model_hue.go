@@ -30,7 +30,7 @@ func NewHue(amount float64) *Hue {
 }
 
 // Apply applies the hue adjustment effect to an image.
-func (h *Hue) Apply(img image.Image) image.Image {
+func (h *Hue) Apply(img image.Image) (image.Image, error) {
 	bounds := img.Bounds()
 	dst := image.NewRGBA(bounds)
 
@@ -76,7 +76,7 @@ func (h *Hue) Apply(img image.Image) image.Image {
 		}
 	}
 
-	return dst
+	return dst, nil
 }
 
 // Meta returns the effect metadata.

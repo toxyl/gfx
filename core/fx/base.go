@@ -14,8 +14,8 @@ var (
 	ErrOutOfBounds     = errors.New("coordinates out of bounds")
 )
 
-// Function represents a base interface for all image processing functions
-type Function interface {
+// Effect represents a base interface for all image processing functions
+type Effect interface {
 	// Name returns the name of the function
 	Name() string
 

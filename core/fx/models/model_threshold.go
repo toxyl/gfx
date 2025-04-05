@@ -29,7 +29,7 @@ func NewThresholdEffect(level float64) *Threshold {
 }
 
 // Apply applies the threshold effect to an image.
-func (t *Threshold) Apply(img image.Image) image.Image {
+func (t *Threshold) Apply(img image.Image) (image.Image, error) {
 	bounds := img.Bounds()
 	dst := image.NewRGBA(bounds)
 
@@ -62,7 +62,7 @@ func (t *Threshold) Apply(img image.Image) image.Image {
 		}
 	}
 
-	return dst
+	return dst, nil
 }
 
 // Meta returns the effect metadata.

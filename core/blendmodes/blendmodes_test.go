@@ -354,14 +354,6 @@ func TestListFunctions(t *testing.T) {
 	})
 }
 
-// validateFloat checks if a float value is within the expected range
-func validateFloat(t *testing.T, got, want, epsilon float64, name string) {
-	t.Helper()
-	if math.Abs(got-want) > epsilon {
-		t.Errorf("%s: got %v, want %v ± %v", name, got, want, epsilon)
-	}
-}
-
 // GetBlendMode returns a blend mode by name for testing
 func GetBlendMode(name string) *IBlendMode {
 	mode, err := Get(name)

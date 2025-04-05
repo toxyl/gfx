@@ -30,7 +30,7 @@ func NewLuminanceEffect(amount float64) *Luminance {
 }
 
 // Apply applies the luminance effect to an image.
-func (l *Luminance) Apply(img image.Image) image.Image {
+func (l *Luminance) Apply(img image.Image) (image.Image, error) {
 	bounds := img.Bounds()
 	dst := image.NewRGBA(bounds)
 
@@ -38,42 +38,29 @@ func (l *Luminance) Apply(img image.Image) image.Image {
 		for x := bounds.Min.X; x < bounds.Max.X; x++ {
 			r, g, b, a := img.At(x, y).RGBA()
 
-			// Convert to float64 and normalize
+			// Convert to float64 for calculations
 			rf := float64(r) / 0xFFFF
 			gf := float64(g) / 0xFFFF
 			bf := float64(b) / 0xFFFF
 
 			// Calculate luminance using standard weights
-			lum := 0.299*rf + 0.587*gf + 0.114*bf
+			luminance := 0.299*rf + 0.587*gf + 0.114*bf
 
-			// Adjust luminance
-			if l.Amount > 0 {
-				lum = lum + (1.0-lum)*l.Amount
-			} else {
-				lum = lum * (1.0 + l.Amount)
-			}
+			// Apply luminance adjustment
+			luminance = math.Max(0, math.Min(1, luminance*l.Amount))
 
-			// Scale RGB values to maintain relative ratios
-			scale := lum / (0.299*rf + 0.587*gf + 0.114*bf)
-			rf *= scale
-			gf *= scale
-			bf *= scale
-
-			// Clamp values
-			rf = math.Max(0, math.Min(1, rf))
-			gf = math.Max(0, math.Min(1, gf))
-			bf = math.Max(0, math.Min(1, bf))
-
+			// Set all channels to the adjusted luminance value
+			vi := uint16(luminance * 0xFFFF)
 			dst.Set(x, y, color.RGBA64{
-				R: uint16(rf * 0xFFFF),
-				G: uint16(gf * 0xFFFF),
-				B: uint16(bf * 0xFFFF),
+				R: vi,
+				G: vi,
+				B: vi,
 				A: uint16(a),
 			})
 		}
 	}
 
-	return dst
+	return dst, nil
 }
 
 // Meta returns the effect metadata.

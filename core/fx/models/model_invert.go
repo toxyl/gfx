@@ -30,7 +30,7 @@ func NewInvertEffect(amount float64) *Invert {
 }
 
 // Apply applies the invert effect to an image.
-func (i *Invert) Apply(img image.Image) image.Image {
+func (i *Invert) Apply(img image.Image) (image.Image, error) {
 	bounds := img.Bounds()
 	dst := image.NewRGBA(bounds)
 
@@ -44,9 +44,9 @@ func (i *Invert) Apply(img image.Image) image.Image {
 			bf := float64(b) / 0xFFFF
 
 			// Invert colors
-			rf = rf + (1.0-rf-rf)*i.Amount
-			gf = gf + (1.0-gf-gf)*i.Amount
-			bf = bf + (1.0-bf-bf)*i.Amount
+			rf = 1.0 - rf
+			gf = 1.0 - gf
+			bf = 1.0 - bf
 
 			// Convert back to uint32
 			r = uint32(math.Max(0, math.Min(0xFFFF, rf*0xFFFF)))
@@ -62,7 +62,7 @@ func (i *Invert) Apply(img image.Image) image.Image {
 		}
 	}
 
-	return dst
+	return dst, nil
 }
 
 // Meta returns the effect metadata.

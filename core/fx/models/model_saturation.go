@@ -30,7 +30,7 @@ func NewSaturationEffect(amount float64) *Saturation {
 }
 
 // Apply applies the saturation adjustment effect to an image.
-func (s *Saturation) Apply(img image.Image) image.Image {
+func (s *Saturation) Apply(img image.Image) (image.Image, error) {
 	bounds := img.Bounds()
 	dst := image.NewRGBA(bounds)
 
@@ -65,7 +65,7 @@ func (s *Saturation) Apply(img image.Image) image.Image {
 		}
 	}
 
-	return dst
+	return dst, nil
 }
 
 // Meta returns the effect metadata.

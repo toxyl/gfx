@@ -3,10 +3,10 @@ package fx
 // RegistryInterface defines the interface for the function registry
 type RegistryInterface interface {
 	// Register registers a new function with the registry
-	Register(f Function) error
+	Register(f Effect) error
 
 	// Get returns a function by name
-	Get(name string) Function
+	Get(name string) Effect
 
 	// List returns a list of all registered functions
 	List() []string

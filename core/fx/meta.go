@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/toxyl/gfx/core/meta"
+	"github.com/toxyl/math"
 )
 
 // EffectMeta holds metadata for an effect.
@@ -72,15 +73,7 @@ func ValidateParameter(value float64, param *meta.ChannelMeta) error {
 	return meta.ValidateChannelValue(value, param)
 }
 
-// ClampParameter clamps a value to the valid range for a parameter.
-// Returns the clamped value.
-//
-// Parameters:
-//   - value: The value to clamp
-//   - param: The parameter metadata
-//
-// Returns:
-//   - The clamped value
+// ClampParameter restricts value to be within the parameter's range.
 func ClampParameter(value float64, param *meta.ChannelMeta) float64 {
-	return meta.ClampChannelValue(value, param)
+	return math.Clamp(value, param.Min, param.Max)
 }

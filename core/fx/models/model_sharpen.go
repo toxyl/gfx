@@ -7,6 +7,7 @@ import (
 
 	"github.com/toxyl/gfx/core/color"
 	"github.com/toxyl/gfx/core/fx"
+	"github.com/toxyl/math"
 )
 
 // SharpenFunction represents a function that applies a sharpening effect to an image
@@ -96,13 +97,7 @@ func (f *SharpenFunction) applyUnsharpMask(x, y int, img *image.Image) *color.Co
 	return color.New(r, g, b, original.A)
 }
 
-// clamp ensures a value is between 0 and 1
+// clamp restricts value to be within the range [0, 1].
 func clamp(v float64) float64 {
-	if v < 0 {
-		return 0
-	}
-	if v > 1 {
-		return 1
-	}
-	return v
+	return math.Clamp(v, 0.0, 1.0)
 }

@@ -6,7 +6,6 @@ import (
 
 	"github.com/toxyl/gfx/core/fx"
 	"github.com/toxyl/gfx/core/meta"
-	"github.com/toxyl/math"
 )
 
 // Translate represents a translation effect.
@@ -33,47 +32,37 @@ func NewTranslateEffect(offsetX, offsetY float64) *Translate {
 	return t
 }
 
-// Apply applies the translation effect to an image.
-func (t *Translate) Apply(img image.Image) image.Image {
+// Apply applies the translate effect to an image.
+func (t *Translate) Apply(img image.Image) (image.Image, error) {
 	bounds := img.Bounds()
 	width := bounds.Max.X - bounds.Min.X
 	height := bounds.Max.Y - bounds.Min.Y
 
-	// Calculate new dimensions
-	newWidth := width + int(math.Abs(t.OffsetX))
-	newHeight := height + int(math.Abs(t.OffsetY))
+	// Calculate translation in pixels
+	dx := int(float64(width) * t.OffsetX)
+	dy := int(float64(height) * t.OffsetY)
 
-	// Create new image with calculated dimensions
-	dst := image.NewRGBA(image.Rect(0, 0, newWidth, newHeight))
+	// Create new image with same dimensions
+	dst := image.NewRGBA(bounds)
 
-	// Calculate offset in pixels
-	offsetX := int(t.OffsetX)
-	offsetY := int(t.OffsetY)
-
-	// Adjust offset to ensure positive coordinates
-	if offsetX < 0 {
-		offsetX = -offsetX
-	}
-	if offsetY < 0 {
-		offsetY = -offsetY
-	}
-
-	for y := 0; y < newHeight; y++ {
-		for x := 0; x < newWidth; x++ {
+	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
+		for x := bounds.Min.X; x < bounds.Max.X; x++ {
 			// Calculate source coordinates
-			srcX := x - offsetX
-			srcY := y - offsetY
+			srcX := x - dx
+			srcY := y - dy
 
-			// Ensure source coordinates are within bounds
-			if srcX >= 0 && srcX < width && srcY >= 0 && srcY < height {
-				dst.Set(x, y, img.At(srcX+bounds.Min.X, srcY+bounds.Min.Y))
+			// Check if source coordinates are within bounds
+			if srcX >= bounds.Min.X && srcX < bounds.Max.X &&
+				srcY >= bounds.Min.Y && srcY < bounds.Max.Y {
+				dst.Set(x, y, img.At(srcX, srcY))
 			} else {
+				// Set to transparent if outside bounds
 				dst.Set(x, y, color.RGBA64{})
 			}
 		}
 	}
 
-	return dst
+	return dst, nil
 }
 
 // Meta returns the effect metadata.

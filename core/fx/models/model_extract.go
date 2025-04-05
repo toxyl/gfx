@@ -30,7 +30,7 @@ func NewExtractEffect(channel string, invert bool) *Extract {
 }
 
 // Apply applies the extract effect to an image.
-func (e *Extract) Apply(img image.Image) image.Image {
+func (e *Extract) Apply(img image.Image) (image.Image, error) {
 	bounds := img.Bounds()
 	dst := image.NewRGBA(bounds)
 
@@ -80,7 +80,7 @@ func (e *Extract) Apply(img image.Image) image.Image {
 		}
 	}
 
-	return dst
+	return dst, nil
 }
 
 // Meta returns the effect metadata.

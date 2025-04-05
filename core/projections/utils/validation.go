@@ -33,10 +33,9 @@ func ValidateRange(value, min, max float64, name string) error {
 	return nil
 }
 
-// ClampRange clamps a value to the specified range.
-// Returns the clamped value.
+// ClampRange restricts value to be within the range [min, max].
 func ClampRange(value, min, max float64) float64 {
-	return math.Max(min, math.Min(max, value))
+	return math.Clamp(value, min, max)
 }
 
 // ValidatePositive checks if a value is positive.

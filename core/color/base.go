@@ -4,14 +4,9 @@ package color
 
 import (
 	"fmt"
-)
 
-// Number is a constraint that permits any number type.
-type Number interface {
-	~int | ~int8 | ~int16 | ~int32 | ~int64 |
-		~uint | ~uint8 | ~uint16 | ~uint32 | ~uint64 |
-		~float32 | ~float64
-}
+	"github.com/toxyl/math"
+)
 
 // iColor is the internal interface for color models.
 type iColor interface {
@@ -34,7 +29,7 @@ type iColor interface {
 // Returns:
 //   - A new instance of the color model
 //   - An error if initialization fails
-func newColor[N Number, M iColor](factory func() M, values ...N) (M, error) {
+func newColor[N math.Number, M iColor](factory func() M, values ...N) (M, error) {
 	model := factory()
 	vals := make([]float64, len(values))
 	for i, v := range values {
@@ -52,7 +47,7 @@ func FromSlice[M iColor](model M, values []float64) error {
 }
 
 // NewChannelMeta creates a new ChannelMeta with the given name, min, max, unit, and description.
-func NewChannelMeta[N Number](name string, min, max N, unit, description string) *Channel {
+func NewChannelMeta[N math.Number](name string, min, max N, unit, description string) *Channel {
 	return NewChannel(name, float64(min), float64(max), unit, description)
 }
 
@@ -69,13 +64,7 @@ func ValidateChannelValue(value float64, channel *Channel) error {
 	return nil
 }
 
-// ClampChannelValue clamps a value to the valid range for a channel.
+// ClampChannelValue restricts value to be within the channel's range.
 func ClampChannelValue(value float64, channel *Channel) float64 {
-	if value < channel.Min() {
-		return channel.Min()
-	}
-	if value > channel.Max() {
-		return channel.Max()
-	}
-	return value
+	return math.Clamp(value, channel.Min(), channel.Max())
 }

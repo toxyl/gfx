@@ -38,57 +38,37 @@ func NewCropCircleEffect(centerX, centerY, radius float64) *CropCircle {
 }
 
 // Apply applies the circular crop effect to an image.
-func (c *CropCircle) Apply(img image.Image) image.Image {
+func (c *CropCircle) Apply(img image.Image) (image.Image, error) {
 	bounds := img.Bounds()
 	width := bounds.Max.X - bounds.Min.X
 	height := bounds.Max.Y - bounds.Min.Y
 
 	// Calculate center and radius in pixels
-	centerX := float64(width) * c.CenterX
-	centerY := float64(height) * c.CenterY
-	radius := float64(width) * c.Radius
+	centerX := int(float64(width) * c.CenterX)
+	centerY := int(float64(height) * c.CenterY)
+	radius := int(float64(width) * c.Radius)
 
-	// Calculate bounding box of circle
-	minX := int(centerX - radius)
-	minY := int(centerY - radius)
-	maxX := int(centerX + radius)
-	maxY := int(centerY + radius)
+	// Create new image with same dimensions
+	dst := image.NewRGBA(bounds)
 
-	// Ensure bounding box is within image bounds
-	if minX < 0 {
-		minX = 0
-	}
-	if minY < 0 {
-		minY = 0
-	}
-	if maxX > width {
-		maxX = width
-	}
-	if maxY > height {
-		maxY = height
-	}
-
-	// Create new image with circle dimensions
-	dst := image.NewRGBA(image.Rect(0, 0, maxX-minX, maxY-minY))
-
-	// Copy pixels from source to destination, only within the circle
-	for y := minY; y < maxY; y++ {
-		for x := minX; x < maxX; x++ {
+	for y := bounds.Min.Y; y < bounds.Max.Y; y++ {
+		for x := bounds.Min.X; x < bounds.Max.X; x++ {
 			// Calculate distance from center
-			dx := float64(x) - centerX
-			dy := float64(y) - centerY
-			distance := math.Sqrt(dx*dx + dy*dy)
+			dx := x - centerX
+			dy := y - centerY
+			distance := math.Sqrt(float64(dx*dx + dy*dy))
 
-			// Only copy pixels within the circle
-			if distance <= radius {
-				dst.Set(x-minX, y-minY, img.At(x+bounds.Min.X, y+bounds.Min.Y))
+			// If pixel is within circle, copy from source
+			if distance <= float64(radius) {
+				dst.Set(x, y, img.At(x, y))
 			} else {
-				dst.Set(x-minX, y-minY, color.RGBA64{})
+				// Otherwise set to transparent
+				dst.Set(x, y, color.RGBA64{})
 			}
 		}
 	}
 
-	return dst
+	return dst, nil
 }
 
 // Meta returns the effect metadata.

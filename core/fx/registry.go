@@ -19,7 +19,7 @@ func NewRegistry() *Registry {
 }
 
 // Register implements RegistryInterface
-func (r *Registry) Register(f Function) error {
+func (r *Registry) Register(f Effect) error {
 	r.mu.Lock()
 	defer r.mu.Unlock()
 
@@ -33,7 +33,7 @@ func (r *Registry) Register(f Function) error {
 }
 
 // Get implements RegistryInterface
-func (r *Registry) Get(name string) Function {
+func (r *Registry) Get(name string) Effect {
 	r.mu.RLock()
 	defer r.mu.RUnlock()
 	return r.functions[name]
