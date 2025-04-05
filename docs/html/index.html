@@ -1,0 +1,2434 @@
+<!-- auto-generated -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>GFXScript Docs</title>
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-okaidia.min.css">
+	<style>
+body {
+	margin: 0;
+	padding: 0;
+	background-color: #0d1117;
+}
+
+button {
+    background: hsla(0, 0%, 20%, 0.8);
+    border: none;
+    color: #fff;
+    font-size: 14px;
+    padding: 5px 10px;
+    margin: 5px;
+	cursor: pointer;
+}
+
+button:hover {
+    background: hsla(0, 0%, 30%, 0.8);
+}
+
+.menu {
+    position: fixed;
+    left: 0;
+    right: 90vw;
+    bottom: 0;
+    top: 0;
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: nowrap;
+    justify-content: center;
+}
+
+.markdown-body {
+    position: fixed;
+    top: 0;
+    left: 20vw;
+    right: 0;
+    bottom: 0;
+    box-sizing: border-box;
+    margin: 0 auto;
+    padding: 45px;
+	padding-right: 20vw;
+    color: #c9d1d9;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+    overflow-y: scroll;
+}
+
+/* Headings */
+.markdown-body h1,
+.markdown-body h2,
+.markdown-body h3,
+.markdown-body h4,
+.markdown-body h5,
+.markdown-body h6 {
+	margin-top: 1.5em;
+	margin-bottom: 0.5em;
+	font-weight: 600;
+	line-height: 1.25;
+}
+
+.markdown-body h1 { font-size: 2em; }
+.markdown-body h2 { font-size: 1.75em; }
+.markdown-body h3 { font-size: 1.5em; }
+.markdown-body h4 { font-size: 1.25em; }
+.markdown-body h5 { font-size: 1em; }
+.markdown-body h6 { font-size: 0.875em; }
+
+/* Paragraphs and Links */
+.markdown-body p {
+	margin: 0.8em 0;
+}
+
+.markdown-body a {
+	color: #58a6ff;
+	text-decoration: none;
+}
+
+.markdown-body a:hover {
+	text-decoration: underline;
+}
+
+/* Blockquotes */
+.markdown-body blockquote {
+	padding: 0 1em;
+	color: #8b949e;
+	border-left: 0.25em solid #30363d;
+	margin: 1em 0;
+}
+
+/* Code (inline and blocks) */
+.markdown-body code {
+	background-color: #161b22;
+	color: #c9d1d9;
+	padding: 0.2em 0.4em;
+	border-radius: 3px;
+	font-family: "SFMono-Regular", Consolas, "Liberation Mono", Menlo, Courier, monospace;
+	font-size: 85%;
+}
+
+.markdown-body pre {
+	background-color: #161b22;
+	padding: 1em;
+	overflow: auto;
+	border-radius: 6px;
+	margin: 1.5em 0;
+}
+
+.markdown-body pre code {
+	background-color: transparent;
+	padding: 0;
+	border: 0;
+	font-size: 100%;
+}
+
+/* Lists */
+.markdown-body ul,
+.markdown-body ol {
+	padding-left: 2em;
+	margin: 1em 0;
+}
+
+.markdown-body li {
+	margin-bottom: 0.25em;
+}
+
+/* Horizontal Rules */
+.markdown-body hr {
+	border: 0;
+	border-top: 1px solid #30363d;
+	margin: 2em 0;
+}
+
+/* Tables */
+.markdown-body table {
+	width: 100%;
+	border-collapse: collapse;
+	margin: 1em 0;
+}
+
+.markdown-body th,
+.markdown-body td {
+	border: 1px solid #30363d;
+	padding: 0.6em 1em;
+}
+
+.markdown-body th {
+	background-color: #161b22;
+}
+
+/* Images */
+.markdown-body img {
+	max-width: 100%;
+	display: block;
+	margin: 0.5em 0;
+	border-radius: 5px;
+}
+
+/* Task Lists (checkboxes) */
+.markdown-body input[type="checkbox"] {
+	margin: 0 .2em .25em -1.6em;
+	vertical-align: middle;
+}
+	
+code[class*="language-gfxs"],
+pre[class*="language-gfxs"] {
+	color: #d4d4d4;
+	background: #1e1e1e;
+	padding: 0.5em;
+	overflow: auto;
+	border-radius: 0.3em;
+	font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+	font-size: 1em;
+	line-height: 1.5em;
+}
+
+/* token styles */
+.token.constant.string {
+	color: #CE9178;
+}
+.token.string.quoted.double {
+	color: #CE9178;
+}
+.token.keyword {
+	color: #569CD6;
+}
+.token.constant.number {
+	color: #B5CEA8;
+}
+.token.constant.numeric {
+	color: #B5CEA8;
+}
+.token.support.function {
+	color: #DCDCAA;
+}
+.token.support.variable {
+	color: #9cdcfe;
+}
+.token.comment.line {
+	color: #6a9955;
+}
+.token.entity.name.type {
+	color:#37A98B;
+}
+.token.entity.name.class {
+	color:#4EC9B0;
+}
+.token.string.regexp {
+	color:#D16969;
+}
+.token.markup.bold {
+	color:#569CD6;
+}
+.token.punctuation {
+	color:#C586C0;
+}
+</style>
+</head>
+<body>
+	<div class="menu">
+		<button onclick="window.location.href='#filters'">Filters</button>
+		<button onclick="window.location.href='#colormodels'">Color Models</button>
+		<button onclick="window.location.href='#blendmodes'">Blend Modes</button>
+		<button onclick="window.location.href='#projections'">Projections</button>
+		<button onclick="window.location.href='#example'">Example Script</button>
+	</div>
+	<div class="markdown-body"><a name="filters"></a><h1>Filters</h1>
+<h2>alpha-map</h2>
+<p>Creates an alpha channel based on a source channel</p>
+<pre><code class="language-gfxs">alpha-map(source=&quot;l&quot; lower=0.000000 upper=1.000000)
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Argument</th>
+<th>Type</th>
+<th>Unit</th>
+<th>Default</th>
+<th>Min</th>
+<th>Max</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>source</td>
+<td>string</td>
+<td></td>
+<td><code>&quot;l&quot;</code></td>
+<td></td>
+<td></td>
+<td>The source channel (<code>l</code> = luminance, <code>s</code> = saturation, <code>s*l</code> = saturation * luminance)</td>
+</tr>
+<tr>
+<td>lower</td>
+<td>float</td>
+<td>%</td>
+<td><code>0.000000</code></td>
+<td><code>0</code></td>
+<td><code>1</code></td>
+<td>The lower threshold, everything below will be treated as fully transparent</td>
+</tr>
+<tr>
+<td>upper</td>
+<td>float</td>
+<td>%</td>
+<td><code>1.000000</code></td>
+<td><code>0</code></td>
+<td><code>1</code></td>
+<td>The upper threshold, everything above will be treated as fully opaque</td>
+</tr>
+</tbody>
+</table>
+<h2>blur</h2>
+<p>Applies a blur using a convolution matrix.</p>
+<pre><code class="language-gfxs">blur(amount=1.000000)
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Argument</th>
+<th>Type</th>
+<th>Unit</th>
+<th>Default</th>
+<th>Min</th>
+<th>Max</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>amount</td>
+<td>float</td>
+<td>px</td>
+<td><code>1.000000</code></td>
+<td><code>-10</code></td>
+<td><code>10</code></td>
+<td>The amount to blur in pixels</td>
+</tr>
+</tbody>
+</table>
+<h2>brightness</h2>
+<p>Adjusts the brightness of the image.</p>
+<pre><code class="language-gfxs">brightness(adjustment=0.000000)
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Argument</th>
+<th>Type</th>
+<th>Unit</th>
+<th>Default</th>
+<th>Min</th>
+<th>Max</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>adjustment</td>
+<td>float</td>
+<td>%</td>
+<td><code>0.000000</code></td>
+<td><code>-1</code></td>
+<td><code>1</code></td>
+<td>Adjustment amount where 0 means no adjustment</td>
+</tr>
+</tbody>
+</table>
+<h2>color-shift</h2>
+<p>Combines hue-shit, sat-shift and lum-shift into a single filter.</p>
+<pre><code class="language-gfxs">color-shift(hue=0.000000 sat=0.000000 lum=0.000000)
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Argument</th>
+<th>Type</th>
+<th>Unit</th>
+<th>Default</th>
+<th>Min</th>
+<th>Max</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>hue</td>
+<td>float</td>
+<td>°</td>
+<td><code>0.000000</code></td>
+<td><code>-360</code></td>
+<td><code>360</code></td>
+<td></td>
+</tr>
+<tr>
+<td>sat</td>
+<td>float</td>
+<td>%</td>
+<td><code>0.000000</code></td>
+<td><code>-1</code></td>
+<td><code>1</code></td>
+<td></td>
+</tr>
+<tr>
+<td>lum</td>
+<td>float</td>
+<td>%</td>
+<td><code>0.000000</code></td>
+<td><code>-1</code></td>
+<td><code>1</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2>contrast</h2>
+<p>Adjusts the image contrast.</p>
+<pre><code class="language-gfxs">contrast(adjustment=0.000000)
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Argument</th>
+<th>Type</th>
+<th>Unit</th>
+<th>Default</th>
+<th>Min</th>
+<th>Max</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>adjustment</td>
+<td>float</td>
+<td>%</td>
+<td><code>0.000000</code></td>
+<td><code>-1</code></td>
+<td><code>1</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2>convolution</h2>
+<p>Applies a 3x3 convolution matrix to the image.</p>
+<pre><code class="language-gfxs">convolution(amount=1.000000 bias=0.000000 factor=1.000000 matrix=[1 1 1] [1 8 1] [1 1 1])
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Argument</th>
+<th>Type</th>
+<th>Unit</th>
+<th>Default</th>
+<th>Min</th>
+<th>Max</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>amount</td>
+<td>float</td>
+<td>%</td>
+<td><code>1.000000</code></td>
+<td><code>-Inf</code></td>
+<td><code>+Inf</code></td>
+<td></td>
+</tr>
+<tr>
+<td>bias</td>
+<td>float</td>
+<td>%</td>
+<td><code>0.000000</code></td>
+<td><code>-Inf</code></td>
+<td><code>+Inf</code></td>
+<td></td>
+</tr>
+<tr>
+<td>factor</td>
+<td>float</td>
+<td>%</td>
+<td><code>1.000000</code></td>
+<td><code>-Inf</code></td>
+<td><code>+Inf</code></td>
+<td></td>
+</tr>
+<tr>
+<td>matrix</td>
+<td>matrix</td>
+<td></td>
+<td><code>[1 1 1] [1 8 1] [1 1 1]</code></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2>crop</h2>
+<p>Crops the layer.</p>
+<pre><code class="language-gfxs">crop(left=0.000000 right=0.000000 top=0.000000 bottom=0.000000)
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Argument</th>
+<th>Type</th>
+<th>Unit</th>
+<th>Default</th>
+<th>Min</th>
+<th>Max</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>left</td>
+<td>float</td>
+<td>%</td>
+<td><code>0.000000</code></td>
+<td><code>0</code></td>
+<td><code>1</code></td>
+<td></td>
+</tr>
+<tr>
+<td>right</td>
+<td>float</td>
+<td>%</td>
+<td><code>0.000000</code></td>
+<td><code>0</code></td>
+<td><code>1</code></td>
+<td></td>
+</tr>
+<tr>
+<td>top</td>
+<td>float</td>
+<td>%</td>
+<td><code>0.000000</code></td>
+<td><code>0</code></td>
+<td><code>1</code></td>
+<td></td>
+</tr>
+<tr>
+<td>bottom</td>
+<td>float</td>
+<td>%</td>
+<td><code>0.000000</code></td>
+<td><code>0</code></td>
+<td><code>1</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2>crop-circle</h2>
+<p>Crops the layer using a circle.</p>
+<pre><code class="language-gfxs">crop-circle(radius=0.500000 offset-x=0.000000 offset-y=0.000000)
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Argument</th>
+<th>Type</th>
+<th>Unit</th>
+<th>Default</th>
+<th>Min</th>
+<th>Max</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>radius</td>
+<td>float</td>
+<td>%</td>
+<td><code>0.500000</code></td>
+<td><code>0</code></td>
+<td><code>+Inf</code></td>
+<td></td>
+</tr>
+<tr>
+<td>offset-x</td>
+<td>float</td>
+<td>%</td>
+<td><code>0.000000</code></td>
+<td><code>-1</code></td>
+<td><code>1</code></td>
+<td></td>
+</tr>
+<tr>
+<td>offset-y</td>
+<td>float</td>
+<td>%</td>
+<td><code>0.000000</code></td>
+<td><code>-1</code></td>
+<td><code>1</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2>edge-detect</h2>
+<p>Detects edges.</p>
+<pre><code class="language-gfxs">edge-detect(amount=1.000000)
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Argument</th>
+<th>Type</th>
+<th>Unit</th>
+<th>Default</th>
+<th>Min</th>
+<th>Max</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>amount</td>
+<td>float</td>
+<td>%</td>
+<td><code>1.000000</code></td>
+<td><code>-Inf</code></td>
+<td><code>+Inf</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2>emboss</h2>
+<p>Embosses the image.</p>
+<pre><code class="language-gfxs">emboss(amount=1.000000)
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Argument</th>
+<th>Type</th>
+<th>Unit</th>
+<th>Default</th>
+<th>Min</th>
+<th>Max</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>amount</td>
+<td>float</td>
+<td>%</td>
+<td><code>1.000000</code></td>
+<td><code>-Inf</code></td>
+<td><code>+Inf</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2>enhance</h2>
+<p>Enhances the image.</p>
+<pre><code class="language-gfxs">enhance(amount=1.000000)
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Argument</th>
+<th>Type</th>
+<th>Unit</th>
+<th>Default</th>
+<th>Min</th>
+<th>Max</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>amount</td>
+<td>float</td>
+<td>%</td>
+<td><code>1.000000</code></td>
+<td><code>-Inf</code></td>
+<td><code>+Inf</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2>extract</h2>
+<p>Extracts a color from the image.</p>
+<pre><code class="language-gfxs">extract(hue=0.000000 hue-tolerance=180.000000 hue-feather=0.000000 sat=0.500000 sat-tolerance=0.500000 sat-feather=0.000000 lum=0.500000 lum-tolerance=0.500000 lum-feather=0.000000)
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Argument</th>
+<th>Type</th>
+<th>Unit</th>
+<th>Default</th>
+<th>Min</th>
+<th>Max</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>hue</td>
+<td>float</td>
+<td>°</td>
+<td><code>0.000000</code></td>
+<td><code>0</code></td>
+<td><code>360</code></td>
+<td></td>
+</tr>
+<tr>
+<td>hue-tolerance</td>
+<td>float</td>
+<td>°</td>
+<td><code>180.000000</code></td>
+<td><code>0</code></td>
+<td><code>360</code></td>
+<td></td>
+</tr>
+<tr>
+<td>hue-feather</td>
+<td>float</td>
+<td>°</td>
+<td><code>0.000000</code></td>
+<td><code>0</code></td>
+<td><code>360</code></td>
+<td></td>
+</tr>
+<tr>
+<td>sat</td>
+<td>float</td>
+<td>%</td>
+<td><code>0.500000</code></td>
+<td><code>0</code></td>
+<td><code>1</code></td>
+<td></td>
+</tr>
+<tr>
+<td>sat-tolerance</td>
+<td>float</td>
+<td>%</td>
+<td><code>0.500000</code></td>
+<td><code>0</code></td>
+<td><code>1</code></td>
+<td></td>
+</tr>
+<tr>
+<td>sat-feather</td>
+<td>float</td>
+<td>%</td>
+<td><code>0.000000</code></td>
+<td><code>0</code></td>
+<td><code>1</code></td>
+<td></td>
+</tr>
+<tr>
+<td>lum</td>
+<td>float</td>
+<td>%</td>
+<td><code>0.500000</code></td>
+<td><code>0</code></td>
+<td><code>1</code></td>
+<td></td>
+</tr>
+<tr>
+<td>lum-tolerance</td>
+<td>float</td>
+<td>%</td>
+<td><code>0.500000</code></td>
+<td><code>0</code></td>
+<td><code>1</code></td>
+<td></td>
+</tr>
+<tr>
+<td>lum-feather</td>
+<td>float</td>
+<td>%</td>
+<td><code>0.000000</code></td>
+<td><code>0</code></td>
+<td><code>1</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2>flip-h</h2>
+<p>Flips the image horizontally.</p>
+<pre><code class="language-gfxs">flip-h()
+</code></pre>
+<h2>flip-v</h2>
+<p>Flips the image vertically.</p>
+<pre><code class="language-gfxs">flip-v()
+</code></pre>
+<h2>gamma</h2>
+<p>Adjusts the image gamma.</p>
+<pre><code class="language-gfxs">gamma(adjustment=0.000000)
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Argument</th>
+<th>Type</th>
+<th>Unit</th>
+<th>Default</th>
+<th>Min</th>
+<th>Max</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>adjustment</td>
+<td>float</td>
+<td>%</td>
+<td><code>0.000000</code></td>
+<td><code>-1</code></td>
+<td><code>1</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2>gray</h2>
+<p>Converts the image to grayscale</p>
+<pre><code class="language-gfxs">gray()
+</code></pre>
+<h2>hue</h2>
+<p>Shifts the hues of the image.</p>
+<pre><code class="language-gfxs">hue(shift=0.000000)
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Argument</th>
+<th>Type</th>
+<th>Unit</th>
+<th>Default</th>
+<th>Min</th>
+<th>Max</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>shift</td>
+<td>float</td>
+<td>°</td>
+<td><code>0.000000</code></td>
+<td><code>-360</code></td>
+<td><code>360</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2>hue-contrast</h2>
+<p>Adjusts the contrast of hues in the image.</p>
+<pre><code class="language-gfxs">hue-contrast(adjustment=0.000000)
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Argument</th>
+<th>Type</th>
+<th>Unit</th>
+<th>Default</th>
+<th>Min</th>
+<th>Max</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>adjustment</td>
+<td>float</td>
+<td>%</td>
+<td><code>0.000000</code></td>
+<td><code>-1</code></td>
+<td><code>1</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2>invert</h2>
+<p>Inverts all colors.</p>
+<pre><code class="language-gfxs">invert()
+</code></pre>
+<h2>lum</h2>
+<p>Shifts the luminosities of the image.</p>
+<pre><code class="language-gfxs">lum(shift=0.000000)
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Argument</th>
+<th>Type</th>
+<th>Unit</th>
+<th>Default</th>
+<th>Min</th>
+<th>Max</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>shift</td>
+<td>float</td>
+<td>%</td>
+<td><code>0.000000</code></td>
+<td><code>-1</code></td>
+<td><code>1</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2>lum-contrast</h2>
+<p>Adjusts the contrast of luminosities in the image.</p>
+<pre><code class="language-gfxs">lum-contrast(adjustment=0.000000)
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Argument</th>
+<th>Type</th>
+<th>Unit</th>
+<th>Default</th>
+<th>Min</th>
+<th>Max</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>adjustment</td>
+<td>float</td>
+<td>%</td>
+<td><code>0.000000</code></td>
+<td><code>-1</code></td>
+<td><code>1</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2>pastelize</h2>
+<p>Converts the image to pastel colors</p>
+<pre><code class="language-gfxs">pastelize()
+</code></pre>
+<h2>project-as-equirectangular</h2>
+<p>Converts the image to a equirectangular projection.</p>
+<pre><code class="language-gfxs">project-as-equirectangular()
+</code></pre>
+<h2>project-as-mercator</h2>
+<p>Converts the image to a mercator projection.</p>
+<pre><code class="language-gfxs">project-as-mercator()
+</code></pre>
+<h2>project-as-polar-to-rect</h2>
+<p>Converts the image to a polar-to-rect projection.</p>
+<pre><code class="language-gfxs">project-as-polar-to-rect()
+</code></pre>
+<h2>project-as-rect-to-polar</h2>
+<p>Converts the image to a rect-to-polar projection.</p>
+<pre><code class="language-gfxs">project-as-rect-to-polar()
+</code></pre>
+<h2>project-as-sinusoidal</h2>
+<p>Converts the image to a sinusoidal projection.</p>
+<pre><code class="language-gfxs">project-as-sinusoidal()
+</code></pre>
+<h2>project-as-stereographic</h2>
+<p>Converts the image to a stereographic projection.</p>
+<pre><code class="language-gfxs">project-as-stereographic()
+</code></pre>
+<h2>remove</h2>
+<p>Removes a color from the image.</p>
+<pre><code class="language-gfxs">remove(hue=0.000000 range=15.000000 feather=15.000000 amount=1.000000)
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Argument</th>
+<th>Type</th>
+<th>Unit</th>
+<th>Default</th>
+<th>Min</th>
+<th>Max</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>hue</td>
+<td>float</td>
+<td>°</td>
+<td><code>0.000000</code></td>
+<td><code>0</code></td>
+<td><code>360</code></td>
+<td></td>
+</tr>
+<tr>
+<td>range</td>
+<td>float</td>
+<td>°</td>
+<td><code>15.000000</code></td>
+<td><code>0</code></td>
+<td><code>360</code></td>
+<td></td>
+</tr>
+<tr>
+<td>feather</td>
+<td>float</td>
+<td>°</td>
+<td><code>15.000000</code></td>
+<td><code>0</code></td>
+<td><code>360</code></td>
+<td></td>
+</tr>
+<tr>
+<td>amount</td>
+<td>float</td>
+<td>%</td>
+<td><code>1.000000</code></td>
+<td><code>0</code></td>
+<td><code>1</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2>rotate</h2>
+<p>Rotates the image.</p>
+<pre><code class="language-gfxs">rotate(angle=0.000000 offset-x=0.000000 offset-y=0.000000)
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Argument</th>
+<th>Type</th>
+<th>Unit</th>
+<th>Default</th>
+<th>Min</th>
+<th>Max</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>angle</td>
+<td>float</td>
+<td>°</td>
+<td><code>0.000000</code></td>
+<td><code>-360</code></td>
+<td><code>360</code></td>
+<td></td>
+</tr>
+<tr>
+<td>offset-x</td>
+<td>float</td>
+<td>%</td>
+<td><code>0.000000</code></td>
+<td><code>-1</code></td>
+<td><code>1</code></td>
+<td>Offset on the x-axis relative to the center.</td>
+</tr>
+<tr>
+<td>offset-y</td>
+<td>float</td>
+<td>%</td>
+<td><code>0.000000</code></td>
+<td><code>-1</code></td>
+<td><code>1</code></td>
+<td>Offset on the y-axis relative to the center.</td>
+</tr>
+</tbody>
+</table>
+<h2>sat</h2>
+<p>Shifts the saturations of the image.</p>
+<pre><code class="language-gfxs">sat(shift=0.000000)
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Argument</th>
+<th>Type</th>
+<th>Unit</th>
+<th>Default</th>
+<th>Min</th>
+<th>Max</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>shift</td>
+<td>float</td>
+<td>%</td>
+<td><code>0.000000</code></td>
+<td><code>-1</code></td>
+<td><code>1</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2>sat-contrast</h2>
+<p>Adjusts the contrast of saturations in the image.</p>
+<pre><code class="language-gfxs">sat-contrast(adjustment=0.000000)
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Argument</th>
+<th>Type</th>
+<th>Unit</th>
+<th>Default</th>
+<th>Min</th>
+<th>Max</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>adjustment</td>
+<td>float</td>
+<td>%</td>
+<td><code>0.000000</code></td>
+<td><code>-1</code></td>
+<td><code>1</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2>scale</h2>
+<p>Scales the image.</p>
+<pre><code class="language-gfxs">scale(factor=0.000000 offset-x=0.000000 offset-y=0.000000)
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Argument</th>
+<th>Type</th>
+<th>Unit</th>
+<th>Default</th>
+<th>Min</th>
+<th>Max</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>factor</td>
+<td>float</td>
+<td>%</td>
+<td><code>0.000000</code></td>
+<td><code>-Inf</code></td>
+<td><code>+Inf</code></td>
+<td>Scale factor where 0 means no scaling, &gt;0 upscaling and &lt;0 downscaling</td>
+</tr>
+<tr>
+<td>offset-x</td>
+<td>float</td>
+<td>%</td>
+<td><code>0.000000</code></td>
+<td><code>-1</code></td>
+<td><code>1</code></td>
+<td>Offset on the x-axis relative to the center.</td>
+</tr>
+<tr>
+<td>offset-y</td>
+<td>float</td>
+<td>%</td>
+<td><code>0.000000</code></td>
+<td><code>-1</code></td>
+<td><code>1</code></td>
+<td>Offset on the y-axis relative to the center.</td>
+</tr>
+</tbody>
+</table>
+<h2>sepia</h2>
+<p>Converts the image to sepia colors.</p>
+<pre><code class="language-gfxs">sepia()
+</code></pre>
+<h2>sharpen</h2>
+<p>Sharpens the image.</p>
+<pre><code class="language-gfxs">sharpen(amount=0.000000)
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Argument</th>
+<th>Type</th>
+<th>Unit</th>
+<th>Default</th>
+<th>Min</th>
+<th>Max</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>amount</td>
+<td>float</td>
+<td>%</td>
+<td><code>0.000000</code></td>
+<td><code>-1</code></td>
+<td><code>1</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2>threshold</h2>
+<p>Colors pixels above the threshold white and pixels below the threshold black.</p>
+<pre><code class="language-gfxs">threshold(threshold=0.500000)
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Argument</th>
+<th>Type</th>
+<th>Unit</th>
+<th>Default</th>
+<th>Min</th>
+<th>Max</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>threshold</td>
+<td>float</td>
+<td>%</td>
+<td><code>0.500000</code></td>
+<td><code>0</code></td>
+<td><code>1</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2>to-polar</h2>
+<p>Converts rectangular coordinates to polar coordinates. For example useful to transform a 360 degrees camera image to an all-sky camera.</p>
+<pre><code class="language-gfxs">to-polar(angle-start=0.000000 angle-end=360.000000 rotation=0.000000 fisheye=0.000000)
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Argument</th>
+<th>Type</th>
+<th>Unit</th>
+<th>Default</th>
+<th>Min</th>
+<th>Max</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>angle-start</td>
+<td>float</td>
+<td>°</td>
+<td><code>0.000000</code></td>
+<td><code>0</code></td>
+<td><code>360</code></td>
+<td></td>
+</tr>
+<tr>
+<td>angle-end</td>
+<td>float</td>
+<td>°</td>
+<td><code>360.000000</code></td>
+<td><code>0</code></td>
+<td><code>360</code></td>
+<td></td>
+</tr>
+<tr>
+<td>rotation</td>
+<td>float</td>
+<td>°</td>
+<td><code>0.000000</code></td>
+<td><code>-360</code></td>
+<td><code>360</code></td>
+<td></td>
+</tr>
+<tr>
+<td>fisheye</td>
+<td>float</td>
+<td>%</td>
+<td><code>0.000000</code></td>
+<td><code>-1</code></td>
+<td><code>1</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<h2>transform</h2>
+<p>Combines translate, rotate and scale into a single filter.</p>
+<pre><code class="language-gfxs">transform(translate-x=0.000000 translate-y=0.000000 rotate=0.000000 scale=0.000000 offset-x=0.000000 offset-y=0.000000)
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Argument</th>
+<th>Type</th>
+<th>Unit</th>
+<th>Default</th>
+<th>Min</th>
+<th>Max</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>translate-x</td>
+<td>float</td>
+<td>%</td>
+<td><code>0.000000</code></td>
+<td><code>-1</code></td>
+<td><code>1</code></td>
+<td>Movement on the x-axis</td>
+</tr>
+<tr>
+<td>translate-y</td>
+<td>float</td>
+<td>%</td>
+<td><code>0.000000</code></td>
+<td><code>-1</code></td>
+<td><code>1</code></td>
+<td>Movement on the y-axis</td>
+</tr>
+<tr>
+<td>rotate</td>
+<td>float</td>
+<td>°</td>
+<td><code>0.000000</code></td>
+<td><code>-360</code></td>
+<td><code>360</code></td>
+<td>Rotation</td>
+</tr>
+<tr>
+<td>scale</td>
+<td>float</td>
+<td>%</td>
+<td><code>0.000000</code></td>
+<td><code>-Inf</code></td>
+<td><code>+Inf</code></td>
+<td>Scale factor where 0 means no scaling, &gt;0 upscaling and &lt;0 downscaling</td>
+</tr>
+<tr>
+<td>offset-x</td>
+<td>float</td>
+<td>%</td>
+<td><code>0.000000</code></td>
+<td><code>-1</code></td>
+<td><code>1</code></td>
+<td>Offset on the x-axis, relative to the center.</td>
+</tr>
+<tr>
+<td>offset-y</td>
+<td>float</td>
+<td>%</td>
+<td><code>0.000000</code></td>
+<td><code>-1</code></td>
+<td><code>1</code></td>
+<td>Offset on the y-axis, relative to the center.</td>
+</tr>
+</tbody>
+</table>
+<h2>translate</h2>
+<p>Moves the layer.</p>
+<pre><code class="language-gfxs">translate(x=0.000000 y=0.000000)
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Argument</th>
+<th>Type</th>
+<th>Unit</th>
+<th>Default</th>
+<th>Min</th>
+<th>Max</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>x</td>
+<td>float</td>
+<td>%</td>
+<td><code>0.000000</code></td>
+<td><code>-1</code></td>
+<td><code>1</code></td>
+<td>Movement on the x-axis</td>
+</tr>
+<tr>
+<td>y</td>
+<td>float</td>
+<td>%</td>
+<td><code>0.000000</code></td>
+<td><code>-1</code></td>
+<td><code>1</code></td>
+<td>Movement on the y-axis</td>
+</tr>
+</tbody>
+</table>
+<h2>translate-wrap</h2>
+<p>Moves the layer and wraps pixels around.</p>
+<pre><code class="language-gfxs">translate-wrap(x=0.000000 y=0.000000)
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Argument</th>
+<th>Type</th>
+<th>Unit</th>
+<th>Default</th>
+<th>Min</th>
+<th>Max</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>x</td>
+<td>float</td>
+<td>%</td>
+<td><code>0.000000</code></td>
+<td><code>-1</code></td>
+<td><code>1</code></td>
+<td>Movement on the x-axis</td>
+</tr>
+<tr>
+<td>y</td>
+<td>float</td>
+<td>%</td>
+<td><code>0.000000</code></td>
+<td><code>-1</code></td>
+<td><code>1</code></td>
+<td>Movement on the y-axis</td>
+</tr>
+</tbody>
+</table>
+<h2>vibrance</h2>
+<p>Adjusts the vibrance of the image.</p>
+<pre><code class="language-gfxs">vibrance(adjustment=0.000000)
+</code></pre>
+<table>
+<thead>
+<tr>
+<th>Argument</th>
+<th>Type</th>
+<th>Unit</th>
+<th>Default</th>
+<th>Min</th>
+<th>Max</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>adjustment</td>
+<td>float</td>
+<td>%</td>
+<td><code>0.000000</code></td>
+<td><code>-1</code></td>
+<td><code>1</code></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<br><a name="colormodels"></a><h1>Color Models</h1>
+<h1>CIELAB</h1>
+<p><em>CIELAB color model using perceptual uniformity.</em></p>
+<table>
+<thead>
+<tr>
+<th>Channel</th>
+<th>Min</th>
+<th>Max</th>
+<th>Unit</th>
+<th>Desc</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>L</td>
+<td>0.000000</td>
+<td>100.000000</td>
+<td></td>
+<td>Lightness.</td>
+</tr>
+<tr>
+<td>A</td>
+<td>-128.000000</td>
+<td>127.000000</td>
+<td></td>
+<td>A channel.</td>
+</tr>
+<tr>
+<td>B</td>
+<td>-128.000000</td>
+<td>127.000000</td>
+<td></td>
+<td>B channel.</td>
+</tr>
+<tr>
+<td>Alpha</td>
+<td>0.000000</td>
+<td>1.000000</td>
+<td></td>
+<td>Alpha channel.</td>
+</tr>
+</tbody>
+</table>
+<h1>CMY</h1>
+<p><em>Cyan, Magenta, Yellow color model.</em></p>
+<table>
+<thead>
+<tr>
+<th>Channel</th>
+<th>Min</th>
+<th>Max</th>
+<th>Unit</th>
+<th>Desc</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>C</td>
+<td>0.000000</td>
+<td>100.000000</td>
+<td>%</td>
+<td>Cyan percentage.</td>
+</tr>
+<tr>
+<td>M</td>
+<td>0.000000</td>
+<td>100.000000</td>
+<td>%</td>
+<td>Magenta percentage.</td>
+</tr>
+<tr>
+<td>Y</td>
+<td>0.000000</td>
+<td>100.000000</td>
+<td>%</td>
+<td>Yellow percentage.</td>
+</tr>
+<tr>
+<td>A</td>
+<td>0.000000</td>
+<td>1.000000</td>
+<td></td>
+<td>Alpha channel.</td>
+</tr>
+</tbody>
+</table>
+<h1>CMYK</h1>
+<p><em>Cyan, Magenta, Yellow, Black color model.</em></p>
+<table>
+<thead>
+<tr>
+<th>Channel</th>
+<th>Min</th>
+<th>Max</th>
+<th>Unit</th>
+<th>Desc</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>C</td>
+<td>0.000000</td>
+<td>100.000000</td>
+<td>%</td>
+<td>Cyan percentage.</td>
+</tr>
+<tr>
+<td>M</td>
+<td>0.000000</td>
+<td>100.000000</td>
+<td>%</td>
+<td>Magenta percentage.</td>
+</tr>
+<tr>
+<td>Y</td>
+<td>0.000000</td>
+<td>100.000000</td>
+<td>%</td>
+<td>Yellow percentage.</td>
+</tr>
+<tr>
+<td>K</td>
+<td>0.000000</td>
+<td>100.000000</td>
+<td>%</td>
+<td>Key (black) percentage.</td>
+</tr>
+<tr>
+<td>A</td>
+<td>0.000000</td>
+<td>1.000000</td>
+<td></td>
+<td>Alpha channel.</td>
+</tr>
+</tbody>
+</table>
+<h1>Grayscale</h1>
+<p><em>Grayscale color model using a single luminance channel.</em></p>
+<table>
+<thead>
+<tr>
+<th>Channel</th>
+<th>Min</th>
+<th>Max</th>
+<th>Unit</th>
+<th>Desc</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Gray</td>
+<td>0.000000</td>
+<td>100.000000</td>
+<td>%</td>
+<td>Grayscale level in percentage.</td>
+</tr>
+<tr>
+<td>A</td>
+<td>0.000000</td>
+<td>1.000000</td>
+<td></td>
+<td>Alpha channel.</td>
+</tr>
+</tbody>
+</table>
+<h1>HEX</h1>
+<p><em>Hexadecimal color model that accepts hex strings.</em></p>
+<table>
+<thead>
+<tr>
+<th>Channel</th>
+<th>Min</th>
+<th>Max</th>
+<th>Unit</th>
+<th>Desc</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Hex</td>
+<td>0.000000</td>
+<td>1.000000</td>
+<td></td>
+<td>Hexadecimal representation</td>
+</tr>
+</tbody>
+</table>
+<h1>HSB</h1>
+<p><em>Hue, Saturation, Brightness color model.</em></p>
+<table>
+<thead>
+<tr>
+<th>Channel</th>
+<th>Min</th>
+<th>Max</th>
+<th>Unit</th>
+<th>Desc</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>H</td>
+<td>0.000000</td>
+<td>360.000000</td>
+<td>°</td>
+<td>Hue angle in degrees.</td>
+</tr>
+<tr>
+<td>S</td>
+<td>0.000000</td>
+<td>100.000000</td>
+<td>%</td>
+<td>Saturation percentage.</td>
+</tr>
+<tr>
+<td>B</td>
+<td>0.000000</td>
+<td>100.000000</td>
+<td>%</td>
+<td>Brightness percentage.</td>
+</tr>
+<tr>
+<td>A</td>
+<td>0.000000</td>
+<td>1.000000</td>
+<td></td>
+<td>Alpha channel.</td>
+</tr>
+</tbody>
+</table>
+<h1>HSL</h1>
+<p><em>Hue, Saturation, Luminance color model.</em></p>
+<table>
+<thead>
+<tr>
+<th>Channel</th>
+<th>Min</th>
+<th>Max</th>
+<th>Unit</th>
+<th>Desc</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>H</td>
+<td>0.000000</td>
+<td>360.000000</td>
+<td>°</td>
+<td>Hue angle in degrees.</td>
+</tr>
+<tr>
+<td>S</td>
+<td>0.000000</td>
+<td>100.000000</td>
+<td>%</td>
+<td>Saturation percentage.</td>
+</tr>
+<tr>
+<td>L</td>
+<td>0.000000</td>
+<td>100.000000</td>
+<td>%</td>
+<td>Luminance percentage.</td>
+</tr>
+<tr>
+<td>A</td>
+<td>0.000000</td>
+<td>1.000000</td>
+<td></td>
+<td>Alpha channel.</td>
+</tr>
+</tbody>
+</table>
+<h1>RGB</h1>
+<p><em>Red, Green, Blue color model, 16-bit channels.</em></p>
+<table>
+<thead>
+<tr>
+<th>Channel</th>
+<th>Min</th>
+<th>Max</th>
+<th>Unit</th>
+<th>Desc</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>R</td>
+<td>0.000000</td>
+<td>1.000000</td>
+<td></td>
+<td>Red channel.</td>
+</tr>
+<tr>
+<td>G</td>
+<td>0.000000</td>
+<td>1.000000</td>
+<td></td>
+<td>Green channel.</td>
+</tr>
+<tr>
+<td>B</td>
+<td>0.000000</td>
+<td>1.000000</td>
+<td></td>
+<td>Blue channel.</td>
+</tr>
+<tr>
+<td>A</td>
+<td>0.000000</td>
+<td>1.000000</td>
+<td></td>
+<td>Alpha channel.</td>
+</tr>
+</tbody>
+</table>
+<h1>YUV</h1>
+<p><em>YUV color model separating luminance and chrominance.</em></p>
+<table>
+<thead>
+<tr>
+<th>Channel</th>
+<th>Min</th>
+<th>Max</th>
+<th>Unit</th>
+<th>Desc</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Y</td>
+<td>0.000000</td>
+<td>1.000000</td>
+<td></td>
+<td>Luma component.</td>
+</tr>
+<tr>
+<td>U</td>
+<td>-0.436000</td>
+<td>0.436000</td>
+<td></td>
+<td>Chrominance U component.</td>
+</tr>
+<tr>
+<td>V</td>
+<td>-0.615000</td>
+<td>0.615000</td>
+<td></td>
+<td>Chrominance V component.</td>
+</tr>
+<tr>
+<td>A</td>
+<td>0.000000</td>
+<td>1.000000</td>
+<td></td>
+<td>Alpha channel.</td>
+</tr>
+</tbody>
+</table>
+<h1>λSB</h1>
+<p><em>λSB (lambdaSB) color model using the wavelength of monochromatic light to define hue, based on HSB.</em></p>
+<table>
+<thead>
+<tr>
+<th>Channel</th>
+<th>Min</th>
+<th>Max</th>
+<th>Unit</th>
+<th>Desc</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>λ</td>
+<td>380.000000</td>
+<td>750.000000</td>
+<td>nm</td>
+<td>Wavelength in nanometers.</td>
+</tr>
+<tr>
+<td>S</td>
+<td>0.000000</td>
+<td>100.000000</td>
+<td>%</td>
+<td>Saturation percentage.</td>
+</tr>
+<tr>
+<td>B</td>
+<td>0.000000</td>
+<td>100.000000</td>
+<td>%</td>
+<td>Brightness percentage.</td>
+</tr>
+<tr>
+<td>A</td>
+<td>0.000000</td>
+<td>1.000000</td>
+<td></td>
+<td>Alpha channel.</td>
+</tr>
+</tbody>
+</table>
+<h1>λSL</h1>
+<p><em>λSL (lambdaSL) color model using the wavelength of monochromatic light to define hue.</em></p>
+<table>
+<thead>
+<tr>
+<th>Channel</th>
+<th>Min</th>
+<th>Max</th>
+<th>Unit</th>
+<th>Desc</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>λ</td>
+<td>380.000000</td>
+<td>750.000000</td>
+<td>nm</td>
+<td>Wavelength in nanometers.</td>
+</tr>
+<tr>
+<td>S</td>
+<td>0.000000</td>
+<td>100.000000</td>
+<td>%</td>
+<td>Saturation percentage.</td>
+</tr>
+<tr>
+<td>L</td>
+<td>0.000000</td>
+<td>100.000000</td>
+<td>%</td>
+<td>Luminance percentage.</td>
+</tr>
+<tr>
+<td>A</td>
+<td>0.000000</td>
+<td>1.000000</td>
+<td></td>
+<td>Alpha channel.</td>
+</tr>
+</tbody>
+</table>
+<br><a name="blendmodes"></a><h1>Blend Modes</h1>
+<table>
+<thead>
+<tr>
+<th>Name</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>add</td>
+<td>Adds the pixel values of the blend layer to the base, brightening the image. It's ideal for simulating light effects such as glows or flares.</td>
+</tr>
+<tr>
+<td>average</td>
+<td>Computes the average of the pixel values from both layers, resulting in a smooth, balanced blend. This mode works well for subtle transitions.</td>
+</tr>
+<tr>
+<td>color</td>
+<td>Replaces the hue and saturation of the base image with those of the blend layer while keeping luminance unchanged. It's perfect for recoloring images without affecting detail.</td>
+</tr>
+<tr>
+<td>color-burn</td>
+<td>Darkens the base by increasing contrast with the blend, deepening shadows and enriching tones. Often used for dramatic, high-contrast effects.</td>
+</tr>
+<tr>
+<td>color-dodge</td>
+<td>Brightens the base image by reducing contrast relative to the blend, enhancing highlights and creating a luminous effect.</td>
+</tr>
+<tr>
+<td>contrast-negate</td>
+<td>Inverts the relative contrast of the image, flipping light and dark areas for a striking, surreal look. This creative mode is great for experimental effects.</td>
+</tr>
+<tr>
+<td>darken</td>
+<td>Compares pixel values and retains the darker one, emphasizing shadows and creating a moody, deeper composite.</td>
+</tr>
+<tr>
+<td>darker-color</td>
+<td>Selects the pixel with the lower overall color intensity, favoring more saturated dark hues and enhancing color depth in shadowed areas.</td>
+</tr>
+<tr>
+<td>difference</td>
+<td>Subtracts one layer's pixel values from the other to produce a high-contrast, sometimes inverted effect. It's often used for edgy, creative visuals.</td>
+</tr>
+<tr>
+<td>divide</td>
+<td>Divides the base pixel values by those of the blend, producing a lighter, sometimes ethereal result. It can generate unique, abstract effects.</td>
+</tr>
+<tr>
+<td>erase</td>
+<td>Reduces the opacity of the base image where the blend is applied, effectively “erasing” parts of the image. Commonly used for masking or creating transparency.</td>
+</tr>
+<tr>
+<td>exclusion</td>
+<td>Creates a softer variant of the difference mode, lowering extreme contrasts for a more subtle, muted effect.</td>
+</tr>
+<tr>
+<td>glow</td>
+<td>Enhances brightness around lighter areas to produce a soft, halo-like effect. This mode is useful for adding a natural or artistic glow.</td>
+</tr>
+<tr>
+<td>hard-light</td>
+<td>Combines aspects of multiply and screen modes based on the blend color, resulting in high contrast with dynamic lighting—ideal for dramatic overlays.</td>
+</tr>
+<tr>
+<td>hard-mix</td>
+<td>Applies a threshold effect that produces a highly posterized, almost binary color output, perfect for bold, graphic designs.</td>
+</tr>
+<tr>
+<td>hue</td>
+<td>Replaces the base image’s hue with that of the blend layer while preserving luminance and saturation, making it great for targeted color shifts.</td>
+</tr>
+<tr>
+<td>lighten</td>
+<td>Compares pixels and selects the lighter value, brightening the image overall. It's often used to emphasize highlights.</td>
+</tr>
+<tr>
+<td>lighter-color</td>
+<td>Similar to lighten but evaluates the overall color brightness rather than just luminance, favoring more vibrant tones.</td>
+</tr>
+<tr>
+<td>linear-burn</td>
+<td>Darkens the image in a linear fashion, gently reducing brightness while preserving detail—a controlled way to deepen shadows.</td>
+</tr>
+<tr>
+<td>linear-light</td>
+<td>Adjusts brightness linearly by combining elements of dodge and burn, offering a versatile method for fine-tuning contrast and exposure.</td>
+</tr>
+<tr>
+<td>luminosity</td>
+<td>Replaces the base image’s luminance with that of the blend while keeping hue and saturation intact, useful for brightness adjustments without color shifts.</td>
+</tr>
+<tr>
+<td>multiply</td>
+<td>Multiplies the pixel values to darken the image, enhancing shadows and adding depth. It's a standard choice for shading and weight.</td>
+</tr>
+<tr>
+<td>negation</td>
+<td>Inverts pixel values by subtracting them from a maximum, producing a high-contrast negative effect. This mode is often used for dramatic, artistic looks.</td>
+</tr>
+<tr>
+<td>normal</td>
+<td>Applies no special blending—simply overlays the blend layer as is. It's the default mode for straightforward layer stacking.</td>
+</tr>
+<tr>
+<td>overlay</td>
+<td>Merges multiply and screen techniques; dark areas become darker and light areas become lighter, boosting contrast and texture.</td>
+</tr>
+<tr>
+<td>pin-light</td>
+<td>Selectively replaces pixels based on brightness thresholds, creating a posterized, high-contrast effect that emphasizes extremes.</td>
+</tr>
+<tr>
+<td>reflect</td>
+<td>Inverts the base color relative to the blend, simulating a mirror-like, reflective effect that can highlight edges or add luminosity.</td>
+</tr>
+<tr>
+<td>saturation</td>
+<td>Transfers only the saturation from the blend to the base while leaving hue and luminance unchanged—ideal for adjusting color intensity.</td>
+</tr>
+<tr>
+<td>screen</td>
+<td>Inverts, multiplies, and then reinverts pixels to produce a brighter, washed-out effect. It's commonly used to add soft highlights.</td>
+</tr>
+<tr>
+<td>soft-light</td>
+<td>Applies a gentle, diffused light effect that subtly darkens or lightens the base image, enhancing textures without harsh contrasts.</td>
+</tr>
+<tr>
+<td>subtract</td>
+<td>Subtracts the blend from the base, often resulting in a darker, more textured image. It's useful for creating moody, vintage-style effects.</td>
+</tr>
+<tr>
+<td>vivid-light</td>
+<td>Combines elements of color dodge and color burn to produce a highly saturated, high-contrast image. This mode is excellent for dramatic and vibrant enhancements.</td>
+</tr>
+</tbody>
+</table>
+<br><a name="projections"></a><h1>Projections</h1>
+<h1>equirectangular</h1>
+<p><em>A linear mapping between cartesian x/y and lat/lon.</em></p>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Min</th>
+<th>Max</th>
+<th>Unit</th>
+<th>Desc</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>lat</td>
+<td>90.000000</td>
+<td>-90.000000</td>
+<td>°</td>
+<td>The latitude where 90 is North and -90 is South.</td>
+</tr>
+<tr>
+<td>lon</td>
+<td>-180.000000</td>
+<td>180.000000</td>
+<td>°</td>
+<td>The longitude where -180 is West and 180 is East..</td>
+</tr>
+</tbody>
+</table>
+<h1>mercator</h1>
+<p><em>A cylindrical projection preserving angles, with significant area distortion near the poles.</em></p>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Min</th>
+<th>Max</th>
+<th>Unit</th>
+<th>Desc</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>lat</td>
+<td>85.051129</td>
+<td>-85.051129</td>
+<td>°</td>
+<td>The latitude where 85.051° is the maximum and -85.051° is the minimum.</td>
+</tr>
+<tr>
+<td>lon</td>
+<td>-180.000000</td>
+<td>180.000000</td>
+<td>°</td>
+<td>The longitude where -180 is West and 180 is East.</td>
+</tr>
+</tbody>
+</table>
+<h1>polar-to-rect</h1>
+<p><em>Converts polar coordinates (angle and normalized radius) to rectangular (Cartesian) coordinates.</em></p>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Min</th>
+<th>Max</th>
+<th>Unit</th>
+<th>Desc</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>θ</td>
+<td>-3.141593</td>
+<td>3.141593</td>
+<td>rad</td>
+<td>Angular coordinate in radians (from -π to π).</td>
+</tr>
+<tr>
+<td>r</td>
+<td>0.000000</td>
+<td>1.000000</td>
+<td></td>
+<td>Normalized radial coordinate (0 at center to 1 at maximum).</td>
+</tr>
+</tbody>
+</table>
+<h1>rect-to-polar</h1>
+<p><em>Converts rectangular (Cartesian) coordinates to polar coordinates (angle and normalized radius).</em></p>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Min</th>
+<th>Max</th>
+<th>Unit</th>
+<th>Desc</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>θ</td>
+<td>-3.141593</td>
+<td>3.141593</td>
+<td>rad</td>
+<td>Angular coordinate in radians (from -π to π).</td>
+</tr>
+<tr>
+<td>r</td>
+<td>0.000000</td>
+<td>1.000000</td>
+<td></td>
+<td>Normalized radial coordinate (0 at center to 1 at maximum).</td>
+</tr>
+</tbody>
+</table>
+<h1>sinusoidal</h1>
+<p><em>A pseudocylindrical projection that preserves area, with a non-linear x scaling based on the cosine of latitude.</em></p>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Min</th>
+<th>Max</th>
+<th>Unit</th>
+<th>Desc</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>lat</td>
+<td>90.000000</td>
+<td>-90.000000</td>
+<td>°</td>
+<td>The latitude where 90 is North and -90 is South.</td>
+</tr>
+<tr>
+<td>lon</td>
+<td>-180.000000</td>
+<td>180.000000</td>
+<td>°</td>
+<td>The longitude where -180 is West and 180 is East.</td>
+</tr>
+</tbody>
+</table>
+<h1>stereographic</h1>
+<p><em>A projection that maps the sphere onto a plane using stereographic projection from the North Pole.</em></p>
+<table>
+<thead>
+<tr>
+<th>Component</th>
+<th>Min</th>
+<th>Max</th>
+<th>Unit</th>
+<th>Desc</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>lat</td>
+<td>90.000000</td>
+<td>-90.000000</td>
+<td>°</td>
+<td>The latitude where 90 is North and -90 is South.</td>
+</tr>
+<tr>
+<td>lon</td>
+<td>-180.000000</td>
+<td>180.000000</td>
+<td>°</td>
+<td>The longitude where -180 is West and 180 is East.</td>
+</tr>
+</tbody>
+</table>
+<br>
+		<a name="example"></a><h1>Example GFXScript</h1>
+		<pre><code class="language-gfxs">[COMPOSITION]
+# The composition section defines the layers making up the final output. 
+# For each layer blendmode, alpha, filter and source (file or URL) must be defined. 
+#
+# The order of compositing:
+# - for each layer:
+#   - if defined (name of filter is not "*"), apply filter 
+#   - blend result with previous layer using the given blendmode and alpha
+# - apply composition filter
+# - if defined, apply crop operation 
+# - if defined, apply resize operation 
+#
+width   = 182
+height  = 182
+color   = hsla(0.00 0.00 0.00 1.00)  # background color of the composition, must be defined as a HSLA color
+filter  = filter4                    # filter to use for the final compositon (or "*" for none)
+crop    = 32 32 64 64                # crop settings for the final composition  (can be ommitted) 
+resize  = 128 128                    # resize settings for the final composition (can be ommitted)
+
+[LAYERS]
+# The layers section defines where the data is loaded from and how all layers are merged together.
+# Processing is from bottom to top to align with the visual representation in common photo editor software. 
+ screen 1.0000 filter3   $IMG2
+ screen 1.0000 filter2   $IMG1
+ screen 1.0000 filter3   https://sdo.gsfc.nasa.gov/assets/img/latest/f_211_193_171pfss_512.jpg
+ screen 1.0000 filter2   https://sdo.gsfc.nasa.gov/assets/img/latest/f_304_211_171pfss_512.jpg
+    add 1.0000 filter1   https://sdo.gsfc.nasa.gov/assets/img/latest/f_094_335_193pfss_512.jpg
+overlay 1.0000 filter1   https://sdo.gsfc.nasa.gov/assets/img/latest/f_HMImag_171pfss_512.jpg
+ normal 1.0000       *   https://sdo.gsfc.nasa.gov/assets/img/latest/latest_512_HMIBpfss.jpg
+
+[VARS]
+# The vars section is used to define variables for reuse in filter definitions.
+# There are two types: 
+# - numbers (int, uint and float are all treated as float64) 
+# - strings (wrapped in double quotes)
+h0     = 25
+ht0    = 60
+hf0    = 60
+l0     =  0.70
+sf0    =  0.20
+myText = "hello world, we force you to use double quotes to wrap strings."
+
+[FILTERS]
+# The filters section is used to define filters that can be used for compositing. 
+# There are several syntax styles possible, so you can decide yourself how verbose you want to be. 
+
+###################################
+# Syntax style 1: named arguments #
+###################################
+# This style allows to change the order of arguments.
+
+# So this filter:
+filter1a {
+  extract(
+    hue = h0      hue-tolerance = ht0     hue-feather = hf0
+    lum = l0      lum-tolerance = 0.30    lum-feather = 0.20
+    sat = 0.75    sat-tolerance = 0.25    sat-feather = sf0 
+  )
+}
+
+# ... is the same as this filter:
+filter1b {
+  extract(
+    hue = h0            lum = l0              sat = 0.75      
+    hue-tolerance = ht0 lum-tolerance = 0.30  sat-tolerance = 0.25
+    hue-feather = hf0   lum-feather = 0.20    sat-feather = sf0
+  )
+}
+
+# ... and this filter:
+filter1c {
+  extract(hue = h0 hue-tolerance = ht0  hue-feather = hf0  lum = l0 lum-tolerance = 0.30 lum-feather = 0.20 sat = 0.75  sat-tolerance = 0.25 sat-feather = sf0)
+}
+
+# You can also omit arguments if you want to use their default:
+filter1d {
+  extract(hue = h0 lum = l0 sat = 0.75)
+}
+
+#####################################
+# Syntax style 2: unnamed arguments #
+#####################################
+# Here the order of arguments matters, but all arguments have default values, 
+# so omitted arguments will use their default value. 
+
+# This filter:
+filter2a {
+  extract( h0 ht0 hf0    l0 0.30 0.20    0.75 0.25 sf0)
+  enhance()
+}
+
+# ... is the same as this filter:
+filter2b {
+  extract( 
+      h0  ht0  hf0    
+      l0 0.30 0.20    
+    0.75 0.25  sf0
+  )
+  enhance()
+}
+
+###################################
+# Syntax style 3: mixed arguments #
+###################################
+# Style 1 and 2 can be mixed as long as each function call uses one or the other. 
+# It is not possible to mixed named and unnamed argument in one function call.
+
+filter5 { 
+  contrast(adjustment = 0.5) # style 1
+  contrast(0.5)              # style 2
+  enhance()
+}
+
+####################
+# Filter inclusion #
+####################
+# You can build more complex filters by combining previously defined filters with the `use()` function. 
+# Note that filters must have been defined before being included!
+
+filterInclude {
+  # The parser will replace this with the contents of `filter1a`
+  use(filter1a) 
+  
+  # The parser will replace this with the contents of `filter2`
+  use(filter2)
+  
+  # This include will also work, even though it's defined below
+  use(another-filter-to-include)  
+  
+  contrast(-0.5)
+}
+
+# Linebreaks are not required, so this is also valid:
+another-filter-to-include { contrast(-0.9) enhance() gamma(l0) }</code></pre>
+	</div>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+	<script>(function(){
+                // Dynamically generated tmLanguage grammar for GFXScript.
+                var tmGrammar = {
+    "fileTypes": [
+        ".gfxs"
+    ],
+    "name": "GFXScript",
+    "patterns": [
+        {
+            "begin": "\"",
+            "end": "\"",
+            "name": "string.quoted.double.gfxs",
+            "patterns": [
+                {
+                    "match": "\\\\.",
+                    "name": "constant.character.escape.gfxs"
+                }
+            ]
+        },
+        {
+            "match": "#.*(?=$|\\r\\n|\\n)",
+            "name": "comment.line.gfxs"
+        },
+        {
+            "match": "(?\u003c=^|\\s*)(\\badd\\b|\\baverage\\b|\\bcolor\\b|\\bcolor-burn\\b|\\bcolor-dodge\\b|\\bcontrast-negate\\b|\\bdarken\\b|\\bdarker-color\\b|\\bdifference\\b|\\bdivide\\b|\\berase\\b|\\bexclusion\\b|\\bglow\\b|\\bhard-light\\b|\\bhard-mix\\b|\\bhue\\b|\\blighten\\b|\\blighter-color\\b|\\blinear-burn\\b|\\blinear-light\\b|\\bluminosity\\b|\\bmultiply\\b|\\bnegation\\b|\\bnormal\\b|\\boverlay\\b|\\bpin-light\\b|\\breflect\\b|\\bsaturation\\b|\\bscreen\\b|\\bsoft-light\\b|\\bsubtract\\b|\\bvivid-light\\b)\\s+(?=\\b(0|1)\\.\\d+?\\b)",
+            "name": "string.regexp.gfxs"
+        },
+        {
+            "match": "(?\u003c=\\b(0|1)\\.\\d+?\\b)\\s+\\b[a-zA-Z][a-zA-Z0-9\\-_]*\\b\\s+(?=(\\.\\./.*|\\./.*|/.*|\\b(http|ftp)s{0,1}://\\S*\\b|\\$IMG\\d+))|(?\u003c=filter\\s*=\\s*)\\b[a-zA-Z][a-zA-Z0-9\\-_]*\\b\\s*|\\b\\b[a-zA-Z][a-zA-Z0-9\\-_]*\\b\\b\\s*(?=\\{)|\\*",
+            "name": "support.variable.gfxs"
+        },
+        {
+            "match": "\\[(\\bVARS\\b|\\bFILTERS\\b|\\bCOMPOSITION\\b|\\bLAYERS\\b)\\]",
+            "name": "entity.name.class.gfxs"
+        },
+        {
+            "match": "(\\.\\./.*|\\./.*|/.*|\\b(http|ftp)s{0,1}://\\S*\\b|\\$IMG\\d+)",
+            "name": "entity.name.type.gfxs"
+        },
+        {
+            "match": "\\b-?\\d+(\\.\\d+)?\\b",
+            "name": "constant.numeric.gfxs"
+        },
+        {
+            "match": "\"[^\"]*\"",
+            "name": "constant.string.gfxs"
+        },
+        {
+            "match": "(\\buse\\b|\\bhsla\\b)",
+            "name": "keyword.include.gfxs"
+        },
+        {
+            "match": "(\\bwidth\\b|\\bheight\\b|\\bcolor\\b|\\bcrop\\b|\\bfilter\\b|\\bresize\\b)(?=\\s*=)",
+            "name": "keyword.other.gfxs"
+        },
+        {
+            "match": "\\b(alpha-map|brightness|color-shift|contrast|convolution|blur|crop|crop-circle|edge-detect|emboss|enhance|extract|flip-h|flip-v|gamma|gray|hue|hue-contrast|invert|lum|lum-contrast|pastelize|remove|rotate|sat|sat-contrast|scale|sepia|sharpen|threshold|to-polar|transform|translate|translate-wrap|vibrance|project-as-equirectangular|project-as-mercator|project-as-polar-to-rect|project-as-rect-to-polar|project-as-sinusoidal|project-as-stereographic)(?=\\s*\\()",
+            "name": "support.function.gfxs"
+        },
+        {
+            "match": "(\\(|\\)|\\{|\\}|\\[|\\])",
+            "name": "punctuation.gfxs"
+        },
+        {
+            "match": "\\b\\b[a-zA-Z][a-zA-Z0-9\\-_]*\\b\\b\\s*(?==)",
+            "name": "markup.bold.gfxs"
+        }
+    ],
+    "scopeName": "source.gfxs"
+};
+            
+                // A simple conversion function from a tmLanguage grammar to a Prism language definition.
+                // This only handles patterns with "match" and "name" properties.
+                function convertTmToPrism(grammar) {
+                    var prismLang = {};
+                    if (grammar.patterns && grammar.patterns.length) {
+                        grammar.patterns.forEach(function(pattern) {
+                            if (pattern.match && pattern.name) {
+                                // Use the first segment of the scope name as the Prism token key.
+                                var tokenKey = pattern.name.replaceAll(".gfxscript", "").replaceAll(".", " ");
+                                if (!prismLang[tokenKey]) {
+                                    prismLang[tokenKey] = [];
+                                }
+                                // Create a global RegExp from the pattern.
+                                prismLang[tokenKey].push(new RegExp(pattern.match, "g"));
+                            }
+                        });
+                    }
+                    // Combine multiple regexes for the same token if necessary.
+                    for (var key in prismLang) {
+                        if (prismLang[key].length === 1) {
+                            prismLang[key] = prismLang[key][0];
+                        } else {
+                            var combined = prismLang[key].map(function(re) { return re.source; }).join("|");
+                            prismLang[key] = new RegExp(combined, "g");
+                        }
+                    }
+                    return prismLang;
+                }
+            
+                // Convert the tmLanguage grammar to a Prism language definition.
+                var prismDefinition = convertTmToPrism(tmGrammar);
+                // Register the language with Prism using your language ID.
+                Prism.languages.gfxs = prismDefinition;
+            })();</script>
+</body>
+</html>

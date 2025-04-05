@@ -4,11 +4,10 @@ import (
 	"runtime"
 	"sync"
 
-	"github.com/toxyl/gfx/color/hsla"
-	"github.com/toxyl/gfx/color/rgba"
+	"github.com/toxyl/gfx/core/color"
 )
 
-func (i *Image) ProcessHSLA(startX, startY, endX, endY int, fn func(x, y int, col *hsla.HSLA) (x2, y2 int, col2 *hsla.HSLA)) *Image {
+func (i *Image) ProcessHSLA(startX, startY, endX, endY int, fn func(x, y int, col *color.HSL) (x2, y2 int, col2 *color.HSL)) *Image {
 	numCores := runtime.NumCPU()
 	sem := make(chan struct{}, numCores) // Limit goroutines to the number of cores.
 	var wg sync.WaitGroup
@@ -22,7 +21,7 @@ func (i *Image) ProcessHSLA(startX, startY, endX, endY int, fn func(x, y int, co
 				wg.Done()
 			}()
 			for x := startX; x < endX; x++ {
-				dst.SetHSLA(fn(x, row, dst.GetHSLA(x, row)))
+				dst.SetHSLA(fn(x, row, color.HSLFromRGB(dst.GetRGBA64(x, row))))
 			}
 		}(y)
 	}
@@ -32,7 +31,7 @@ func (i *Image) ProcessHSLA(startX, startY, endX, endY int, fn func(x, y int, co
 }
 
 // ProcessRGBA processes RGBA pixels using goroutines per row.
-func (i *Image) ProcessRGBA(startX, startY, endX, endY int, fn func(x, y int, col *rgba.RGBA) (x2, y2 int, col2 *rgba.RGBA)) *Image {
+func (i *Image) ProcessRGBA(startX, startY, endX, endY int, fn func(x, y int, col *color.RGBA64) (x2, y2 int, col2 *color.RGBA64)) *Image {
 	numCores := runtime.NumCPU()
 	sem := make(chan struct{}, numCores)
 	var wg sync.WaitGroup
@@ -46,7 +45,8 @@ func (i *Image) ProcessRGBA(startX, startY, endX, endY int, fn func(x, y int, co
 				wg.Done()
 			}()
 			for x := startX; x < endX; x++ {
-				dst.SetRGBA(fn(x, row, dst.GetRGBA(x, row)))
+				x2, y2, c := fn(x, row, dst.GetRGBA64(x, row))
+				dst.SetRGBA(x2, y2, c)
 			}
 		}(y)
 	}

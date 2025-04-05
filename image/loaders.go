@@ -5,10 +5,10 @@ import (
 	"strings"
 
 	"github.com/toxyl/errors"
-	"github.com/toxyl/flo"
-	"github.com/toxyl/gfx/jpg"
-	"github.com/toxyl/gfx/net"
-	"github.com/toxyl/gfx/png"
+	"github.com/toxyl/gfx/fs"
+	"github.com/toxyl/gfx/fs/jpg"
+	"github.com/toxyl/gfx/fs/net"
+	"github.com/toxyl/gfx/fs/png"
 )
 
 func loadFromURL(url string) (image.Image, error) {
@@ -28,7 +28,7 @@ func loadFromURL(url string) (image.Image, error) {
 }
 
 func loadFromFile(path string) (image.Image, error) {
-	imgData := flo.File(path).AsBytes()
+	imgData := fs.LoadBytes(path)
 	if len(imgData) == 0 {
 		return nil, errors.Newf("no data found at %s", path)
 	}

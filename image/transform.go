@@ -7,14 +7,14 @@ import (
 	"sync"
 )
 
-// TransformRotateScale applies a combined rotation and scaling transformation
+// Transform applies a combined rotation and scaling transformation
 // to the image around the specified center point. The transformation is defined as:
 //
 //	p_dest = center + factor * R(theta) * (p_src - center)
 //
 // This method computes the inverse mapping for each destination pixel.
 // The original image dimensions are maintained, so parts of the transformed image that fall outside are clipped.
-func (i *Image) TransformRotateScale(angle float64, factor float64, centerX, centerY int) *Image {
+func (i *Image) Transform(angle float64, factor float64, centerX, centerY int) *Image {
 	i.Lock()
 	defer i.Unlock()
 	w := i.raw.Bounds().Dx()

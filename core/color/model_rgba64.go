@@ -324,3 +324,19 @@ func (c *RGBA64) ToUint16() color.RGBA64 {
 func (c *RGBA64) Get() *RGBA64 {
 	return c.Copy()
 }
+
+// srgbToLinear converts a value from sRGB to linear color space.
+func srgbToLinear(v float64) float64 {
+	if v <= 0.04045 {
+		return v / 12.92
+	}
+	return math.Pow((v+0.055)/1.055, 2.4)
+}
+
+// linearToSrgb converts a value from linear to sRGB color space.
+func linearToSrgb(v float64) float64 {
+	if v <= 0.0031308 {
+		return v * 12.92
+	}
+	return 1.055*math.Pow(v, 1/2.4) - 0.055
+}

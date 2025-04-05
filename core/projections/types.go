@@ -1,9 +1,5 @@
 package projections
 
-import (
-	"github.com/toxyl/gfx/registry/meta"
-)
-
 // Projection defines the interface for all projection types
 type Projection interface {
 	// To converts from geographic coordinates (latitude, longitude) to cartesian coordinates (x, y)
@@ -14,14 +10,14 @@ type Projection interface {
 
 // RegistryProjection wraps a Projection for registration in the registry
 type RegistryProjection struct {
-	Meta *meta.Projection
+	Meta *ProjectionMeta
 	To   func(latitude, longitude, w, h float64) (x, y float64)
 	From func(x, y, w, h float64) (latitude, longitude float64)
 }
 
 // Name returns the name of the projection
 func (p *RegistryProjection) Name() string {
-	return p.Meta.Name
+	return p.Meta.Name()
 }
 
 // Convert converts coordinates from one projection to another

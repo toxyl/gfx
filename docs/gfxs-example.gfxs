@@ -1,0 +1,134 @@
+[COMPOSITION]
+# The composition section defines the layers making up the final output. 
+# For each layer blendmode, alpha, filter and source (file or URL) must be defined. 
+#
+# The order of compositing:
+# - for each layer:
+#   - if defined (name of filter is not "*"), apply filter 
+#   - blend result with previous layer using the given blendmode and alpha
+# - apply composition filter
+# - if defined, apply crop operation 
+# - if defined, apply resize operation 
+#
+width   = 182
+height  = 182
+color   = hsla(0.00 0.00 0.00 1.00)  # background color of the composition, must be defined as a HSLA color
+filter  = filter4                    # filter to use for the final compositon (or "*" for none)
+crop    = 32 32 64 64                # crop settings for the final composition  (can be ommitted) 
+resize  = 128 128                    # resize settings for the final composition (can be ommitted)
+
+[LAYERS]
+# The layers section defines where the data is loaded from and how all layers are merged together.
+# Processing is from bottom to top to align with the visual representation in common photo editor software. 
+ screen 1.0000 filter3   $IMG2
+ screen 1.0000 filter2   $IMG1
+ screen 1.0000 filter3   https://sdo.gsfc.nasa.gov/assets/img/latest/f_211_193_171pfss_512.jpg
+ screen 1.0000 filter2   https://sdo.gsfc.nasa.gov/assets/img/latest/f_304_211_171pfss_512.jpg
+    add 1.0000 filter1   https://sdo.gsfc.nasa.gov/assets/img/latest/f_094_335_193pfss_512.jpg
+overlay 1.0000 filter1   https://sdo.gsfc.nasa.gov/assets/img/latest/f_HMImag_171pfss_512.jpg
+ normal 1.0000       *   https://sdo.gsfc.nasa.gov/assets/img/latest/latest_512_HMIBpfss.jpg
+
+[VARS]
+# The vars section is used to define variables for reuse in filter definitions.
+# There are two types: 
+# - numbers (int, uint and float are all treated as float64) 
+# - strings (wrapped in double quotes)
+h0     = 25
+ht0    = 60
+hf0    = 60
+l0     =  0.70
+sf0    =  0.20
+myText = "hello world, we force you to use double quotes to wrap strings."
+
+[FILTERS]
+# The filters section is used to define filters that can be used for compositing. 
+# There are several syntax styles possible, so you can decide yourself how verbose you want to be. 
+
+###################################
+# Syntax style 1: named arguments #
+###################################
+# This style allows to change the order of arguments.
+
+# So this filter:
+filter1a {
+  extract(
+    hue = h0      hue-tolerance = ht0     hue-feather = hf0
+    lum = l0      lum-tolerance = 0.30    lum-feather = 0.20
+    sat = 0.75    sat-tolerance = 0.25    sat-feather = sf0 
+  )
+}
+
+# ... is the same as this filter:
+filter1b {
+  extract(
+    hue = h0            lum = l0              sat = 0.75      
+    hue-tolerance = ht0 lum-tolerance = 0.30  sat-tolerance = 0.25
+    hue-feather = hf0   lum-feather = 0.20    sat-feather = sf0
+  )
+}
+
+# ... and this filter:
+filter1c {
+  extract(hue = h0 hue-tolerance = ht0  hue-feather = hf0  lum = l0 lum-tolerance = 0.30 lum-feather = 0.20 sat = 0.75  sat-tolerance = 0.25 sat-feather = sf0)
+}
+
+# You can also omit arguments if you want to use their default:
+filter1d {
+  extract(hue = h0 lum = l0 sat = 0.75)
+}
+
+#####################################
+# Syntax style 2: unnamed arguments #
+#####################################
+# Here the order of arguments matters, but all arguments have default values, 
+# so omitted arguments will use their default value. 
+
+# This filter:
+filter2a {
+  extract( h0 ht0 hf0    l0 0.30 0.20    0.75 0.25 sf0)
+  enhance()
+}
+
+# ... is the same as this filter:
+filter2b {
+  extract( 
+      h0  ht0  hf0    
+      l0 0.30 0.20    
+    0.75 0.25  sf0
+  )
+  enhance()
+}
+
+###################################
+# Syntax style 3: mixed arguments #
+###################################
+# Style 1 and 2 can be mixed as long as each function call uses one or the other. 
+# It is not possible to mixed named and unnamed argument in one function call.
+
+filter5 { 
+  contrast(adjustment = 0.5) # style 1
+  contrast(0.5)              # style 2
+  enhance()
+}
+
+####################
+# Filter inclusion #
+####################
+# You can build more complex filters by combining previously defined filters with the `use()` function. 
+# Note that filters must have been defined before being included!
+
+filterInclude {
+  # The parser will replace this with the contents of `filter1a`
+  use(filter1a) 
+  
+  # The parser will replace this with the contents of `filter2`
+  use(filter2)
+  
+  # This include will also work, even though it's defined below
+  use(another-filter-to-include)  
+  
+  contrast(-0.5)
+}
+
+# Linebreaks are not required, so this is also valid:
+another-filter-to-include { contrast(-0.9) enhance() gamma(l0) }

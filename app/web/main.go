@@ -7,7 +7,7 @@ import (
 	"encoding/base64"
 	"flag"
 	"fmt"
-	"image"
+	stdImage "image"
 	"image/png"
 	"io"
 	"math"
@@ -25,8 +25,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/gofiber/fiber/v2/middleware/cors"
 	"github.com/gofiber/fiber/v2/middleware/recover"
-	_ "github.com/toxyl/gfx/core" // never remove, ensures core is loaded!
-	"github.com/toxyl/gfx/core/image"
+	coreImage "github.com/toxyl/gfx/core/image"
 	"github.com/toxyl/gfx/parser"
 )
 
@@ -93,7 +92,7 @@ func saveBytesAsPNG(filename string, buf []byte, maxMP int) error {
 	}
 
 	// Create image from the decoded standard image
-	i, err := image.FromImage(img)
+	i, err := coreImage.FromImage(img)
 	if err != nil {
 		return fmt.Errorf("failed to create image: %s", err.Error())
 	}
@@ -105,14 +104,14 @@ func saveBytesAsPNG(filename string, buf []byte, maxMP int) error {
 		scale := math.Sqrt(float64(maxMP) / float64(mp))
 		newW := int(float64(width) * scale)
 		newH := int(float64(height) * scale)
-		i, err = i.Resize(newW, newH, image.ResizeBilinear)
+		i, err = i.Resize(newW, newH, coreImage.ResizeBilinear)
 		if err != nil {
 			return fmt.Errorf("failed to resize image: %s", err.Error())
 		}
 	}
 
 	// Save as PNG
-	err = image.SaveAsPNG(i, filename)
+	err = i.SavePNG(filename)
 	if err != nil {
 		return fmt.Errorf("failed to save image: %s", err.Error())
 	}
@@ -196,7 +195,7 @@ var (
 			return c.Status(http.StatusInternalServerError).SendString("Failed to open image file: " + err.Error())
 		}
 		defer file.Close()
-		img, _, err := image.Decode(file)
+		img, _, err := stdImage.Decode(file)
 		if err == nil {
 			width := img.Bounds().Dx()
 			height := img.Bounds().Dy()
@@ -215,10 +214,14 @@ var (
 		}
 
 		// Render the composition and encode the processed image as PNG into memory.
+		renderedComp, renderErr := comp.Render()
+		if renderErr != nil {
+			return c.Status(http.StatusInternalServerError).SendString("Failed to render composition: " + renderErr.Error())
+		}
+
 		outBuffer := new(bytes.Buffer)
-		renderedComp := comp.Render()
-		renderedData := renderedComp.Get()
-		if err := png.Encode(outBuffer, renderedData); err != nil {
+		stdImg := renderedComp.ToStandard()
+		if err := png.Encode(outBuffer, stdImg); err != nil {
 			return c.Status(http.StatusInternalServerError).SendString("Failed to encode processed image: " + err.Error())
 		}
 
@@ -286,15 +289,34 @@ var (
 				return c.Status(http.StatusBadRequest).SendString("Failed to save image: " + err.Error())
 			}
 
-			i := gfxi.NewFromFile(tempOrigPath)
-			updatedGfxs := strings.ReplaceAll(updateDimensionsIfMissing(gfxs, i.W(), i.H()), `$IMG`, i.Path())
+			// Load the image using the core/image package
+			i, err := coreImage.LoadImage(tempOrigPath)
+			if err != nil {
+				continue
+			}
+
+			// Get image dimensions
+			width, height := i.Size()
+
+			updatedGfxs := strings.ReplaceAll(updateDimensionsIfMissing(gfxs, width, height), `$IMG`, tempOrigPath)
 			comp, err := parser.ParseComposition(updatedGfxs)
 			if err != nil {
 				continue
 			}
+
 			processedName := changeExtension(fileHeader.Filename)
 			processedPath := filepath.Join(tempDir, processedName)
-			comp.Render().SaveAsPNG(processedPath)
+
+			// Render the composition and save the result
+			renderedComp, renderErr := comp.Render()
+			if renderErr != nil {
+				continue
+			}
+
+			if err := renderedComp.SavePNG(processedPath); err != nil {
+				continue
+			}
+
 			processedFiles = append(processedFiles, processedFile{originalName: processedName, processedPath: processedPath})
 		}
 
@@ -377,17 +399,59 @@ var (
 		if url == "" {
 			return c.Status(http.StatusBadRequest).SendString("URL required")
 		}
-		u, err := base64.URLEncoding.DecodeString(url)
-		if err != nil || len(u) == 0 {
+
+		decodedURL, err := base64.URLEncoding.DecodeString(url)
+		if err != nil || len(decodedURL) == 0 {
 			return c.Status(http.StatusBadRequest).SendString("Valid URL required")
 		}
-		i := gfxi.NewFromURL(string(u)).ResizeToMaxMP(MAX_MP).SaveAsPNG(baseImage)
-		filterText := updateDimensionsIfMissing(strings.ReplaceAll(string(data), `$IMG`, i.Path()), i.W(), i.H())
+
+		// Download image from URL
+		resp, err := http.Get(string(decodedURL))
+		if err != nil {
+			return c.Status(http.StatusBadRequest).SendString("Failed to download image: " + err.Error())
+		}
+		defer resp.Body.Close()
+
+		// Save to a temporary file
+		tempFile, err := os.Create(baseImage)
+		if err != nil {
+			return c.Status(http.StatusInternalServerError).SendString("Failed to create temporary file: " + err.Error())
+		}
+		defer tempFile.Close()
+
+		_, err = io.Copy(tempFile, resp.Body)
+		if err != nil {
+			return c.Status(http.StatusInternalServerError).SendString("Failed to save downloaded image: " + err.Error())
+		}
+		tempFile.Close()
+
+		// Load the image using the core/image package
+		img, err := coreImage.LoadImage(baseImage)
+		if err != nil {
+			return c.Status(http.StatusInternalServerError).SendString("Failed to load image: " + err.Error())
+		}
+
+		// Get image dimensions
+		width, height := img.Size()
+
+		// Update the filter text and parse the composition
+		filterText := updateDimensionsIfMissing(strings.ReplaceAll(string(data), `$IMG`, baseImage), width, height)
 		comp, err := parser.ParseComposition(filterText)
 		if err != nil {
 			return c.Status(http.StatusBadRequest).SendString("GFXS filter could not be parsed: " + err.Error())
 		}
-		_ = comp.Render().SaveAsPNG(baseImage)
+
+		// Render the composition
+		renderedComp, renderErr := comp.Render()
+		if renderErr != nil {
+			return c.Status(http.StatusInternalServerError).SendString("Failed to render composition: " + renderErr.Error())
+		}
+
+		// Save the result
+		if err := renderedComp.SavePNG(baseImage); err != nil {
+			return c.Status(http.StatusInternalServerError).SendString("Failed to save rendered image: " + err.Error())
+		}
+
 		time.Sleep(100 * time.Millisecond)
 		return c.SendFile(baseImage)
 	}

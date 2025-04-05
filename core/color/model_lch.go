@@ -4,7 +4,7 @@ package color
 import (
 	"fmt"
 
-	"github.com/toxyl/gfx/core/color/constants"
+	"github.com/toxyl/gfx/core/color/utils"
 	"github.com/toxyl/math"
 )
 
@@ -15,73 +15,12 @@ import (
 var _ iColor = (*LCH)(nil) // Ensure LCH implements the ColorModel interface.
 
 //////////////////////////////////////////////////////
-// Conversion utilities
-//////////////////////////////////////////////////////
-
-// labToLch converts LAB to LCH color space.
-func labToLch(l, a, b float64) (l2, c, h float64) {
-	// Handle exact white
-	if math.Abs(l-100) < constants.LCH_WhiteThreshold && math.Abs(a) < constants.LCH_WhiteThreshold && math.Abs(b) < constants.LCH_WhiteThreshold {
-		return 100, 0, 0
-	}
-
-	// Handle near-white colors
-	if math.Abs(l-100) < constants.LCH_NearWhiteThreshold && math.Abs(a) < constants.LCH_WhiteThreshold && math.Abs(b) < constants.LCH_WhiteThreshold {
-		return l, 0, 0
-	}
-
-	// Handle gray colors (a and b close to zero)
-	if math.Abs(a) < constants.LCH_WhiteThreshold && math.Abs(b) < constants.LCH_WhiteThreshold {
-		return l, 0, 0
-	}
-
-	c = math.Sqrt(a*a + b*b)
-
-	// Handle very small chroma values
-	if c < constants.LCH_ChromaThreshold {
-		return l, 0, 0
-	}
-
-	h = math.Atan2(b, a) * constants.LCH_DegreesPerRadian
-
-	if h < 0 {
-		h += constants.LCH_DegreesPerCircle
-	}
-
-	return l, c, h
-}
-
-// lchToLab converts LCH to LAB color space.
-func lchToLab(l, c, h float64) (l2, a, b float64) {
-	// Handle exact white
-	if math.Abs(l-100) < constants.LCH_WhiteThreshold && math.Abs(c) < constants.LCH_WhiteThreshold {
-		return 100, 0, 0
-	}
-
-	// Handle near-white colors
-	if math.Abs(l-100) < constants.LCH_NearWhiteThreshold && math.Abs(c) < constants.LCH_WhiteThreshold {
-		return l, 0, 0
-	}
-
-	// Handle gray colors (chroma close to zero)
-	if math.Abs(c) < constants.LCH_ChromaThreshold {
-		return l, 0, 0
-	}
-
-	h = h * constants.LCH_RadiansPerDegree
-	a = c * math.Cos(h)
-	b = c * math.Sin(h)
-
-	return l, a, b
-}
-
-//////////////////////////////////////////////////////
 // Constructors
 //////////////////////////////////////////////////////
 
 // NewLCH creates a new LCH instance.
-// L (lightness) is in range [0,1]
-// C (chroma) is in range [0,1]
+// L (lightness) is in range [0,100]
+// C (chroma) is in range [0,100]
 // H (hue) is in range [0,360]
 // Alpha is in range [0,1]
 func NewLCH[N math.Number](l, c, h, alpha N) (*LCH, error) {
@@ -90,17 +29,13 @@ func NewLCH[N math.Number](l, c, h, alpha N) (*LCH, error) {
 
 // LCHFromRGB converts an RGBA64 (RGB) to an LCH color.
 func LCHFromRGB(c *RGBA64) *LCH {
-	// First convert to LAB
-	x, y, z := rgbToXyz(c.R, c.G, c.B)
-	l, a, b := xyzToLab(x, y, z)
-
-	// Then convert to LCH
-	l2, chroma, h := labToLch(l, a, b)
+	// Convert RGB to LCH
+	l, chroma, hue := utils.RGBToLCH(c.R, c.G, c.B)
 
 	return &LCH{
-		L:     l2,
+		L:     l,
 		C:     chroma,
-		H:     h,
+		H:     hue,
 		Alpha: c.A,
 	}
 }
@@ -110,18 +45,20 @@ func LCHFromRGB(c *RGBA64) *LCH {
 //////////////////////////////////////////////////////
 
 // LCH is a helper struct representing a color in the LCH color model.
-// LCH is similar to HCL but with a different ordering of components.
 type LCH struct {
-	L, C, H, Alpha float64
+	L     float64 // [0,100] Lightness
+	C     float64 // [0,100] Chroma
+	H     float64 // [0,360] Hue
+	Alpha float64 // [0,1] Alpha
 }
 
 func (l *LCH) Meta() *ColorModelMeta {
 	return NewModelMeta(
 		"LCH",
-		"Lightness, Chroma, Hue color model.",
+		"Lightness, Chroma, Hue color model (polar form of LAB).",
 		NewChannelMeta("L", 0, 100, "", "Lightness."),
-		NewChannelMeta("C", 0, 1, "", "Chroma."),
-		NewChannelMeta("H", 0, 360, "°", "Hue in degrees."),
+		NewChannelMeta("C", 0, 100, "", "Chroma (colorfulness)."),
+		NewChannelMeta("H", 0, 360, "°", "Hue angle."),
 		NewChannelMeta("Alpha", 0, 1, "", "Alpha channel."),
 	)
 }
@@ -131,16 +68,15 @@ func (l *LCH) Meta() *ColorModelMeta {
 //////////////////////////////////////////////////////
 
 func (l *LCH) ToRGB() *RGBA64 {
-	// First convert to LAB
-	l2, a, b := lchToLab(l.L, l.C, l.H)
+	// Convert LCH to RGB
+	r, g, b := utils.LCHToRGB(l.L, l.C, l.H)
 
-	// Then convert to XYZ
-	x, y, z := labToXyz(l2, a, b)
-
-	// Finally convert to RGB
-	r, g, b := xyzToRgb(x, y, z)
-
-	return &RGBA64{R: r, G: g, B: b, A: l.Alpha}
+	return &RGBA64{
+		R: r,
+		G: g,
+		B: b,
+		A: l.Alpha,
+	}
 }
 
 // FromSlice initializes an LCH instance from a slice of float64 values.

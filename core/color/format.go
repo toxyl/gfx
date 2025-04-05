@@ -98,12 +98,8 @@ func parseHSL(hsl string) (iColor, error) {
 	s, _ := strconv.ParseFloat(matches[2], 64)
 	l, _ := strconv.ParseFloat(matches[3], 64)
 
-	return &HSL{
-		H:     h,
-		S:     s / 100,
-		L:     l / 100,
-		Alpha: 1.0,
-	}, nil
+	// Create HSL with proper field names from model_hsl.go
+	return NewHSL(h, s/100, l/100, 1.0)
 }
 
 // parseNamedColor parses a named color

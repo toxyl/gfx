@@ -3,69 +3,10 @@ package color
 
 import (
 	"fmt"
-	"strconv"
-	"strings"
 
-	"github.com/toxyl/gfx/core/color/constants"
+	"github.com/toxyl/gfx/core/color/utils"
 	"github.com/toxyl/math"
 )
-
-//////////////////////////////////////////////////////
-// Conversion utilities
-//////////////////////////////////////////////////////
-
-func rgbToHex(r, g, b float64) string {
-	// Convert normalized [0,1] RGB to hex string
-	r8 := uint8(math.Clamp(r, 0, 1) * constants.HEX_Max)
-	g8 := uint8(math.Clamp(g, 0, 1) * constants.HEX_Max)
-	b8 := uint8(math.Clamp(b, 0, 1) * constants.HEX_Max)
-	return fmt.Sprintf("%s%02x%02x%02x", constants.HEX_Prefix, r8, g8, b8)
-}
-
-func hexToRgb(hex string) (r, g, b float64, err error) {
-	// Remove prefix and convert to lowercase
-	hex = strings.TrimPrefix(strings.ToLower(hex), constants.HEX_Prefix)
-
-	// Parse hex string
-	var r8, g8, b8 uint64
-	switch len(hex) {
-	case constants.HEX_ShortLength: // #RGB
-		r8, err = strconv.ParseUint(hex[0:constants.HEX_ShortOffset]+hex[0:constants.HEX_ShortOffset], constants.HEX_Base, constants.HEX_Bits)
-		if err != nil {
-			return
-		}
-		g8, err = strconv.ParseUint(hex[1:constants.HEX_ShortOffset+1]+hex[1:constants.HEX_ShortOffset+1], constants.HEX_Base, constants.HEX_Bits)
-		if err != nil {
-			return
-		}
-		b8, err = strconv.ParseUint(hex[2:constants.HEX_ShortOffset+2]+hex[2:constants.HEX_ShortOffset+2], constants.HEX_Base, constants.HEX_Bits)
-		if err != nil {
-			return
-		}
-	case constants.HEX_LongLength: // #RRGGBB
-		r8, err = strconv.ParseUint(hex[0:constants.HEX_LongOffset], constants.HEX_Base, constants.HEX_Bits)
-		if err != nil {
-			return
-		}
-		g8, err = strconv.ParseUint(hex[2:constants.HEX_LongOffset+2], constants.HEX_Base, constants.HEX_Bits)
-		if err != nil {
-			return
-		}
-		b8, err = strconv.ParseUint(hex[4:constants.HEX_LongOffset+4], constants.HEX_Base, constants.HEX_Bits)
-		if err != nil {
-			return
-		}
-	default:
-		err = fmt.Errorf("invalid hex color format: %s", hex)
-		return
-	}
-
-	// Convert to normalized [0,1] range
-	r = float64(r8) / constants.HEX_Max
-	g = float64(g8) / constants.HEX_Max
-	b = float64(b8) / constants.HEX_Max
-	return
-}
 
 //////////////////////////////////////////////////////
 // Implementation check
@@ -77,19 +18,28 @@ var _ iColor = (*Hex)(nil) // Ensure Hex implements the ColorModel interface.
 // Constructors
 //////////////////////////////////////////////////////
 
-// NewHex creates a new Hex instance from a hex color string.
-// The string should be in the format "#RRGGBB" or "#RGB".
-func NewHex(hex string, alpha float64) (*Hex, error) {
+// NewHex creates a new Hex instance.
+// Alpha is in range [0,1].
+func NewHex[N math.Number](hex string, alpha N) (*Hex, error) {
+	// Validate hex string
+	if _, _, _, err := utils.HexToRGB(hex); err != nil {
+		return nil, fmt.Errorf("invalid hex color: %v", err)
+	}
+
+	// Create new instance
 	h := &Hex{
 		Hex:   hex,
-		Alpha: alpha,
+		Alpha: float64(alpha),
 	}
+
 	return h, nil
 }
 
 // HexFromRGB converts an RGBA64 (RGB) to a Hex color.
 func HexFromRGB(c *RGBA64) *Hex {
-	hex := rgbToHex(c.R, c.G, c.B)
+	// Convert RGB to hex string
+	hex := utils.RGBToHex(c.R, c.G, c.B)
+
 	return &Hex{
 		Hex:   hex,
 		Alpha: c.A,
@@ -100,17 +50,18 @@ func HexFromRGB(c *RGBA64) *Hex {
 // Type
 //////////////////////////////////////////////////////
 
-// Hex is a helper struct representing a color in the Hex color model with an alpha channel.
+// Hex is a helper struct representing a color in the Hex color model.
+// Hex represents colors using a hexadecimal string in format "#RRGGBB".
 type Hex struct {
-	Hex   string
-	Alpha float64
+	Hex   string  // Hex color string in format "#RRGGBB"
+	Alpha float64 // [0,1] Alpha
 }
 
 func (h *Hex) Meta() *ColorModelMeta {
 	return NewModelMeta(
 		"Hex",
 		"Hexadecimal color model.",
-		NewChannelMeta("Hex", 0, 1, "", "Hexadecimal color value."),
+		NewChannelMeta("Hex", 0, 1, "", "Hexadecimal color string."),
 		NewChannelMeta("Alpha", 0, 1, "", "Alpha channel."),
 	)
 }
@@ -120,7 +71,18 @@ func (h *Hex) Meta() *ColorModelMeta {
 //////////////////////////////////////////////////////
 
 func (h *Hex) ToRGB() *RGBA64 {
-	r, g, b, _ := hexToRgb(h.Hex)
+	// Convert hex to RGB
+	r, g, b, err := utils.HexToRGB(h.Hex)
+	if err != nil {
+		// Return black on error
+		return &RGBA64{
+			R: 0,
+			G: 0,
+			B: 0,
+			A: h.Alpha,
+		}
+	}
+
 	return &RGBA64{
 		R: r,
 		G: g,
@@ -129,13 +91,14 @@ func (h *Hex) ToRGB() *RGBA64 {
 	}
 }
 
-// FromSlice initializes the color from a slice of float64 values.
-func (h *Hex) FromSlice(values []float64) error {
-	if len(values) != 1 {
-		return fmt.Errorf("Hex requires exactly 1 value: Alpha")
+// FromSlice initializes a Hex instance from a slice of float64 values.
+// The slice must contain exactly 1 value: Alpha.
+func (h *Hex) FromSlice(vals []float64) error {
+	if len(vals) != 1 {
+		return fmt.Errorf("Hex requires 1 value, got %d", len(vals))
 	}
 
-	h.Alpha = values[0]
+	h.Alpha = vals[0]
 
 	return nil
 }

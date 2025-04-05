@@ -1,0 +1,56 @@
+[COMPOSITION]
+width = 640
+height = 480
+# filter = f
+
+[VARS]
+min =   0
+max =  360
+rot =  -90
+t   =    1
+h0  =  120
+l0  =  0.3
+t2  =  0.23
+
+[FILTERS]
+f {
+    use(b)
+	vibrance(t2)
+	# vibrance(adjustment=t)
+    to-polar(min max rot)
+}
+
+b {
+    sharpen()
+    #use(d)
+}
+
+# [LAYERS]
+# multiply       1.0000 g  $IMG1
+
+[COMPOSITION]
+color = hsla(0 0 0 1.0)
+
+[LAYERS]
+# normal       1.0000 g  $IMG1
+normal       1.0000 f  $IMG1
+
+[VARS]
+doesThisWork = "hello"
+
+[FILTERS]
+g {
+    use(f)
+	vibrance(0.75)
+    to-polar(min max rot)
+    enhance()
+    extract(
+        hue = h0    
+        lum = l0     
+        sat = 0.75   
+    )
+    sepia()
+}
+
+# [LAYERS]
+# normal       1.0000 *  $IMG1

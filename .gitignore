@@ -1,3 +1,4 @@
+.nsa.yaml
 test_data/*.png
 test_data/blendmode/*.png
 test_data/compositions/*.png

@@ -4,95 +4,8 @@ package color
 import (
 	"fmt"
 
-	"github.com/toxyl/gfx/core/color/constants"
-	"github.com/toxyl/math"
+	"github.com/toxyl/gfx/core/color/utils"
 )
-
-//////////////////////////////////////////////////////
-// Conversion utilities
-//////////////////////////////////////////////////////
-
-func rgbToHsl(r, g, b float64) (h, s, l float64) {
-	max := math.Max(r, math.Max(g, b))
-	min := math.Min(r, math.Min(g, b))
-
-	// Calculate lightness
-	l = (max + min) / 2
-
-	// If max and min are equal, it's a shade of gray
-	if max == min {
-		return 0, 0, l
-	}
-
-	// Calculate saturation
-	if l > 0.5 {
-		s = (max - min) / (2 - max - min)
-	} else {
-		s = (max - min) / (max + min)
-	}
-
-	// Calculate hue in degrees
-	switch max {
-	case r:
-		h = (g - b) / (max - min)
-		if g < b {
-			h += 6
-		}
-	case g:
-		h = (b-r)/(max-min) + 2
-	case b:
-		h = (r-g)/(max-min) + 4
-	}
-	h *= 60 // Convert to degrees
-	if h < 0 {
-		h += 360
-	}
-	h = math.Mod(h, 360) // Ensure hue is in [0,360] range
-
-	return h, s, l
-}
-
-func hslToRgb(h, s, l float64) (r, g, b float64) {
-	if s == 0 {
-		return l, l, l
-	}
-
-	// Convert hue to normalized value
-	h = h * constants.HSL_HueNormalization
-
-	var q float64
-	if l < 0.5 {
-		q = l * (1 + s)
-	} else {
-		q = l + s - l*s
-	}
-	p := 2*l - q
-
-	r = hueToRgb(p, q, h+constants.HSL_HueOffset1)
-	g = hueToRgb(p, q, h)
-	b = hueToRgb(p, q, h-constants.HSL_HueOffset1)
-
-	return r, g, b
-}
-
-func hueToRgb(p, q, t float64) float64 {
-	if t < 0 {
-		t += 1
-	}
-	if t > 1 {
-		t -= 1
-	}
-	if t < constants.HSL_HueOffset3 {
-		return p + (q-p)*6*t
-	}
-	if t < constants.HSL_HueOffset4 {
-		return q
-	}
-	if t < constants.HSL_HueOffset5 {
-		return p + (q-p)*(constants.HSL_HueOffset5-t)*6
-	}
-	return p
-}
 
 //////////////////////////////////////////////////////
 // Implementation check
@@ -118,7 +31,7 @@ func NewHSL(h, s, l, alpha float64) (*HSL, error) {
 
 // HSLFromRGB converts an RGBA64 (RGB) to an HSL color.
 func HSLFromRGB(c *RGBA64) *HSL {
-	h, s, l := rgbToHsl(c.R, c.G, c.B)
+	h, s, l := utils.RGBToHSL(c.R, c.G, c.B)
 	return &HSL{
 		H:     h,
 		S:     s,
@@ -152,7 +65,7 @@ func (hsl *HSL) Meta() *ColorModelMeta {
 //////////////////////////////////////////////////////
 
 func (hsl *HSL) ToRGB() *RGBA64 {
-	r, g, b := hslToRgb(hsl.H, hsl.S, hsl.L)
+	r, g, b := utils.HSLToRGB(hsl.H, hsl.S, hsl.L)
 	return &RGBA64{
 		R: r,
 		G: g,

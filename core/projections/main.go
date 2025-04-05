@@ -2,19 +2,17 @@ package projections
 
 import (
 	"math"
-
-	"github.com/toxyl/gfx/registry/meta"
 )
 
 func init() {
 	// Register Equirectangular projection
 	Default.Register(
 		&RegistryProjection{
-			Meta: meta.NewProjection(
+			Meta: NewProjectionMeta(
 				"equirectangular",
 				"A linear mapping between cartesian x/y and lat/lon.",
-				meta.NewCoordinate("lat", "The latitude where 90 is North and -90 is South.", "°", 90, -90),
-				meta.NewCoordinate("lon", "The longitude where -180 is West and 180 is East.", "°", -180, 180),
+				NewCoordinateMeta("lat", "The latitude where 90 is North and -90 is South.", "°", 90, -90),
+				NewCoordinateMeta("lon", "The longitude where -180 is West and 180 is East.", "°", -180, 180),
 			),
 			To: func(latitude, longitude, w, h float64) (x, y float64) {
 				return NewEquirectangular().To(latitude, longitude, w, h)
@@ -28,11 +26,11 @@ func init() {
 	// Register Mercator projection
 	Default.Register(
 		&RegistryProjection{
-			Meta: meta.NewProjection(
+			Meta: NewProjectionMeta(
 				"mercator",
 				"A conformal cylindrical map projection.",
-				meta.NewCoordinate("lat", "The latitude where 90 is North and -90 is South.", "°", 90, -90),
-				meta.NewCoordinate("lon", "The longitude where -180 is West and 180 is East.", "°", -180, 180),
+				NewCoordinateMeta("lat", "The latitude where 90 is North and -90 is South.", "°", 90, -90),
+				NewCoordinateMeta("lon", "The longitude where -180 is West and 180 is East.", "°", -180, 180),
 			),
 			To: func(latitude, longitude, w, h float64) (x, y float64) {
 				return NewMercator().To(latitude, longitude, w, h)
@@ -46,11 +44,11 @@ func init() {
 	// Register Sinusoidal projection
 	Default.Register(
 		&RegistryProjection{
-			Meta: meta.NewProjection(
+			Meta: NewProjectionMeta(
 				"sinusoidal",
 				"An equal-area pseudocylindrical projection.",
-				meta.NewCoordinate("lat", "The latitude where 90 is North and -90 is South.", "°", 90, -90),
-				meta.NewCoordinate("lon", "The longitude where -180 is West and 180 is East.", "°", -180, 180),
+				NewCoordinateMeta("lat", "The latitude where 90 is North and -90 is South.", "°", 90, -90),
+				NewCoordinateMeta("lon", "The longitude where -180 is West and 180 is East.", "°", -180, 180),
 			),
 			To: func(latitude, longitude, w, h float64) (x, y float64) {
 				return NewSinusoidal().To(latitude, longitude, w, h)
@@ -64,11 +62,11 @@ func init() {
 	// Register Stereographic projection
 	Default.Register(
 		&RegistryProjection{
-			Meta: meta.NewProjection(
+			Meta: NewProjectionMeta(
 				"stereographic",
 				"A conformal map projection.",
-				meta.NewCoordinate("lat", "The latitude where 90 is North and -90 is South.", "°", 90, -90),
-				meta.NewCoordinate("lon", "The longitude where -180 is West and 180 is East.", "°", -180, 180),
+				NewCoordinateMeta("lat", "The latitude where 90 is North and -90 is South.", "°", 90, -90),
+				NewCoordinateMeta("lon", "The longitude where -180 is West and 180 is East.", "°", -180, 180),
 			),
 			To: func(latitude, longitude, w, h float64) (x, y float64) {
 				return NewStereographic().To(latitude, longitude, w, h)
@@ -82,11 +80,11 @@ func init() {
 	// Register RectPolar projection
 	Default.Register(
 		&RegistryProjection{
-			Meta: meta.NewProjection(
+			Meta: NewProjectionMeta(
 				"rectpolar",
 				"Converts from rectangular to polar coordinates.",
-				meta.NewCoordinate("radius", "The distance from the center.", "", 1, 0),
-				meta.NewCoordinate("angle", "The angle in radians.", "rad", 2*math.Pi, 0),
+				NewCoordinateMeta("radius", "The distance from the center.", "", 1, 0),
+				NewCoordinateMeta("angle", "The angle in radians.", "rad", 2*math.Pi, 0),
 			),
 			To: func(x, y, w, h float64) (radius, angle float64) {
 				return NewRectPolar().To(x, y, w, h)
@@ -100,11 +98,11 @@ func init() {
 	// Register PolarRect projection
 	Default.Register(
 		&RegistryProjection{
-			Meta: meta.NewProjection(
+			Meta: NewProjectionMeta(
 				"polarrect",
 				"Converts from polar to rectangular coordinates.",
-				meta.NewCoordinate("radius", "The distance from the center.", "", 1, 0),
-				meta.NewCoordinate("angle", "The angle in radians.", "rad", 2*math.Pi, 0),
+				NewCoordinateMeta("radius", "The distance from the center.", "", 1, 0),
+				NewCoordinateMeta("angle", "The angle in radians.", "rad", 2*math.Pi, 0),
 			),
 			To: func(radius, angle, w, h float64) (x, y float64) {
 				return NewPolarRect().To(radius, angle, w, h)

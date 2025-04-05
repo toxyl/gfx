@@ -1,0 +1,6 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+Instead of the "math" package from the standard library you must use "github.com/toxyl/math" as drop-in replacement. For reference the package is included in the workspace. If you need new math-related functionality that fits in "github.com/toxyl/math", implement it in [user_functions.go](mdc:math/user_functions.go), [user_consts.go](mdc:math/user_consts.go), [user_types.go](mdc:math/user_types.go) and/or [user_vars.go](mdc:math/user_vars.go) following the generics approach found in the files. Also write a test for the new functionality and upon successfully passing the test, make a commit for github.com/toxyl/math and let me review it. If I accept, push and tag it, then continue with your implementation. 

@@ -4,6 +4,7 @@ package color
 import (
 	"fmt"
 
+	"github.com/toxyl/gfx/core/color/utils"
 	"github.com/toxyl/math"
 )
 
@@ -91,19 +92,24 @@ var _ iColor = (*HSB)(nil) // Ensure HSB implements the ColorModel interface.
 //////////////////////////////////////////////////////
 
 // NewHSB creates a new HSB instance.
-// It accepts channel values in the [0,1] range for H, S, B and A.
-func NewHSB[N math.Number](h, s, b, alpha N) (*HSB, error) {
-	return newColor(func() *HSB { return &HSB{} }, h, s, b, alpha)
+// Hue is in degrees [0,360]
+// Saturation is in range [0,1]
+// Brightness is in range [0,1]
+// Alpha is in range [0,1]
+func NewHSB[N math.Number](hue, saturation, brightness, alpha N) (*HSB, error) {
+	return newColor(func() *HSB { return &HSB{} }, hue, saturation, brightness, alpha)
 }
 
 // HSBFromRGB converts an RGBA64 (RGB) to an HSB color.
 func HSBFromRGB(c *RGBA64) *HSB {
-	h, s, b := rgbToHsb(c.R, c.G, c.B)
+	// Convert RGB to HSB
+	h, s, b := utils.RGBToHSB(c.R, c.G, c.B)
+
 	return &HSB{
-		H:     h,
-		S:     s,
-		B:     b,
-		Alpha: c.A,
+		Hue:        h,
+		Saturation: s,
+		Brightness: b,
+		Alpha:      c.A,
 	}
 }
 
@@ -111,18 +117,21 @@ func HSBFromRGB(c *RGBA64) *HSB {
 // Type
 //////////////////////////////////////////////////////
 
-// HSB is a helper struct representing a color in the HSB color model with an alpha channel.
+// HSB is a helper struct representing a color in the HSB color model.
 type HSB struct {
-	H, S, B, Alpha float64
+	Hue        float64 // in degrees [0,360]
+	Saturation float64 // [0,1]
+	Brightness float64 // [0,1]
+	Alpha      float64 // [0,1]
 }
 
-func (hsb *HSB) Meta() *ColorModelMeta {
+func (h *HSB) Meta() *ColorModelMeta {
 	return NewModelMeta(
 		"HSB",
 		"Hue, Saturation, Brightness color model.",
 		NewChannelMeta("H", 0, 360, "°", "Hue in degrees."),
-		NewChannelMeta("S", 0, 100, "%", "Saturation percentage."),
-		NewChannelMeta("B", 0, 100, "%", "Brightness percentage."),
+		NewChannelMeta("S", 0, 1, "", "Saturation."),
+		NewChannelMeta("B", 0, 1, "", "Brightness."),
 		NewChannelMeta("Alpha", 0, 1, "", "Alpha channel."),
 	)
 }
@@ -131,36 +140,39 @@ func (hsb *HSB) Meta() *ColorModelMeta {
 // Conversion
 //////////////////////////////////////////////////////
 
-func (hsb *HSB) ToRGB() *RGBA64 {
-	r, g, b := hsbToRgb(hsb.H, hsb.S, hsb.B)
+func (h *HSB) ToRGB() *RGBA64 {
+	// Convert HSB to RGB
+	r, g, b := utils.HSBToRGB(h.Hue, h.Saturation, h.Brightness)
+
 	return &RGBA64{
 		R: r,
 		G: g,
 		B: b,
-		A: hsb.Alpha,
+		A: h.Alpha,
 	}
 }
 
-// FromSlice initializes the color from a slice of float64 values.
-func (hsb *HSB) FromSlice(values []float64) error {
-	if len(values) != 4 {
-		return fmt.Errorf("HSB requires exactly 4 values: H, S, B, Alpha")
+// FromSlice initializes a HSB instance from a slice of float64 values.
+// The slice must contain exactly 4 values in the order: Hue, Saturation, Brightness, Alpha.
+func (h *HSB) FromSlice(vals []float64) error {
+	if len(vals) != 4 {
+		return fmt.Errorf("HSB requires 4 values, got %d", len(vals))
 	}
 
-	hsb.H = values[0]
-	hsb.S = values[1]
-	hsb.B = values[2]
-	hsb.Alpha = values[3]
+	h.Hue = vals[0]
+	h.Saturation = vals[1]
+	h.Brightness = vals[2]
+	h.Alpha = vals[3]
 
 	return nil
 }
 
 // FromRGBA64 converts an RGBA64 color to this color model.
-func (hsb *HSB) FromRGBA64(rgba *RGBA64) iColor {
+func (h *HSB) FromRGBA64(rgba *RGBA64) iColor {
 	return HSBFromRGB(rgba)
 }
 
 // ToRGBA64 converts the color to RGBA64.
-func (hsb *HSB) ToRGBA64() *RGBA64 {
-	return hsb.ToRGB()
+func (h *HSB) ToRGBA64() *RGBA64 {
+	return h.ToRGB()
 }

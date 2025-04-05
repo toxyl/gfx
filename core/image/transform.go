@@ -452,4 +452,3 @@ func (i *Image) Translate(xOffset, yOffset int) (*Image, error) {
 
 	return newImg, nil
 }
-

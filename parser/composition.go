@@ -2,14 +2,15 @@ package parser
 
 import (
 	"fmt"
-	"image/color"
+	stdcolor "image/color"
 	"path/filepath"
 	"sort"
 	"strings"
 
 	"github.com/toxyl/gfx/config"
-	"github.com/toxyl/gfx/core/blendmodes/registry"
-	"github.com/toxyl/gfx/core/colormodels/hsl"
+	"github.com/toxyl/gfx/config/constants"
+	"github.com/toxyl/gfx/core/blendmodes"
+	"github.com/toxyl/gfx/core/color"
 	"github.com/toxyl/gfx/core/image"
 	"github.com/toxyl/gfx/fs"
 	"github.com/toxyl/math"
@@ -18,10 +19,10 @@ import (
 type Composition struct {
 	Width  int
 	Height int
-	Color  *hsl.HSL
+	Color  *color.HSL
 	Crop   *Crop
 	Resize *Resize
-	Filter *Filter
+	Filter *FX
 	Vars   []*Var
 	Layers []*Layer
 }
@@ -33,27 +34,27 @@ func (c *Composition) String() string {
 	comp := []string{}
 	if c.Width != 0 {
 		comp = append(comp, spf("%s %s %d",
-			spfPad(maxLenName, config.COMP_WIDTH), config.ASSIGN, c.Width))
+			spfPad(maxLenName, constants.COMP_WIDTH), constants.ASSIGN, c.Width))
 	}
 	if c.Height != 0 {
 		comp = append(comp, spf("%s %s %d",
-			spfPad(maxLenName, config.COMP_HEIGHT), config.ASSIGN, c.Height))
+			spfPad(maxLenName, constants.COMP_HEIGHT), constants.ASSIGN, c.Height))
 	}
 	if c.Color != nil {
 		comp = append(comp, spf("%s %s hsla%s%f %f %f %f%s",
-			spfPad(maxLenName, config.COMP_COLOR), config.ASSIGN, config.LPAREN, c.Color.H(), c.Color.S(), c.Color.L(), c.Color.A(), config.RPAREN))
+			spfPad(maxLenName, constants.COMP_COLOR), constants.ASSIGN, constants.LPAREN, c.Color.H, c.Color.S, c.Color.L, c.Color.Alpha, constants.RPAREN))
 	}
 	if c.Filter != nil {
 		comp = append(comp, spf("%s %s %s",
-			spfPad(maxLenName, config.COMP_FILTER), config.ASSIGN, c.Filter.Name))
+			spfPad(maxLenName, constants.COMP_FILTER), constants.ASSIGN, c.Filter.Name))
 	}
 	if c.Crop != nil {
 		comp = append(comp, spf("%s %s %d %d %d %d",
-			spfPad(maxLenName, config.COMP_CROP), config.ASSIGN, c.Crop.X, c.Crop.Y, c.Crop.W, c.Crop.H))
+			spfPad(maxLenName, constants.COMP_CROP), constants.ASSIGN, c.Crop.X, c.Crop.Y, c.Crop.W, c.Crop.H))
 	}
 	if c.Resize != nil {
 		comp = append(comp, spf("%s %s %d %d",
-			spfPad(maxLenName, config.COMP_RESIZE), config.ASSIGN, c.Resize.W, c.Resize.H))
+			spfPad(maxLenName, constants.COMP_RESIZE), constants.ASSIGN, c.Resize.W, c.Resize.H))
 	}
 	vars := []string{}
 	filters := []string{}
@@ -100,13 +101,13 @@ func (c *Composition) String() string {
 %s%s%s
 %s
 `,
-		config.LBRACKET, strings.ToUpper(config.SECTION_COMPOSITION), config.RBRACKET,
+		constants.LBRACKET, strings.ToUpper(constants.SECTION_COMPOSITION), constants.RBRACKET,
 		strings.Join(comp, "\n"),
-		config.LBRACKET, strings.ToUpper(config.SECTION_LAYERS), config.RBRACKET,
+		constants.LBRACKET, strings.ToUpper(constants.SECTION_LAYERS), constants.RBRACKET,
 		strings.Join(layers, "\n"),
-		config.LBRACKET, strings.ToUpper(config.SECTION_VARS), config.RBRACKET,
+		constants.LBRACKET, strings.ToUpper(constants.SECTION_VARS), constants.RBRACKET,
 		strings.Join(vars, "\n"),
-		config.LBRACKET, strings.ToUpper(config.SECTION_FILTERS), config.RBRACKET,
+		constants.LBRACKET, strings.ToUpper(constants.SECTION_FILTERS), constants.RBRACKET,
 		strings.Join(filters, "\n"),
 	)
 }
@@ -131,6 +132,21 @@ func (c *Composition) Save(path string) *Composition {
 	return c
 }
 
+// RGBA64 represents an RGBA color with 64-bit precision.
+type RGBA64 struct {
+	R, G, B, A float64
+}
+
+// To16bit returns the color as a standard library 16-bit RGBA.
+func (c *RGBA64) To16bit() stdcolor.RGBA64 {
+	return stdcolor.RGBA64{
+		R: uint16(c.R * 65535),
+		G: uint16(c.G * 65535),
+		B: uint16(c.B * 65535),
+		A: uint16(c.A * 65535),
+	}
+}
+
 func (c *Composition) Render(images ...string) (*image.Image, error) {
 	w, h := c.Width, c.Height
 	res, err := image.New(w, h)
@@ -140,16 +156,16 @@ func (c *Composition) Render(images ...string) (*image.Image, error) {
 
 	if c.Color != nil {
 		// Use Process to fill with color
-		err = res.Process(func(x, y int, _ *color.RGBA64) (*color.RGBA64, error) {
-			return &color.RGBA64{
-				R: c.Color.R(),
-				G: c.Color.G(),
-				B: c.Color.B(),
-				A: c.Color.A(),
-			}, nil
-		})
-		if err != nil {
-			return nil, fmt.Errorf("failed to fill image with color: %w", err)
+		col := c.Color.ToRGBA64()
+
+		// Instead of using Process with custom types, iterate manually
+		for y := 0; y < h; y++ {
+			for x := 0; x < w; x++ {
+				err := res.SetPixel(x, y, col.ToRGBA64())
+				if err != nil {
+					return nil, fmt.Errorf("failed to set pixel: %w", err)
+				}
+			}
 		}
 	}
 
@@ -175,9 +191,14 @@ func (c *Composition) Render(images ...string) (*image.Image, error) {
 			continue // rendering failed, maybe URL or file wasn't available
 		}
 
-		// Use Blend method for drawing one image onto another
-		blendMode := registry.Get(l.BlendMode)
-		err = res.Blend(scaled, 0, 0, w, h, 0, 0, w, h, blendMode, l.Alpha)
+		// Get blend mode
+		blendMode, err := blendmodes.Get(l.BlendMode)
+		if err != nil {
+			blendMode, _ = blendmodes.Get("normal") // Use normal mode as fallback
+		}
+
+		// Draw the scaled image onto the result
+		err = res.DrawImage(scaled, 0, 0, blendMode, l.Alpha)
 		if err != nil {
 			return nil, fmt.Errorf("failed to blend layer: %w", err)
 		}
@@ -186,11 +207,15 @@ func (c *Composition) Render(images ...string) (*image.Image, error) {
 	if c.Filter != nil {
 		for _, filter := range c.Filter.Get() {
 			if filter != nil {
-				// Apply filter will need to be updated to return error
 				var filterErr error
-				res, filterErr = filter.Apply(res)
+				stdImg := res.ToStandard()
+				newImg, filterErr := filter.Apply(stdImg)
 				if filterErr != nil {
 					return nil, fmt.Errorf("failed to apply filter: %w", filterErr)
+				}
+				res, err = image.FromImage(newImg)
+				if err != nil {
+					return nil, fmt.Errorf("failed to convert image: %w", err)
 				}
 			}
 		}

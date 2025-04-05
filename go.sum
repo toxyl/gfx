@@ -21,10 +21,6 @@ github.com/toxyl/flo v0.0.0-20240412132929-869b69ff6976 h1:mOOW3wwqdsHeFXEaW+pta
 github.com/toxyl/flo v0.0.0-20240412132929-869b69ff6976/go.mod h1:A+Vbz2MdgMHJn1V11q0D8TBtR4hTQmot9Is6QxkFgoU=
 github.com/toxyl/glog v1.0.0-alpha.15 h1:cc7jRcEk/NKtjW1KQsXHws1v9PTgMW457HZmEVrhE64=
 github.com/toxyl/glog v1.0.0-alpha.15/go.mod h1:3EMPMP5wXep81eUXWfX2vLdr4zRxkMfCcHnGHciblMc=
-github.com/toxyl/math v0.0.1-alpha.2 h1:guGcg9eL+sVd/vqEUo3WKl/k1V0wRNQ8LtJzqTrc+SQ=
-github.com/toxyl/math v0.0.1-alpha.2/go.mod h1:vapRKwqknwc4Fnu3/kX0Qp7VfgOfTRyaqgEZCn5gf5c=
-github.com/toxyl/math v0.0.1-alpha.3 h1:QZ50oeA1VUJpOgNwtDW0lM9Sc7u/i0yWvJNks7qL79o=
-github.com/toxyl/math v0.0.1-alpha.3/go.mod h1:vapRKwqknwc4Fnu3/kX0Qp7VfgOfTRyaqgEZCn5gf5c=
 github.com/valyala/bytebufferpool v1.0.0 h1:GqA5TC/0021Y/b9FG4Oi9Mr3q7XYx6KllzawFIhcdPw=
 github.com/valyala/bytebufferpool v1.0.0/go.mod h1:6bBcMArwyJ5K/AmCkWv1jt77kVWyCJ6HpOuEn7z0Csc=
 github.com/valyala/fasthttp v1.51.0 h1:8b30A5JlZ6C7AS81RsWjYMQmrZG6feChmgAolCl1SqA=

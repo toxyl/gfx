@@ -4,10 +4,10 @@ import (
 	"runtime"
 	"sync"
 
-	"github.com/toxyl/gfx/color/hsla"
+	"github.com/toxyl/gfx/core/color"
 )
 
-func (i *Image) mergeHSLA(src *Image, startX, startY, endX, endY int, fn func(x, y int, col *hsla.HSLA) (x2, y2 int, col2 *hsla.HSLA)) *Image {
+func (i *Image) mergeHSLA(src *Image, startX, startY, endX, endY int, fn func(x, y int, col *color.HSL) (x2, y2 int, col2 *color.HSL)) *Image {
 	numCores := runtime.NumCPU()
 	sem := make(chan struct{}, numCores)
 	var wg sync.WaitGroup
@@ -22,7 +22,7 @@ func (i *Image) mergeHSLA(src *Image, startX, startY, endX, endY int, fn func(x,
 				wg.Done()
 			}()
 			for x := startX; x < endX; x++ {
-				dst.SetHSLA(fn(x, row, src.GetHSLA(x, row)))
+				dst.SetHSLA(fn(x, row, color.HSLFromRGB(src.GetRGBA64(x, row))))
 			}
 		}(y)
 	}

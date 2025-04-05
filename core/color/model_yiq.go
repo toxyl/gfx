@@ -4,7 +4,7 @@ package color
 import (
 	"fmt"
 
-	"github.com/toxyl/gfx/core/color/constants"
+	"github.com/toxyl/gfx/core/color/utils"
 	"github.com/toxyl/math"
 )
 
@@ -13,31 +13,6 @@ import (
 //////////////////////////////////////////////////////
 
 var _ iColor = (*YIQ)(nil) // Ensure YIQ implements the ColorModel interface.
-
-//////////////////////////////////////////////////////
-// Conversion utilities
-//////////////////////////////////////////////////////
-
-// rgbToYiq converts RGB to YIQ color space.
-// YIQ is the color space used by NTSC television.
-// Y represents luminance, I and Q represent chrominance.
-func rgbToYiq(r, g, b float64) (y, i, q float64) {
-	// NTSC YIQ conversion matrix
-	y = constants.YIQ_RGB_Y1*r + constants.YIQ_RGB_Y2*g + constants.YIQ_RGB_Y3*b
-	i = constants.YIQ_RGB_I1*r + constants.YIQ_RGB_I2*g + constants.YIQ_RGB_I3*b
-	q = constants.YIQ_RGB_Q1*r + constants.YIQ_RGB_Q2*g + constants.YIQ_RGB_Q3*b
-	return y, i, q
-}
-
-// yiqToRgb converts YIQ to RGB color space.
-func yiqToRgb(y, i, q float64) (r, g, b float64) {
-	// NTSC YIQ to RGB conversion matrix
-	// Using inverse matrix coefficients for round trip consistency
-	r = math.Clamp(y+constants.YIQ_RGB_R1*i+constants.YIQ_RGB_R2*q, 0, 1)
-	g = math.Clamp(y+constants.YIQ_RGB_G1*i+constants.YIQ_RGB_G2*q, 0, 1)
-	b = math.Clamp(y+constants.YIQ_RGB_B1*i+constants.YIQ_RGB_B2*q, 0, 1)
-	return r, g, b
-}
 
 //////////////////////////////////////////////////////
 // Constructors
@@ -53,7 +28,9 @@ func NewYIQ[N math.Number](y, i, q, alpha N) (*YIQ, error) {
 
 // YIQFromRGB converts an RGBA64 (RGB) to a YIQ color.
 func YIQFromRGB(c *RGBA64) *YIQ {
-	y, i, q := rgbToYiq(c.R, c.G, c.B)
+	// Convert RGB to YIQ
+	y, i, q := utils.RGBToYIQ(c.R, c.G, c.B)
+
 	return &YIQ{
 		Y:     y,
 		I:     i,
@@ -68,17 +45,21 @@ func YIQFromRGB(c *RGBA64) *YIQ {
 
 // YIQ is a helper struct representing a color in the YIQ color model.
 // YIQ is the color space used by NTSC television.
+// Y represents luminance, I and Q represent chrominance.
 type YIQ struct {
-	Y, I, Q, Alpha float64
+	Y     float64 // [0,1] Luminance
+	I     float64 // [-0.5,0.5] In-phase
+	Q     float64 // [-0.5,0.5] Quadrature
+	Alpha float64 // [0,1] Alpha
 }
 
-func (yiq *YIQ) Meta() *ColorModelMeta {
+func (y *YIQ) Meta() *ColorModelMeta {
 	return NewModelMeta(
 		"YIQ",
-		"YIQ color model.",
-		NewChannelMeta("Y", 0, 1, "", "Luminance."),
-		NewChannelMeta("I", constants.YIQ_I_Min, constants.YIQ_I_Max, "", "In-phase."),
-		NewChannelMeta("Q", constants.YIQ_Q_Min, constants.YIQ_Q_Max, "", "Quadrature."),
+		"NTSC YIQ color model.",
+		NewChannelMeta("Y", 0, 1, "", "Luminance component."),
+		NewChannelMeta("I", -0.5, 0.5, "", "In-phase component."),
+		NewChannelMeta("Q", -0.5, 0.5, "", "Quadrature component."),
 		NewChannelMeta("Alpha", 0, 1, "", "Alpha channel."),
 	)
 }
@@ -87,36 +68,39 @@ func (yiq *YIQ) Meta() *ColorModelMeta {
 // Conversion
 //////////////////////////////////////////////////////
 
-func (yiq *YIQ) ToRGB() *RGBA64 {
-	r, g, b := yiqToRgb(yiq.Y, yiq.I, yiq.Q)
+func (y *YIQ) ToRGB() *RGBA64 {
+	// Convert YIQ to RGB
+	r, g, b := utils.YIQToRGB(y.Y, y.I, y.Q)
+
 	return &RGBA64{
 		R: r,
 		G: g,
 		B: b,
-		A: yiq.Alpha,
+		A: y.Alpha,
 	}
 }
 
-// FromSlice initializes the color from a slice of float64 values.
-func (yiq *YIQ) FromSlice(values []float64) error {
-	if len(values) != 4 {
-		return fmt.Errorf("YIQ requires exactly 4 values: Y, I, Q, Alpha")
+// FromSlice initializes a YIQ instance from a slice of float64 values.
+// The slice must contain exactly 4 values in the order: Y, I, Q, Alpha.
+func (y *YIQ) FromSlice(vals []float64) error {
+	if len(vals) != 4 {
+		return fmt.Errorf("YIQ requires 4 values, got %d", len(vals))
 	}
 
-	yiq.Y = values[0]
-	yiq.I = values[1]
-	yiq.Q = values[2]
-	yiq.Alpha = values[3]
+	y.Y = vals[0]
+	y.I = vals[1]
+	y.Q = vals[2]
+	y.Alpha = vals[3]
 
 	return nil
 }
 
 // FromRGBA64 converts an RGBA64 color to this color model.
-func (yiq *YIQ) FromRGBA64(rgba *RGBA64) iColor {
+func (y *YIQ) FromRGBA64(rgba *RGBA64) iColor {
 	return YIQFromRGB(rgba)
 }
 
 // ToRGBA64 converts the color to RGBA64.
-func (yiq *YIQ) ToRGBA64() *RGBA64 {
-	return yiq.ToRGB()
+func (y *YIQ) ToRGBA64() *RGBA64 {
+	return y.ToRGB()
 }

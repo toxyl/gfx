@@ -6,9 +6,9 @@ import (
 )
 
 func (i *Image) Draw(src *Image, srcX, srcY, srcW, srcH, dstX, dstY, dstW, dstH int, mode *blendmodes.IBlendMode, alpha float64) *Image {
-	s := src.Crop(srcX, srcY, srcW, srcH, true)
+	s := src.Crop(srcX, srcY, srcW, srcH)
 	if srcW != dstW || srcH != dstH {
-		s = s.Resize(dstW, dstH)
+		s = s.Resize(dstW, dstH, ResizeTypeBilinear)
 	}
 	return i.mergeHSLA(s, 0, 0, dstW, dstH, func(x, y int, srcCol *color.HSL) (x2 int, y2 int, col2 *color.HSL) {
 		rgb := srcCol.ToRGB()

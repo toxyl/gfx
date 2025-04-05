@@ -3,47 +3,67 @@ package main
 import (
 	"flag"
 	"fmt"
+	"os"
+	"path/filepath"
 	"strings"
+	"time"
 
+	"github.com/toxyl/gfx/fs"
 	"github.com/toxyl/gfx/parser"
 )
 
 func main() {
-	var (
-		fileIn      = flag.String("in", "", "(required) composition file")
-		fileOut     = flag.String("out", "", "(required) output file (png or jpg)")
-		fileOutGFXS = flag.String("gfxs", "", "(optional) path where to save parsed composition file (gfxs)")
-		fileOutYAML = flag.String("yaml", "", "(optional) path where to save parsed composition file (yaml)")
-	)
+	if len(os.Args) < 3 {
+		fmt.Printf("Usage: %s [GFXScript file] [output image file] <[image file 1] .. [image file N]>", filepath.Base(os.Args[0]))
+		return
+	}
+	fileIn := os.Args[1]
+	fileOut := os.Args[2]
+	images := []string{}
 
-	flag.Parse()
+	if len(os.Args) > 3 {
+		images = os.Args[3:]
+	}
 
-	if strings.TrimSpace(*fileIn) == "" {
+	if strings.TrimSpace(fileIn) == "" {
 		fmt.Printf("no input file given!\n")
 		flag.Usage()
 		return
 	}
 
-	if strings.TrimSpace(*fileOut) == "" {
+	if strings.TrimSpace(fileOut) == "" {
 		fmt.Printf("no output file given!\n")
 		flag.Usage()
 		return
 	}
 
-	comp := parser.NewComposition("", 0, 0).LoadGFXS(*fileIn)
-	f := *fileOut
+	t := time.Now()
+	comp, err := parser.ParseComposition(fs.LoadString(fileIn))
+	if err != nil {
+		panic("Failed to parse composition: " + err.Error())
+	}
+	f := fileOut
 	fl := strings.ToLower(f)
-
+	comp.Save("test-parsed.gfxs")
+	fmt.Printf("Composition parsed in %s.\n", time.Since(t).String())
+	t = time.Now()
 	if strings.HasSuffix(fl, ".png") {
-		comp.Render().SaveAsPNG(f)
+		img, err := comp.Render(images...)
+		if err == nil {
+			err = img.SavePNG(f)
+			if err != nil {
+				panic("Failed to save PNG: " + err.Error())
+			}
+		}
 	}
 	if strings.HasSuffix(fl, ".jpg") || strings.HasSuffix(fl, ".jpeg") {
-		comp.Render().SaveAsJPG(f)
+		img, err := comp.Render(images...)
+		if err == nil {
+			err = img.SaveJPEG(f, 90)
+			if err != nil {
+				panic("Failed to save JPEG: " + err.Error())
+			}
+		}
 	}
-	if strings.TrimSpace(*fileOutGFXS) != "" {
-		comp.SaveGFXS(*fileOutGFXS)
-	}
-	if strings.TrimSpace(*fileOutYAML) != "" {
-		comp.SaveYAML(*fileOutYAML)
-	}
+	fmt.Printf("Rendered and saved in %s.\n", time.Since(t).String())
 }

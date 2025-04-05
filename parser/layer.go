@@ -3,9 +3,11 @@ package parser
 import (
 	"flag"
 	"fmt"
+	"io"
+	"net/http"
+	"os"
 	"strconv"
 
-	"github.com/toxyl/gfx/config"
 	"github.com/toxyl/gfx/core/image"
 	"github.com/toxyl/gfx/fs/net"
 )
@@ -15,7 +17,7 @@ type Layer struct {
 	Source    string
 	BlendMode string
 	Alpha     float64
-	Filter    *Filter
+	Filter    *FX
 }
 
 func (l *Layer) String() string {
@@ -35,7 +37,7 @@ func (l *Layer) String() string {
 
 func (l *Layer) load() error {
 	if l.Source != "" {
-		if l.Source[0] == config.CHAR_CLI_ARG {
+		if l.Source[0] == '$' {
 			if i, err := strconv.Atoi(l.Source[1:]); err == nil {
 				l.Source = flag.Arg(i)
 				if l.Source == "" {
@@ -43,18 +45,44 @@ func (l *Layer) load() error {
 				}
 			}
 		}
+
 		// Try loading from URL first
 		if net.IsURL(l.Source) {
-			data, err := image.LoadFromURL(l.Source)
+			// Download the file from URL
+			resp, err := http.Get(l.Source)
+			if err != nil {
+				return fmt.Errorf("failed to download from URL: %w", err)
+			}
+			defer resp.Body.Close()
+
+			// Create a temporary file
+			tempFile, err := os.CreateTemp("", "image-*.tmp")
+			if err != nil {
+				return fmt.Errorf("failed to create temp file: %w", err)
+			}
+			defer os.Remove(tempFile.Name())
+			defer tempFile.Close()
+
+			// Copy the response body to the temp file
+			_, err = io.Copy(tempFile, resp.Body)
+			if err != nil {
+				return fmt.Errorf("failed to copy response to temp file: %w", err)
+			}
+
+			// Close the file to ensure all data is written
+			tempFile.Close()
+
+			// Load the image from the temp file
+			data, err := image.LoadImage(tempFile.Name())
 			if err == nil {
 				l.data = data
 				return nil
 			}
-			// If URL loading fails, we'll continue to try loading as a file
+			// If loading fails, continue to try other methods
 		}
 
 		// Try loading from file
-		data, err := image.LoadFromFile(l.Source)
+		data, err := image.LoadImage(l.Source)
 		if err != nil {
 			return fmt.Errorf("failed to load image: %w", err)
 		}
@@ -82,9 +110,14 @@ func (l *Layer) Render(w, h int) (*image.Image, error) {
 		for _, filter := range l.Filter.Get() {
 			if filter != nil {
 				var filterErr error
-				res, filterErr = filter.Apply(res)
+				stdImg := res.ToStandard()
+				newImg, filterErr := filter.Apply(stdImg)
 				if filterErr != nil {
 					return nil, fmt.Errorf("failed to apply filter: %w", filterErr)
+				}
+				res, err = image.FromImage(newImg)
+				if err != nil {
+					return nil, fmt.Errorf("failed to convert image: %w", err)
 				}
 			}
 		}
@@ -92,7 +125,7 @@ func (l *Layer) Render(w, h int) (*image.Image, error) {
 	return res, nil
 }
 
-func NewLayer(blendmode string, alpha float64, filter *Filter, source string) *Layer {
+func NewLayer(blendmode string, alpha float64, filter *FX, source string) *Layer {
 	l := Layer{
 		data:      nil,
 		Source:    source,

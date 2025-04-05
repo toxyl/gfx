@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"github.com/toxyl/gfx/core/color/constants"
+	"github.com/toxyl/gfx/core/color/utils"
 	"github.com/toxyl/math"
 )
 
@@ -78,13 +79,13 @@ func hclToLab(h, c, l float64) (l2, a, b float64) {
 // hclToRgb converts HCL to RGB color space.
 func hclToRgb(h, c, l float64) (r, g, b float64) {
 	// First convert to LAB
-	l2, a, b := hclToLab(h, c, l)
+	l2, a, b := utils.LCHToLAB(l, c, h)
 
 	// Then convert to XYZ
-	x, y, z := labToXyz(l2, a, b)
+	x, y, z := utils.LABToXYZ(l2, a, b)
 
 	// Finally convert to RGB
-	r, g, b = xyzToRgb(x, y, z)
+	r, g, b = utils.XYZToRGB(x, y, z)
 	return r, g, b
 }
 
@@ -94,8 +95,8 @@ func hclToRgb(h, c, l float64) (r, g, b float64) {
 
 // NewHCL creates a new HCL instance.
 // H (hue) is in range [0,360]
-// C (chroma) is in range [0,1]
-// L (luminance) is in range [0,1]
+// C (chroma) is in range [0,100]
+// L (lightness) is in range [0,100]
 // Alpha is in range [0,1]
 func NewHCL[N math.Number](h, c, l, alpha N) (*HCL, error) {
 	return newColor(func() *HCL { return &HCL{} }, h, c, l, alpha)
@@ -103,17 +104,13 @@ func NewHCL[N math.Number](h, c, l, alpha N) (*HCL, error) {
 
 // HCLFromRGB converts an RGBA64 (RGB) to an HCL color.
 func HCLFromRGB(c *RGBA64) *HCL {
-	// First convert to LAB
-	x, y, z := rgbToXyz(c.R, c.G, c.B)
-	l, a, b := xyzToLab(x, y, z)
-
-	// Then convert to HCL
-	h, chroma, l2 := labToHcl(l, a, b)
+	// Convert RGB to HCL
+	h, chroma, lightness := utils.RGBToHCL(c.R, c.G, c.B)
 
 	return &HCL{
 		H:     h,
 		C:     chroma,
-		L:     l2,
+		L:     lightness,
 		Alpha: c.A,
 	}
 }
@@ -123,18 +120,20 @@ func HCLFromRGB(c *RGBA64) *HCL {
 //////////////////////////////////////////////////////
 
 // HCL is a helper struct representing a color in the HCL color model.
-// HCL is a polar version of LAB that's more intuitive for some applications.
 type HCL struct {
-	H, C, L, Alpha float64
+	H     float64 // [0,360] Hue
+	C     float64 // [0,100] Chroma
+	L     float64 // [0,100] Lightness
+	Alpha float64 // [0,1] Alpha
 }
 
-func (hcl *HCL) Meta() *ColorModelMeta {
+func (h *HCL) Meta() *ColorModelMeta {
 	return NewModelMeta(
 		"HCL",
-		"Hue, Chroma, Luminance color model.",
-		NewChannelMeta("H", 0, 360, "°", "Hue in degrees."),
-		NewChannelMeta("C", 0, 1, "", "Chroma."),
-		NewChannelMeta("L", 0, 1, "", "Luminance."),
+		"Hue, Chroma, Lightness color model (polar form of LAB).",
+		NewChannelMeta("H", 0, 360, "°", "Hue angle."),
+		NewChannelMeta("C", 0, 100, "", "Chroma (colorfulness)."),
+		NewChannelMeta("L", 0, 100, "", "Lightness."),
 		NewChannelMeta("Alpha", 0, 1, "", "Alpha channel."),
 	)
 }
@@ -143,32 +142,39 @@ func (hcl *HCL) Meta() *ColorModelMeta {
 // Conversion
 //////////////////////////////////////////////////////
 
-func (hcl *HCL) ToRGB() *RGBA64 {
-	r, g, b := hclToRgb(hcl.H, hcl.C, hcl.L)
-	return &RGBA64{R: r, G: g, B: b, A: hcl.Alpha}
+func (h *HCL) ToRGB() *RGBA64 {
+	// Convert HCL to RGB
+	r, g, b := utils.HCLToRGB(h.H, h.C, h.L)
+
+	return &RGBA64{
+		R: r,
+		G: g,
+		B: b,
+		A: h.Alpha,
+	}
 }
 
 // FromSlice initializes an HCL instance from a slice of float64 values.
 // The slice must contain exactly 4 values in the order: H, C, L, Alpha.
-func (hcl *HCL) FromSlice(vals []float64) error {
+func (h *HCL) FromSlice(vals []float64) error {
 	if len(vals) != 4 {
 		return fmt.Errorf("HCL requires 4 values, got %d", len(vals))
 	}
 
-	hcl.H = vals[0]
-	hcl.C = vals[1]
-	hcl.L = vals[2]
-	hcl.Alpha = vals[3]
+	h.H = vals[0]
+	h.C = vals[1]
+	h.L = vals[2]
+	h.Alpha = vals[3]
 
 	return nil
 }
 
 // FromRGBA64 converts an RGBA64 color to this color model.
-func (hcl *HCL) FromRGBA64(rgba *RGBA64) iColor {
+func (h *HCL) FromRGBA64(rgba *RGBA64) iColor {
 	return HCLFromRGB(rgba)
 }
 
 // ToRGBA64 converts the color to RGBA64.
-func (hcl *HCL) ToRGBA64() *RGBA64 {
-	return hcl.ToRGB()
+func (h *HCL) ToRGBA64() *RGBA64 {
+	return h.ToRGB()
 }

@@ -72,6 +72,40 @@ const (
 	YCBCR_Cr_Min = -0.5
 	YCBCR_Cr_Max = 0.5
 
+	// Color conversion thresholds
+	WhiteThreshold     = 1e-10
+	NearWhiteThreshold = 0.01
+	ChromaThreshold    = 1e-10
+	AlphaEpsilon       = 1e-10
+
+	// Wavelength ranges for visible spectrum
+	WavelengthRedMin    = 620.0
+	WavelengthYellowMin = 590.0
+	WavelengthGreenMin  = 520.0
+	WavelengthCyanMin   = 495.0
+	WavelengthBlueMin   = 450.0
+	WavelengthVioletMin = 380.0
+
+	// Hue ranges for color models
+	HueRed     = 0.0
+	HueYellow  = 60.0
+	HueGreen   = 120.0
+	HueCyan    = 180.0
+	HueBlue    = 240.0
+	HueMagenta = 300.0
+	HueRange   = 60.0
+
+	// Color model conversion constants
+	DegreesPerCircle = 360.0
+	RadiansPerDegree = 0.017453292519943295 // π/180
+	DegreesPerRadian = 57.29577951308232    // 180/π
+	HueNormalization = 1.0 / 360.0
+	HueOffset1       = 1.0 / 3.0
+	HueOffset2       = 2.0 / 3.0
+	HueOffset3       = 1.0 / 6.0
+	HueOffset4       = 1.0 / 2.0
+	HueOffset5       = 2.0 / 3.0
+
 	// LSL model thresholds and values
 	LSL_Threshold  = 1e-10
 	LSL_HueRed     = 0.0

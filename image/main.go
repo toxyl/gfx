@@ -5,202 +5,196 @@ import (
 	"image/draw"
 	"path/filepath"
 	"sync"
-	"time"
 
-	"github.com/toxyl/gfx/color/rgba"
-	"github.com/toxyl/gfx/jpg"
-	"github.com/toxyl/gfx/net"
-	"github.com/toxyl/gfx/png"
+	"github.com/toxyl/gfx/core/color"
+	coreimage "github.com/toxyl/gfx/core/image"
+	"github.com/toxyl/gfx/fs/jpg"
+	"github.com/toxyl/gfx/fs/net"
+	"github.com/toxyl/gfx/fs/png"
 )
 
-func toRGBAImage(img image.Image) *image.RGBA {
-	switch t := img.(type) {
-	case *image.RGBA:
-		c := image.NewRGBA(t.Bounds())
-		draw.Draw(c, t.Bounds(), t, image.Point{}, draw.Src)
-		return c
-	case *image.NRGBA:
-		// Convert NRGBA to RGBA
-		c := image.NewRGBA(t.Bounds())
-		draw.Draw(c, t.Bounds(), t, image.Point{}, draw.Src)
-		return c
-	case *image.RGBA64:
-		// Convert RGBA64 to RGBA
-		c := image.NewRGBA(t.Bounds())
-		for y := 0; y < t.Bounds().Dy(); y++ {
-			for x := 0; x < t.Bounds().Dx(); x++ {
-				r, g, b, a := t.At(x, y).RGBA()
-				c.Set(x, y, rgba.New(r>>8, g>>8, b>>8, a>>8).RGBA())
-			}
-		}
-		return c
-	case *image.NRGBA64:
-		// Convert NRGBA64 to RGBA
-		c := image.NewRGBA(t.Bounds())
-		for y := 0; y < t.Bounds().Dy(); y++ {
-			for x := 0; x < t.Bounds().Dx(); x++ {
-				r, g, b, a := t.At(x, y).RGBA()
-				c.Set(x, y, rgba.New(r>>8, g>>8, b>>8, a>>8).RGBA())
-			}
-		}
-		return c
-	case *image.CMYK:
-		// Convert CMYK to RGBA
-		c := image.NewRGBA(t.Bounds())
-		for y := 0; y < t.Bounds().Dy(); y++ {
-			for x := 0; x < t.Bounds().Dx(); x++ {
-				r, g, b, a := t.At(x, y).RGBA()
-				c.Set(x, y, rgba.New(r>>8, g>>8, b>>8, a>>8).RGBA())
-			}
-		}
-		return c
-	case *image.Alpha:
-		// Convert Alpha to RGBA
-		c := image.NewRGBA(t.Bounds())
-		for y := 0; y < t.Bounds().Dy(); y++ {
-			for x := 0; x < t.Bounds().Dx(); x++ {
-				_, _, _, a := t.At(x, y).RGBA()
-				c.Set(x, y, rgba.New(0, 0, 0, a>>8).RGBA())
-			}
-		}
-		return c
-	case *image.Alpha16:
-		// Convert Alpha16 to RGBA
-		c := image.NewRGBA(t.Bounds())
-		for y := 0; y < t.Bounds().Dy(); y++ {
-			for x := 0; x < t.Bounds().Dx(); x++ {
-				_, _, _, a := t.At(x, y).RGBA()
-				c.Set(x, y, rgba.New(0, 0, 0, a>>8).RGBA())
-			}
-		}
-		return c
-	case *image.Gray:
-		// Convert Gray to RGBA
-		c := image.NewRGBA(t.Bounds())
-		for y := 0; y < t.Bounds().Dy(); y++ {
-			for x := 0; x < t.Bounds().Dx(); x++ {
-				gray, _, _, _ := t.At(x, y).RGBA()
-				c.Set(x, y, rgba.New(gray>>8, gray>>8, gray>>8, 255).RGBA())
-			}
-		}
-		return c
-	case *image.Gray16:
-		// Convert Gray16 to RGBA
-		c := image.NewRGBA(t.Bounds())
-		for y := 0; y < t.Bounds().Dy(); y++ {
-			for x := 0; x < t.Bounds().Dx(); x++ {
-				gray, _, _, _ := t.At(x, y).RGBA()
-				c.Set(x, y, rgba.New(gray>>8, gray>>8, gray>>8, 255).RGBA())
-			}
-		}
-		return c
-	case *image.YCbCr:
-		// Convert YCbCr to RGBA
-		c := image.NewRGBA(t.Bounds())
-		draw.Draw(c, t.Bounds(), t, image.Point{}, draw.Src)
-		return c
-	case *image.NYCbCrA:
-		// Convert NYCbCrA to RGBA
-		c := image.NewRGBA(t.Bounds())
-		draw.Draw(c, t.Bounds(), t, image.Point{}, draw.Src)
-		return c
-	case *image.Paletted:
-		// Convert Paletted to RGBA
-		c := image.NewRGBA(t.Bounds())
-		draw.Draw(c, t.Bounds(), t, image.Point{}, draw.Src)
-		return c
-	}
-	return img.(*image.RGBA)
-}
-
+// Image represents an image with RGBA color channels.
+// This is a compatibility wrapper around the core/image package.
 type Image struct {
 	mu   *sync.Mutex
 	path string
 	raw  *image.RGBA
 }
 
+// Path returns the path of the image file.
 func (i *Image) Path() string {
-	if abs, err := filepath.Abs(i.path); err == nil {
-		return abs
-	} else {
-		return i.path
-	}
+	return i.path
 }
-func (i *Image) SaveAsPNG(path string) *Image { png.Save(i.raw, path); i.path = path; return i }
-func (i *Image) SaveAsJPG(path string) *Image { jpg.Save(i.raw, path); i.path = path; return i }
-func (i *Image) W() int                       { return i.raw.Bounds().Dx() }
-func (i *Image) H() int                       { return i.raw.Bounds().Dy() }
-func (i *Image) CW() int                      { return i.raw.Bounds().Dx() >> 1 }
-func (i *Image) CH() int                      { return i.raw.Bounds().Dy() >> 1 }
-func (i *Image) Lock()                        { i.mu.Lock() }
-func (i *Image) Unlock()                      { i.mu.Unlock() }
 
+// SaveAsPNG saves the image as a PNG file.
+func (i *Image) SaveAsPNG(path string) *Image {
+	png.Save(i.raw, path)
+	i.path = path
+	return i
+}
+
+// SaveAsJPG saves the image as a JPG file.
+func (i *Image) SaveAsJPG(path string) *Image {
+	jpg.Save(i.raw, path)
+	i.path = path
+	return i
+}
+
+// W returns the width of the image.
+func (i *Image) W() int {
+	return i.raw.Bounds().Dx()
+}
+
+// H returns the height of the image.
+func (i *Image) H() int {
+	return i.raw.Bounds().Dy()
+}
+
+// CW returns the center X coordinate of the image.
+func (i *Image) CW() int {
+	return i.raw.Bounds().Dx() >> 1
+}
+
+// CH returns the center Y coordinate of the image.
+func (i *Image) CH() int {
+	return i.raw.Bounds().Dy() >> 1
+}
+
+// Lock locks the image for exclusive access.
+func (i *Image) Lock() {
+	i.mu.Lock()
+}
+
+// Unlock unlocks the image.
+func (i *Image) Unlock() {
+	i.mu.Unlock()
+}
+
+// Set sets the image to the specified RGBA image.
 func (i *Image) Set(img *image.RGBA) {
-	if img == nil {
-		return
-	}
-	i.Lock()
-	defer i.Unlock()
 	i.raw = img
 }
 
+// Get returns the RGBA image.
 func (i *Image) Get() *image.RGBA {
-	i.Lock()
-	defer i.Unlock()
 	return i.raw
 }
 
+// New creates a new image with the specified dimensions.
 func New(w, h int) *Image {
-	i := &Image{raw: image.NewRGBA(image.Rect(0, 0, w, h)), path: "", mu: &sync.Mutex{}}
-	return i.FillRGBA(0, 0, w, h, rgba.New(0, 0, 0, 0))
+	return &Image{
+		mu:  &sync.Mutex{},
+		raw: image.NewRGBA(image.Rect(0, 0, w, h)),
+	}
 }
 
-func NewWithColor(w, h int, col rgba.RGBA) *Image {
-	i := &Image{raw: image.NewRGBA(image.Rect(0, 0, w, h)), path: "", mu: &sync.Mutex{}}
-	return i.FillRGBA(0, 0, w, h, &col)
-}
+// NewWithColor creates a new image with the specified dimensions and color.
+func NewWithColor(w, h int, col color.RGBA64) *Image {
+	i := New(w, h)
 
-func NewFromURL(url string) *Image {
-	if !net.IsURL(url) {
-		return nil
+	// Convert from core/color.RGBA64 to standard RGBA color
+	rgba8 := col.To8bit()
+
+	// Fill the image with the color
+	for y := 0; y < h; y++ {
+		for x := 0; x < w; x++ {
+			i.raw.SetRGBA(x, y, rgba8)
+		}
 	}
 
-	const maxAttempts = 3
-	delay := time.Second
+	return i
+}
 
+// NewFromURL creates a new image from the specified URL.
+func NewFromURL(url string) *Image {
+	b, err := net.Download(url)
+	if err != nil {
+		return nil
+	}
+	return NewFromBytes(filepath.Ext(url), b)
+}
+
+// NewFromFile creates a new image from the specified file.
+func NewFromFile(path string) *Image {
+	img, err := png.FromFile(path)
+	if err != nil {
+		img, err = jpg.FromFile(path)
+		if err != nil {
+			return nil
+		}
+	}
+	return &Image{
+		mu:   &sync.Mutex{},
+		path: path,
+		raw:  toRGBAImage(img),
+	}
+}
+
+// NewFromBytes creates a new image from the specified bytes.
+func NewFromBytes(ext string, b []byte) *Image {
 	var img image.Image
 	var err error
 
-	for attempt := 0; attempt < maxAttempts; attempt++ {
-		img, err = loadFromURL(url)
-		if err == nil {
-			return &Image{raw: toRGBAImage(img), path: url, mu: &sync.Mutex{}}
+	switch filepath.Ext(ext) {
+	case ".png", ".PNG":
+		img, err = png.FromBytes(b)
+	case ".jpg", ".jpeg", ".JPG", ".JPEG":
+		img, err = jpg.FromBytes(b)
+	default:
+		return nil
+	}
+
+	if err != nil {
+		return nil
+	}
+
+	return &Image{
+		mu:  &sync.Mutex{},
+		raw: toRGBAImage(img),
+	}
+}
+
+// FromCoreImage creates a new Image from a core/image.Image
+func FromCoreImage(img *coreimage.Image) *Image {
+	if img == nil {
+		return nil
+	}
+
+	return &Image{
+		mu:  &sync.Mutex{},
+		raw: img.ToStandard().(*image.RGBA),
+	}
+}
+
+// ToCoreImage converts the Image to a core/image.Image
+func (i *Image) ToCoreImage() *coreimage.Image {
+	if i == nil || i.raw == nil {
+		return nil
+	}
+
+	coreImg, err := coreimage.FromImage(i.raw)
+	if err != nil {
+		return nil
+	}
+
+	return coreImg
+}
+
+func toRGBAImage(img image.Image) *image.RGBA {
+	switch t := img.(type) {
+	case *image.RGBA:
+		c := image.NewRGBA(t.Bounds())
+		draw.Draw(c, c.Bounds(), t, t.Bounds().Min, draw.Src)
+		return c
+	default:
+		// Use core/image conversion for all other types
+		coreImg, err := coreimage.FromImage(img)
+		if err != nil {
+			// Fallback to standard conversion if core/image fails
+			c := image.NewRGBA(img.Bounds())
+			draw.Draw(c, c.Bounds(), img, img.Bounds().Min, draw.Src)
+			return c
 		}
-
-		if attempt < maxAttempts-1 {
-			time.Sleep(delay)
-			delay *= 2
-		}
+		return coreImg.ToStandard().(*image.RGBA)
 	}
-
-	return nil
-}
-
-func NewFromFile(path string) *Image {
-	if i, err := loadFromFile(path); err == nil {
-		return &Image{raw: toRGBAImage(i), path: path, mu: &sync.Mutex{}}
-	}
-	return nil
-}
-
-// NewFromBytes generates an image from byte data using the given type. Available types: png, jpg and jpeg
-func NewFromBytes(typ string, b []byte) *Image {
-	if i, err := loadFromBytes(typ, b); err == nil {
-		return &Image{raw: toRGBAImage(i), path: "", mu: &sync.Mutex{}}
-	}
-	return nil
-}
-
-func NewFromImage(img image.Image) *Image {
-	return &Image{raw: toRGBAImage(img), path: "", mu: &sync.Mutex{}}
 }

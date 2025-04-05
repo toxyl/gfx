@@ -2,6 +2,9 @@ package main
 
 import (
 	_ "embed"
+	"io"
+	"net/http"
+	"os"
 
 	"github.com/toxyl/gfx/core/image"
 )
@@ -11,8 +14,35 @@ var (
 )
 
 func init() {
-	var err error
-	fAIAImage, err = image.LoadFromURL("https://sdo.gsfc.nasa.gov/assets/img/latest/f_211_193_171pfss_512.jpg")
+	// URL of the image to load
+	url := "https://sdo.gsfc.nasa.gov/assets/img/latest/f_211_193_171pfss_512.jpg"
+
+	// Download the file from URL
+	resp, err := http.Get(url)
+	if err != nil {
+		panic("Failed to download image: " + err.Error())
+	}
+	defer resp.Body.Close()
+
+	// Create a temporary file
+	tempFile, err := os.CreateTemp("", "aia-image-*.jpg")
+	if err != nil {
+		panic("Failed to create temp file: " + err.Error())
+	}
+	defer os.Remove(tempFile.Name())
+	defer tempFile.Close()
+
+	// Copy the response body to the temp file
+	_, err = io.Copy(tempFile, resp.Body)
+	if err != nil {
+		panic("Failed to save image to temp file: " + err.Error())
+	}
+
+	// Close the file to ensure all data is written
+	tempFile.Close()
+
+	// Load the image from the temp file
+	fAIAImage, err = image.LoadImage(tempFile.Name())
 	if err != nil {
 		panic("Failed to load AIA image: " + err.Error())
 	}
