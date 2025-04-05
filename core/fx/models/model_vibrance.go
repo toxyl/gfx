@@ -4,6 +4,7 @@ import (
 	"image"
 	"image/color"
 
+	gfxcolor "github.com/toxyl/gfx/core/color"
 	"github.com/toxyl/gfx/core/fx"
 	"github.com/toxyl/gfx/core/meta"
 	"github.com/toxyl/math"
@@ -43,7 +44,7 @@ func (v *Vibrance) isSkinTone(r, g, b float64) bool {
 }
 
 // Apply applies the vibrance adjustment effect to an image.
-func (v *Vibrance) Apply(img image.Image) image.Image {
+func (v *Vibrance) Apply(img image.Image) (image.Image, error) {
 	bounds := img.Bounds()
 	dst := image.NewRGBA(bounds)
 
@@ -86,10 +87,52 @@ func (v *Vibrance) Apply(img image.Image) image.Image {
 		}
 	}
 
-	return dst
+	return dst, nil
 }
 
 // Meta returns the effect metadata.
 func (v *Vibrance) Meta() *fx.EffectMeta {
 	return v.meta
+}
+
+// Description returns the description of the vibrance effect.
+func (v *Vibrance) Description() string {
+	return v.meta.Description
+}
+
+// GetArgs returns the effect arguments.
+func (v *Vibrance) GetArgs() []fx.FunctionArg {
+	return []fx.FunctionArg{
+		{
+			Name:        "Amount",
+			Type:        "float64",
+			Description: "Vibrance adjustment value (-1.0 to 1.0)",
+			Value:       v.Amount,
+		},
+	}
+}
+
+// Name returns the name of the effect.
+func (v *Vibrance) Name() string {
+	return v.meta.Name
+}
+
+// GetColorModel returns the color model used by this effect.
+func (v *Vibrance) GetColorModel() *gfxcolor.Color64 {
+	return nil // Vibrance effect doesn't modify the color model
+}
+
+// ValidateArgs validates the effect arguments.
+func (v *Vibrance) ValidateArgs(args ...any) error {
+	if len(args) != 1 {
+		return fx.ErrInvalidArgument
+	}
+	amount, ok := args[0].(float64)
+	if !ok {
+		return fx.ErrInvalidArgument
+	}
+	if amount < -1.0 || amount > 1.0 {
+		return fx.ErrInvalidArgument
+	}
+	return nil
 }
