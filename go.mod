@@ -3,7 +3,7 @@ module github.com/toxyl/gfx
 go 1.23.4
 
 require (
-	github.com/gofiber/fiber/v2 v2.52.11
+	github.com/gofiber/fiber/v2 v2.52.12
 	github.com/toxyl/errors v0.0.0-20240410073853-96b96b437ed5
 	github.com/toxyl/flo v0.0.0-20240412132929-869b69ff6976
 )
